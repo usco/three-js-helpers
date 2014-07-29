@@ -1,0 +1,25 @@
+<script src="custom-axis-helper.js" ></script>
+
+<polymer-element name="axis-helper" extends="three-js-helper"
+  attributes="size xColor yColor zColor textColor addLabels addArrows">
+  <script>Polymer('axis-helper',{
+      object:null,
+      size:50,
+      xColor:null,
+      yColor:null,
+      zColor:null,
+      textColor:null,
+      addLabels:true,
+      addArrows:true,
+
+      ready: function() {
+        this.object = new THREE.LabeledAxes(this.size, this.xColor, this.yColor, this.zColor, this.textColor, this.addLabels, this.addArrows);
+        this.super();
+      },
+      enteredView:function()
+      {
+        this.super();
+      }
+    });
+  </script>
+</polymer-element>
