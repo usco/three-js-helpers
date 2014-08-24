@@ -13,17 +13,17 @@ usage:
 ------
 
   - include the custom elements you need:
-    
-    <link rel="import" href="components/three-js-helpers/axis-helper.html">
-    <link rel="import" href="components/three-js-helpers/grid-helper.html">
-    
-    
+
+        <link rel="import" href="components/three-js-helpers/axis-helper.html">
+        <link rel="import" href="components/three-js-helpers/grid-helper.html">
+
+
   - used them within a three-js scene:
-  
-      <three-js-scene name="helpers" active>
+
+        <three-js-scene name="helpers" active>
             <axis-helper> </axis-helper>
             <grid-helper> </grid-helper>
-      </three-js-scene>
+        </three-js-scene>
 
 
 Notes:
