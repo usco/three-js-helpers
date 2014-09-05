@@ -18,7 +18,7 @@ THREE.ArrowHelper2 = function (direction, origin, length, color, headLength, hea
 	  
 	this.arrowHeadRootPosition = this.origin.clone().add(this.direction);
 	this.head = new THREE.Mesh(new THREE.CylinderGeometry(0, this.headRadius, this.headLength, 8, 1, false), new THREE.MeshBasicMaterial({color:this.headColor}));
-	this.head.position = this.arrowHeadRootPosition;
+	this.head.position.copy( this.arrowHeadRootPosition );
   
   this.head.lookAt(this.arrowHeadRootPosition.clone().add(this.direction.clone().setLength(this.headLength)) );
   this.head.rotateX(Math.PI/2);
