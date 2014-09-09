@@ -13,14 +13,14 @@ THREE.CustomGridHelper = function ( size, step , upVector, color, opacity, text,
       };
       THREE.Object3D.call( this );
       
-      this.size = size || 1000;
-      this.step = step || 100;
-      this.color = color ||  0x00baff;
-      this.opacity = opacity || 0.2;
-      this.text = text || true;
-      this.textColor= textColor || "#000000";
-      this.textPosition =  "center";
-      this.upVector = upVector || new THREE.Vector3(0,1,0);
+      this.size         = size || 1000;
+      this.step         = step || 100;
+      this.color        = color ||  0x00baff;
+      this.opacity      = opacity || 0.2;
+      this.text         = text || true;
+      this.textColor    = textColor || "#000000";
+      this.textPosition = "center";
+      this.upVector     = upVector || new THREE.Vector3(0,1,0);
       
       this.name = "grid";
       

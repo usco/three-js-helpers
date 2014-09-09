@@ -35,9 +35,9 @@ THREE.LabeledAxes = function (size, xColor, yColor, zColor, textColor, addLabels
 	
       this.size = size || 50 ;
       this.xColor = xColor || "0xFF7700" ;
-      this.yColor = yColor || "0x77FF00" ;
-      this.zColor = zColor || "0x0077FF" ;
-      this.textColor = textColor  || "#FFFFFF" ;
+      this.yColor = yColor || "0x77FF00" ;
+      this.zColor = zColor || "0x0077FF" ;
+      this.textColor = textColor || "#FFFFFF" ;
       addLabels = addLabels || true ;
       addArrows = addArrows || true ;
       
