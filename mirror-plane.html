@@ -1,0 +1,25 @@
+<script src="mirror-plane.js" ></script>
+
+<polymer-element name="mirror-plane" extends="three-js-helper"
+  attributes="width length up">
+  <script>Polymer('mirror-plane',{
+      width:200,
+      length:200,
+      up:[0,1,0],
+      ready: function() {
+        this.object = new MirrorPlane(this.width, this.length, new THREE.Vector3(this.up[0],this.up[1],this.up[2]));
+        this.super();
+      },
+      attached:function()
+      {
+        this.super();
+        this.object.mirrorCamera.toIgnore=this.object.plane;
+        this.object.parent.add( this.object.mirrorCamera );
+        this.fire("renderableadded",{renderable:this.object.mirrorCamera, scene:this.object.parent});
+      },
+      upChanged:function(){
+        this.object.setUp( new THREE.Vector3(this.up[0],this.up[1],this.up[2]) );  
+      },
+    });
+  </script>
+</polymer-element>

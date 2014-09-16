@@ -1,0 +1,24 @@
+<script src="shadow-plane.js" ></script>
+
+<polymer-element name="shadow-plane" extends="three-js-helper"
+  attributes="width length shadowColor shadowResolution up">
+  <script>Polymer('shadow-plane',{
+      width:200,
+      length:200,
+      shadowColor:null,
+      shadowResolution:null,
+      up:[0,1,0],
+      ready: function() {
+        this.object = new ShadowPlane(this.width, this.length, this.shadowColor, this.shadowResolution, new THREE.Vector3(this.up[0],this.up[1],this.up[2]));
+        this.super();
+      },
+      attached:function()
+      {
+        this.super();
+      },
+      upChanged:function(){
+        this.object.setUp( new THREE.Vector3(this.up[0],this.up[1],this.up[2]) );  
+      },
+    });
+  </script>
+</polymer-element>
