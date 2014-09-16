@@ -1,5 +1,5 @@
 
-THREE.CustomGridHelper = function ( size, step , upVector, color, opacity, text, textColor, textPosition) {
+GridHelper = function ( size, step , upVector, color, opacity, text, textColor, textPosition) {
 	
       defaults = {
         size: 1000,
@@ -32,9 +32,9 @@ THREE.CustomGridHelper = function ( size, step , upVector, color, opacity, text,
       this.lookAt(upVector);
 };
 
-THREE.CustomGridHelper.prototype = Object.create( THREE.Object3D.prototype );
+GridHelper.prototype = Object.create( THREE.Object3D.prototype );
 
-THREE.CustomGridHelper.prototype._drawGrid = function() {
+GridHelper.prototype._drawGrid = function() {
       var gridGeometry, gridMaterial, mainGridZ, planeFragmentShader, planeGeometry, planeMaterial, subGridGeometry, subGridMaterial, subGridZ;
       
       var size= this.size;
@@ -131,7 +131,7 @@ THREE.CustomGridHelper.prototype._drawGrid = function() {
 };
 
 
-THREE.CustomGridHelper.prototype.toggle = function(toggle) {
+GridHelper.prototype.toggle = function(toggle) {
 	
 	//apply visibility settings to all children 
       this.traverse( function( child ) {
@@ -139,20 +139,20 @@ THREE.CustomGridHelper.prototype.toggle = function(toggle) {
       });
 };
 
-THREE.CustomGridHelper.prototype.setOpacity = function(opacity) {
+GridHelper.prototype.setOpacity = function(opacity) {
       this.opacity = opacity;
       this.mainGrid.material.opacity = opacity;
       this.subGrid.material.opacity = opacity;
 };
 
-THREE.CustomGridHelper.prototype.setColor = function(color) {
+GridHelper.prototype.setColor = function(color) {
       this.color = color;
       this.mainGrid.material.color = new THREE.Color().setHex(this.color);
       this.subGrid.material.color = new THREE.Color().setHex(this.color);
 };
 
 
-THREE.CustomGridHelper.prototype.toggleText = function(toggle) {
+GridHelper.prototype.toggleText = function(toggle) {
   this.text = toggle;
   var labels = this.labels.children;
   for (var i = 0; i < this.labels.children.length; i++) {
@@ -161,17 +161,23 @@ THREE.CustomGridHelper.prototype.toggleText = function(toggle) {
   }
 };
 
-THREE.CustomGridHelper.prototype.setTextColor = function(color) {
+GridHelper.prototype.setTextColor = function(color) {
   this.textColor = color;
   this._drawNumbering();
 };
 
-THREE.CustomGridHelper.prototype.setTextLocation = function(location) {
+GridHelper.prototype.setTextLocation = function(location) {
   this.textLocation = location;
   return this._drawNumbering();
 };
 
-THREE.CustomGridHelper.prototype.resize = function(size) {
+GridHelper.prototype.setUp = function(upVector) {
+  this.upVector = upVector;
+  this.up = upVector;
+  this.lookAt(upVector);
+};
+
+GridHelper.prototype.resize = function(size) {
   if (size ) {
     var size = Math.max(size,10);
     this.step = Math.max(this.step,5);
@@ -184,7 +190,7 @@ THREE.CustomGridHelper.prototype.resize = function(size) {
   else{console.log("aaargh, size", size);}
 };
 
-THREE.CustomGridHelper.prototype._drawNumbering = function() {
+GridHelper.prototype._drawNumbering = function() {
       var label, sizeLabel, sizeLabel2, xLabelsLeft, xLabelsRight, yLabelsBack, yLabelsFront;
       var size = this.size;
       var step = this.step;
@@ -244,7 +250,7 @@ THREE.CustomGridHelper.prototype._drawNumbering = function() {
       this.mainGrid.add(this.labels);
 };
 
-THREE.CustomGridHelper.prototype.drawTextOnPlane = function(text, size) {
+GridHelper.prototype.drawTextOnPlane = function(text, size) {
   var canvas, context, material, plane, texture;
   
   if (size == null) {
@@ -286,7 +292,7 @@ THREE.CustomGridHelper.prototype.drawTextOnPlane = function(text, size) {
 
 //autoresize, disabled for now
 /*
-THREE.CustomGridHelper.prototype.updateGridSize = function() {
+GridHelper.prototype.updateGridSize = function() {
       var max, maxX, maxY, min, minX, minY, size, subchild, _getBounds, _i, _len, _ref,
         _this = this;
       minX = 99999;
