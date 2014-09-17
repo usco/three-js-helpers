@@ -17,7 +17,7 @@ ShadowPlane.prototype._drawPlane=function(){
   var length = this.length;
   var shadowColor = this.shadowColor;
 
-  var planeGeometry = new THREE.PlaneGeometry(-width, length, 5, 5);
+  var planeGeometry = new THREE.PlaneGeometry(-width, length, 1, 1);
       planeFragmentShader = [
       "uniform vec3 diffuse;",
       "uniform float opacity;",
@@ -59,7 +59,7 @@ ShadowPlane.prototype._drawPlane=function(){
       //create plane for shadow projection    
       this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
       this.plane.rotation.x = Math.PI;
-      this.plane.position.z = -0.8;
+      this.plane.position.z = -0.2;
       this.name = "shadowPlane";
       this.plane.receiveShadow = true;
       
