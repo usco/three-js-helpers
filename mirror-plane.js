@@ -3,7 +3,7 @@ MirrorPlane = function (width, length, resolution, color, upVector) {
   THREE.Object3D.call( this );	
   this.width = width || 200;
   this.length = length || 200;
-  this.resolution = resolution || 512;
+  this.resolution = resolution || 256;
   this.color = color ||  0x777777;
   this.upVector = upVector || new THREE.Vector3(0,1,0);
   
