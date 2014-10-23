@@ -8,37 +8,36 @@ ObjectDimensionsHelper = function (options) {
   var cage = new THREE.Object3D()
   var lineMat = new THREE.MeshBasicMaterial({color: color, wireframe: true, shading:THREE.FlatShading});
 
-  //console.log("mesh",mesh)
-
   this.getBounds(mesh);
   var delta = this.computeMiddlePoint(mesh);
   cage.position = delta
   
+  
+  var width = this.width;
+  var length = this.length;
+  var height = this.height;
+
   var widthArrowPos = new THREE.Vector3(delta.x+this.length/2,delta.y,delta.z-this.height/2); 
   var lengthArrowPos = new THREE.Vector3( delta.x, delta.y+this.width/2, delta.z-this.height/2)
   var heightArrowPos = new THREE.Vector3( delta.x-this.length/2,delta.y+this.width/2,delta.z)
 
   //console.log("width", this.width, "length", this.length, "height", this.height,"delta",delta, "widthArrowPos", widthArrowPos)
+  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: false,linewidth:1} )
 
-  dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: false,linewidth:1} )
-  baseCubeGeom = new THREE.CubeGeometry(this.length, this.width,this.height)
+  var baseOutlineGeometry = new THREE.Geometry();
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(this.length/2, -this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(this.length/2, this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
+  baseOutlineGeometry.computeLineDistances();
 
-  var geometry = new THREE.Geometry();
-    geometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
-    geometry.vertices.push(new THREE.Vector3(this.length/2, -this.width/2, 0));
-    geometry.vertices.push(new THREE.Vector3(this.length/2, this.width/2, 0));
-    geometry.vertices.push(new THREE.Vector3(-this.length/2, this.width/2, 0));
-    geometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
-    
-  
-  geometry.computeLineDistances();
-
-  var baseOutline = new THREE.Line( geometry, dashMaterial, THREE.Lines );
+  var baseOutline = new THREE.Line( baseOutlineGeometry, dashMaterial, THREE.Lines );
   baseOutline.renderDepth = 1e20
-  baseOutline.position = new THREE.Vector3(delta.x,delta.y,delta.z-this.height/2)
+  baseOutline.position.copy( new THREE.Vector3(delta.x,delta.y,delta.z-this.height/2) );
   this.add(baseOutline);
 
-
+  baseCubeGeom = new THREE.BoxGeometry(this.length, this.width,this.height)
   var bla = new THREE.Mesh(baseCubeGeom,new THREE.MeshBasicMaterial({wireframe:true,color:0xff0000}))
   bla.position = new THREE.Vector3(delta.x,delta.y,delta.z);
   //this.add( bla )
@@ -46,11 +45,9 @@ ObjectDimensionsHelper = function (options) {
   var sideLength =10;
   
   //length, sideLength, position, direction, color, text, textSize,
-  var widthArrow = new SizeHelper({length:this.width,sideLength:sideLength,position:widthArrowPos,direction:new THREE.Vector3(0,0,-1) });
-
-  var lengthArrow = new SizeHelper(  {length:this.length,sideLength:sideLength,position:lengthArrowPos,direction:new THREE.Vector3(1,0,0) });
-
-  var heightArrow = new SizeHelper(  {length:this.height,sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,1,0) });
+  var widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,position:widthArrowPos,direction:new THREE.Vector3(0,0,-1) });
+  var lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,position:lengthArrowPos,direction:new THREE.Vector3(1,0,0) });
+  var heightArrow = new SizeHelper( {length:this.height,sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,1,0) });
         
   this.add( widthArrow );
   this.add( lengthArrow );

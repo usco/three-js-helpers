@@ -5,6 +5,8 @@
    * arrows should be on the outside
    * if text does not fit either, offset it to the side
 */
+
+//TODO: how to put items on the left instead of right, front instead of back etc
 SizeHelper = function(options)
 {
   var options = options || {};
@@ -13,7 +15,6 @@ SizeHelper = function(options)
   this.up = new THREE.Vector3(0,0,1);
   //this.start = start;
   //this.end = end;
-
   var position = options.position || new THREE.Vector3();
   var direction = this.direction = options.direction || new THREE.Vector3(1,0,0);
   
@@ -55,7 +56,7 @@ SizeHelper = function(options)
     sideLineGeometry.vertices.push( new THREE.Vector3( 0, sideLength+sideLengthExtra , 0 ) );
     
     var leftSideLine = new THREE.Line( sideLineGeometry, new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.4, transparent:true } ) );
-    leftSideLine.position.x = -this.length / 2;
+    leftSideLine.position.x = -this.length / 2 ;
 
     var rightSideLine = leftSideLine.clone();
     rightSideLine.position.x = this.length / 2;
@@ -72,7 +73,6 @@ SizeHelper = function(options)
   var arrowSize = length/2;
   
   //draw dimention / text
-  //var labelPosition = new THREE.Vector3(0,
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize});
   this.label.position.y = sideLength;
   this.label.rotation.z = Math.PI;
@@ -96,6 +96,7 @@ SizeHelper = function(options)
     }
   }
   this.add( this.label );
+  console.log(leftArrowPos);
   
   var leftArrowHeadSize = rightArrowHeadSize = 0;
   if(leftArrow) leftArrowHeadSize = arrowHeadSize;
@@ -115,7 +116,7 @@ SizeHelper = function(options)
   mainArrowRight.line.material.linecap = "miter";
   
   //general attributes
-  this.position = position; 
+  this.position.copy( position ); 
   var angle = new THREE.Vector3(1,0,0).angleTo(direction); //new THREE.Vector3(1,0,0).cross( direction );
   this.setRotationFromAxisAngle(direction,angle);
 
@@ -133,6 +134,7 @@ SizeHelper = function(options)
   mainArrowLeft.cone.material.depthWrite=false;
   mainArrowLeft.line.material.depthTest=false;
   mainArrowLeft.line.material.depthWrite=false;
+  
 }
 
 SizeHelper.prototype = Object.create( BaseHelper.prototype );
