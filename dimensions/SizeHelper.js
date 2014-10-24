@@ -26,18 +26,15 @@ SizeHelper = function(options)
     //position = position.multiplyScalar(0.2);
     position.x = -40 //-= position.x;
     options.length = end.clone().sub( start ).length();
-    console.log("start",start,"end", end);
+    //console.log("start",start,"end", end);
     direction = this.direction = (start.clone().sub(end)).normalize();
-    console.log("dir", direction);
+    //console.log("dir", direction);
   }
   //TODO: do this better  
   var length = this.length = options.length || 10;
-  
   this.color = options.color || "#000000" ;
-  
   this.text = options.text || this.length;
   var textSize = options.textSize || 8;
-  
   var sideLength = options.sideLength || 3;
   var sideLengthExtra = options.sideLengthExtra || 2;
   var drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
@@ -64,6 +61,7 @@ SizeHelper = function(options)
     this.add( rightSideLine );
     this.add( leftSideLine );
   }
+
     
   var leftArrowDir = new THREE.Vector3(1,0,0);
   var rightArrowDir = new THREE.Vector3(-1,0,0);
@@ -96,8 +94,7 @@ SizeHelper = function(options)
     }
   }
   this.add( this.label );
-  console.log(leftArrowPos);
-  
+    
   var leftArrowHeadSize = rightArrowHeadSize = 0;
   if(leftArrow) leftArrowHeadSize = arrowHeadSize;
   if(rightArrow) rightArrowHeadSize = arrowHeadSize;
@@ -117,7 +114,7 @@ SizeHelper = function(options)
   
   //general attributes
   this.position.copy( position ); 
-  var angle = new THREE.Vector3(1,0,0).angleTo(direction); //new THREE.Vector3(1,0,0).cross( direction );
+  var angle = new THREE.Vector3(1,0,0).angleTo(direction);
   this.setRotationFromAxisAngle(direction,angle);
 
   //leftSideLine.renderDepth = 1e20;
