@@ -17,7 +17,7 @@ ShadowPlane.prototype._drawPlane=function(){
   var length = this.length;
   var shadowColor = this.shadowColor;
 
-  var planeGeometry = new THREE.PlaneGeometry(-width, length, 1, 1);
+  var planeGeometry = new THREE.PlaneBufferGeometry(-width, length, 1, 1);
       planeFragmentShader = [
       "uniform vec3 diffuse;",
       "uniform float opacity;",

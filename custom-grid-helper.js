@@ -78,7 +78,7 @@ GridHelper.prototype._drawGrid = function() {
       this.subGrid = new THREE.Line(subGridGeometry, subGridMaterial, THREE.LinePieces);
 
 		//create plane for shadow projection      
-      planeGeometry = new THREE.PlaneGeometry(-size, size, 5, 5);
+      PlaneBufferGeometry = new THREE.PlaneBufferGeometry(-size, size, 5, 5);
       planeFragmentShader = [
       "uniform vec3 diffuse;",
       "uniform float opacity;",
@@ -281,7 +281,7 @@ GridHelper.prototype.drawTextOnPlane = function(text, size) {
     color: 0xffffff,
     alphaTest: 0.3
   });
-  plane = new THREE.Mesh(new THREE.PlaneGeometry(size / 8, size / 8), material);
+  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(size / 8, size / 8), material);
   plane.doubleSided = true
   plane.overdraw = true
   

@@ -18,7 +18,7 @@ MirrorPlane.prototype._drawPlane=function(){
   var length = this.length;
 
   var groundMirror = new THREE.Mirror( null, null, { clipBias: 0.003, textureWidth: this.resolution, textureHeight: this.resolution, color: this.color } );
-  var planeGeometry = new THREE.PlaneGeometry(width, length, 1, 1);
+  var planeGeometry = new THREE.PlaneBufferGeometry(width, length, 1, 1);
 	var planeMaterial = groundMirror.material;
 
   //create plane for reflection

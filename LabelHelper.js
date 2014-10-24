@@ -150,7 +150,7 @@ LabelHelperPlane.prototype.generate = function() {
   var width = this.width;
   var height = this.height;
   
-  var textPlane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), material);
+  var textPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(width, height), material);
   textPlane.renderDepth =1e20;
   
   this.textMesh = textPlane;
