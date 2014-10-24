@@ -24,12 +24,11 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
 
   this.getBounds(mesh);
   var delta = this.computeMiddlePoint(mesh);
-  //var delta = new THREE.Vector3();
   
   var width = this.width;
   var length = this.length;
   var height = this.height;
-  console.log("w",width,"l",length,"h",height,delta);
+  //console.log("w",width,"l",length,"h",height,delta);
   
   var baseCubeGeom = new THREE.BoxGeometry(this.length, this.width,this.height)
   this.meshBoundingBox = new THREE.Mesh(baseCubeGeom,new THREE.MeshBasicMaterial({wireframe:true,color:0xff0000}))
@@ -72,7 +71,6 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
 
 ObjectDimensionsHelper.prototype.detach = function(mesh){
   this.mesh = null;
-  
   //this.remove( this.meshBoundingBox );
   this.remove( this.baseOutline );
   this.remove( this.arrows );
@@ -90,13 +88,7 @@ ObjectDimensionsHelper.prototype.computeMiddlePoint=function(mesh)
 
 ObjectDimensionsHelper.prototype.getBounds=function(mesh)
 {
-  if( !(mesh.boundingBox))
-  {
-    //TODO: "meshes" should have bounding box/sphere informations, not just shapes/geometries should have it
-      mesh.boundingBox = computeObject3DBoundingBox(mesh);
-  }
-  //mesh.geometry.computeBoundingBox();
-  var bbox = mesh.boundingBox;
+  var bbox = new THREE.Box3().setFromObject( mesh );
 
   var length = ( (bbox.max.x-bbox.min.x).toFixed(2) )/1; // division by one to coerce to number
   var width  = ( (bbox.max.y-bbox.min.y).toFixed(2) )/1;
