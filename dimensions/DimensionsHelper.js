@@ -16,6 +16,7 @@ ObjectDimensionsHelper = function (options) {
   var width = this.width;
   var length = this.length;
   var height = this.height;
+  console.log("w",width,"l",length,"h",height);
 
   var widthArrowPos = new THREE.Vector3(delta.x+this.length/2,delta.y,delta.z-this.height/2); 
   var lengthArrowPos = new THREE.Vector3( delta.x, delta.y+this.width/2, delta.z-this.height/2)
@@ -75,11 +76,12 @@ ObjectDimensionsHelper.prototype.getBounds=function(mesh)
     //TODO: "meshes" should have bounding box/sphere informations, not just shapes/geometries should have it
       mesh.boundingBox = computeObject3DBoundingBox(mesh);
   }
+  //mesh.geometry.computeBoundingBox();
   var bbox = mesh.boundingBox;
 
-  var length = (bbox.max.x-bbox.min.x).toFixed(2);
-  var width  = (bbox.max.y-bbox.min.y).toFixed(2);
-  var height = (bbox.max.z-bbox.min.z).toFixed(2);
+  var length = ( (bbox.max.x-bbox.min.x).toFixed(2) )/1; // division by one to coerce to number
+  var width  = ( (bbox.max.y-bbox.min.y).toFixed(2) )/1;
+  var height = ( (bbox.max.z-bbox.min.z).toFixed(2) )/1;
 
   this.width = width;
   this.height = height;
