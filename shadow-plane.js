@@ -6,6 +6,7 @@ ShadowPlane = function (width, length, shadowColor, upVector) {
   this.shadowColor = shadowColor || new THREE.Color(1,1,1);
   this.upVector = upVector || new THREE.Vector3(0,1,0);
 
+  this.userData.unselectable = true; // this should never be selectable
   this._drawPlane();
 }
 ShadowPlane.prototype = Object.create( THREE.Object3D.prototype );

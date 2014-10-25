@@ -7,6 +7,7 @@ MirrorPlane = function (width, length, resolution, color, upVector) {
   this.color = color ||  0x777777;
   this.upVector = upVector || new THREE.Vector3(0,1,0);
   
+  this.userData.unselectable = true; // this should never be selectable
   this._drawPlane();
 }
 MirrorPlane.prototype = Object.create( THREE.Object3D.prototype );
