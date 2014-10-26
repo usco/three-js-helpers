@@ -171,7 +171,7 @@ THREE.Mirror.prototype.renderWithMirror = function ( otherMirror ) {
 
 THREE.Mirror.prototype.updateTextureMatrix = function () {
 
-	var sign = THREE.Math.sign;
+	var sign = Math.sign;
 
 	this.updateMatrixWorld();
 	this.camera.updateMatrixWorld();
