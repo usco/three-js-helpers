@@ -24,7 +24,7 @@ SizeHelper = function(options)
   {
     position = start.clone();
     //position = position.multiplyScalar(0.2);
-    position.x = -40 //-= position.x;
+    //position.x = -40 //-= position.x;
     options.length = end.clone().sub( start ).length();
     //console.log("start",start,"end", end);
     direction = this.direction = (start.clone().sub(end)).normalize();
