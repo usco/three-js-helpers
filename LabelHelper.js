@@ -35,7 +35,7 @@ LabelHelper.prototype.generateTextFromCanvas = function()
   var color = this.color;
   var background = this.background;
   var bgColor = this.bgColor;
-  var borderThickness = 0;
+  var borderThickness = 1;
   
   //for background drawing
   var bgRect = function(ctx, x, y, w, h, r) {
@@ -69,7 +69,7 @@ LabelHelper.prototype.generateTextFromCanvas = function()
     var textWidth = context.measureText(text).width*resMult;
     context.fillStyle = bgColor;
     context.strokeStyle = bgColor;
-    bgRect(context, canvas.width / 2 - upscaledFontSize, canvas.height / 2 - upscaledFontSize, textWidth + borderThickness, upscaledFontSize * 1.4 + borderThickness, 0);
+    bgRect(context, canvas.width / 2 - upscaledFontSize -10, canvas.height / 2 - upscaledFontSize, textWidth + borderThickness, upscaledFontSize * 1.4 + borderThickness, 0);
   }
   
   context.fillStyle = color;
