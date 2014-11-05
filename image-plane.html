@@ -1,0 +1,20 @@
+<script src="image-plane.js" ></script>
+
+<polymer-element name="image-plane" extends="three-js-helper"
+  attributes="width length  resoluton up imgUrl">
+  <script>Polymer('image-plane',{
+      width:200,
+      length:200,
+      imgUrl: "",
+      resolution:512,
+      up:[0,1,0],
+      ready: function() {
+        this.object = new ImagePlane(this.width, this.length, this.imgUrl, this.resolution, new THREE.Vector3(this.up[0],this.up[1],this.up[2]));
+        this.super();
+      },
+      upChanged:function(){
+        this.object.setUp( new THREE.Vector3().fromArray( this.up ) );  
+      },
+    });
+  </script>
+</polymer-element>
