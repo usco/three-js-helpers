@@ -7,20 +7,27 @@
 */
 AngularDimHelper = function(options)
 {
+  BaseHelper.call( this );
   var options = options || {};
   //Todo : auto adjust arrows : if not enough space, arrows shoud be outside
-  BaseHelper.call( this );
   this.up = new THREE.Vector3(0,0,1);
   //this.start = start;
   //this.end = end;
 
-  var position = options.position || new THREE.Vector3();
-  var direction = this.direction = options.direction || new THREE.Vector3(1,0,0);
-  var angle = this.angle = options.angle || 75;//in degrees , not radians
-  this.color = options.color || "#000000" ;
+  var position  = this.position  = options.position !== undefined ? options.position : new THREE.Vector3();
+  var direction = this.direction = options.direction !== undefined ? options.direction : new THREE.Vector3(1,0,0);
+  var angle     = this.angle     = options.angle !== undefined ? options.angle : 75;//in degrees , not radians
+  var radians   = options.radians !== undefined? options.radians: false;
   
-  this.text = options.text || this.length;
-  var textSize = options.textSize || 8;
+  this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0x000000;
+  this.linesColor = options.linesColor !== undefined ? options.linesColor : 0x000000;
+  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
+  
+  var length = 5;//TODO: remove this
+  var textSize  = options.textSize  !== undefined? options.textSize: 10;
+  var precision = options.precision !== undefined? options.precision: 2;
+  var text      = options.text      !== undefined? options.text   : angle.toFixed(precision) + "";//coerce as str
+  
   
   var sideLength = options.sideLength || 3;
   var sideLengthExtra = options.sideLengthExtra || 2;
@@ -52,7 +59,7 @@ AngularDimHelper = function(options)
   matrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ) , angleStart+angle );
   endSideLineOrientation.applyMatrix4( matrix );
   
-  var lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.8, transparent:true } )
+  var lineMaterial = new THREE.LineBasicMaterial( { color: this.linesColor, linewidth:1, depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.8, transparent:true } )
 
   var startPos = startSideLineOrientation.clone().multiplyScalar(radius);
   var endPos = endSideLineOrientation.clone().multiplyScalar(radius);
@@ -81,8 +88,6 @@ AngularDimHelper = function(options)
     this.add( endSideLine );
   }
   
-  var length = 5;//TODO: remove this
-  
   var leftArrowDir = new THREE.Vector3(1,0,0);
   var rightArrowDir = new THREE.Vector3(-1,0,0);
   var leftArrowPos = new THREE.Vector3().copy(startPos);//0,sideLength,0);
@@ -90,8 +95,8 @@ AngularDimHelper = function(options)
   var arrowHeadSize = 4;
   var arrowSize = arrowHeadSize;//length/2;
   
-  //vAngle = angle*180/Math.PI;
-  this.text = new String(angle.toFixed(2))+"°";
+  vAngle = angle*180/Math.PI;
+  this.text = new String(vAngle.toFixed(2))+"°";
   var arcMidPosition = arcMidOrientation.clone().multiplyScalar(radius);
   
   //sin(ang/2) = (arrowHeadSize/2) / radius
@@ -101,7 +106,6 @@ AngularDimHelper = function(options)
   //cBase = Math.sin(fooAngle) * radius;
   var cHeight = Math.cos(fooAngle) * radius;
 
-  console.log("angl",fooAngle); 
   
   var blaOrient = new THREE.Vector3(1,0,0);
   var matrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ) , angleStart + fooAngle*2 );
@@ -112,7 +116,7 @@ AngularDimHelper = function(options)
 
   //draw dimention / text
   //var labelPosition = new THREE.Vector3(0,
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize});
+  this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize,bgColor:this.textBgColor});
   this.label.position.copy( arcMidPosition );
   this.label.rotation.z = Math.PI;
   
@@ -140,10 +144,13 @@ AngularDimHelper = function(options)
   if(leftArrow) leftArrowHeadSize = arrowHeadSize;
   if(rightArrow) rightArrowHeadSize = arrowHeadSize;
   //direction, origin, length, color, headLength, headRadius, headColor
-  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir,leftArrowPos,arrowSize, this.color,leftArrowHeadSize, 2);
-  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir,rightArrowPos,arrowSize, this.color,rightArrowHeadSize, 2);
+  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir,leftArrowPos,arrowSize, this.arrowColor,leftArrowHeadSize, 2);
+  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir,rightArrowPos,arrowSize, this.arrowColor,rightArrowHeadSize, 2);
   mainArrowLeft.scale.z =0.1;
   mainArrowRight.scale.z=0.1;
+  
+  this.mainArrowLeft  = mainArrowLeft;
+  this.mainArrowRight = mainArrowRight;
   
   this.add( mainArrowLeft );
   this.add( mainArrowRight );
@@ -156,11 +163,10 @@ AngularDimHelper = function(options)
   //draw arc
   var arcGeom = new THREE.CircleGeometry( radius, 30, angleStart, angle );
   arcGeom.vertices.shift();
-  var arcLine = new THREE.Line( arcGeom, lineMaterial ); 
-  this.add(arcLine);
+  this.arcLine = new THREE.Line( arcGeom, lineMaterial ); 
+  this.add( this.arcLine );
   
   //general attributes
-  this.position = position; 
   var angle = new THREE.Vector3(1,0,0).angleTo(direction); //new THREE.Vector3(1,0,0).cross( direction );
   this.setRotationFromAxisAngle(direction, angle);
 
@@ -179,3 +185,38 @@ AngularDimHelper = function(options)
 
 AngularDimHelper.prototype = Object.create( BaseHelper.prototype );
 AngularDimHelper.prototype.constructor = AngularDimHelper;
+
+AngularDimHelper.prototype.computeAngle = function(start, mid, end){
+  var v1 = new THREE.Vector3( start.clone().sub( mid ) );
+  var v2 = new THREE.Vector3( end.clone().sub( mid ) );
+  var angle = v1.angleTo( v2 );
+  return angle;
+}
+
+AngularDimHelper.prototype.setStart = function(start){
+  this.start = start;
+}
+
+AngularDimHelper.prototype.setMid = function(mid){
+  this.mid = mid;
+}
+
+AngularDimHelper.prototype.setEnd = function(end){
+  this.end = end;
+  if(this.start && this.mid && this.end){
+    this.angle = this.computeAngle( this.start, this.mid, this.end );
+  }
+}
+
+AngularDimHelper.prototype.set = function(){
+
+}
+
+AngularDimHelper.prototype.unset = function(){
+
+  this.remove( this.label);
+  this.remove( this.arcLine );
+  this.remove( this.mainArrowLeft );
+  this.remove( this.mainArrowRight );
+}
+
