@@ -3,6 +3,7 @@ DistanceHelper = function(options)
   BaseHelper.call( this );
   var options = options || {};
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0xFF0000;
+  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
 }
 
 DistanceHelper.prototype = Object.create( BaseHelper.prototype );
@@ -56,13 +57,13 @@ DistanceHelper.prototype.set = function( options )
   this.arrow = new THREE.ArrowHelper(direction.normalize(), start, length ,this.arrowColor, 3, 1);
   this.arrow.line.geometry.computeLineDistances();
   this.arrow.line.material = new THREE.LineDashedMaterial( { color: this.arrowColor,
-   linewidth:3,depthTest:false,depthWrite:false,renderDepth : 1e20,} );
+   linewidth:1,depthTest:false,depthWrite:false,renderDepth : 1e20,} );
   this.arrow.cone.material = new THREE.MeshBasicMaterial({color:this.arrowColor,depthTest:false,depthWrite:false,renderDepth : 1e20});
   this.arrow.position.copy( start );
   this.add( this.arrow ) ;
   
   //length label
-  this.label = new LabelHelper3d({text:text,fontSize:textSize});
+  this.label = new LabelHelper3d({text:text,fontSize:textSize,bgColor:this.textBgColor});
   //new LabelHelperPlane({text:this.text,fontSize:this.textSize});
   
   //at midpoint

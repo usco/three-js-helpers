@@ -38,6 +38,7 @@ SizeHelper = function(options)
   var sideLength = options.sideLength || 3;
   var sideLengthExtra = options.sideLengthExtra || 2;
   var drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
+  var textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   
   var leftArrow = options.leftArrow !== undefined ? options.leftArrow: true  ;
   var rightArrow = options.rightArrow !== undefined ? options.rightArrow : true;
@@ -71,7 +72,7 @@ SizeHelper = function(options)
   var arrowSize = length/2;
   
   //draw dimention / text
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize});
+  this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize,bgColor:textBgColor});
   this.label.position.y = sideLength;
   this.label.rotation.z = Math.PI;
   
