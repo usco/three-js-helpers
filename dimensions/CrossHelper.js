@@ -3,9 +3,9 @@
 */
 CrossHelper = function(options)
 {
-  var options = options || {}
-  
   BaseHelper.call( this );
+  
+  var options = options || {}
 
   var position = options.position || new THREE.Vector3();
   var direction = this.direction = options.direction || new THREE.Vector3();
@@ -21,7 +21,7 @@ CrossHelper = function(options)
   startCrossGeometry.vertices.push( new THREE.Vector3( 0, -offsetPos, 0 ) );
   startCrossGeometry.vertices.push( new THREE.Vector3( 0, -id/2, 0 ) );
   startCrossGeometry.vertices.push( new THREE.Vector3( 0, offsetPos , 0 ) );
-    startCrossGeometry.vertices.push( new THREE.Vector3( 0, id/2 , 0 ) );
+  startCrossGeometry.vertices.push( new THREE.Vector3( 0, id/2 , 0 ) );
   
   startCrossGeometry.vertices.push( new THREE.Vector3( -offsetPos, 0, 0 ) );
   startCrossGeometry.vertices.push( new THREE.Vector3( -id/2, 0, 0 ) );
@@ -30,7 +30,7 @@ CrossHelper = function(options)
   
   this.centerCross = new THREE.Line( startCrossGeometry, new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:opacity, transparent:true } ),THREE.LinePieces );
   this.add( this.centerCross ) ;
-
+  this.position.copy( position );
 }
 
 CrossHelper.prototype = Object.create( BaseHelper.prototype );
