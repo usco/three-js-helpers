@@ -29,7 +29,7 @@ DistanceHelper.prototype.set = function( options )
     options.length = direction.length();
   }
   
-  console.log("start", start, "end", end, "length", options.length,"direction", direction);
+  //console.log("start", start, "end", end, "length", options.length,"direction", direction);
   
   var length = options.length !== undefined ? options.length : 50;
   var textSize  = options.textSize  !== undefined? options.textSize: 10;

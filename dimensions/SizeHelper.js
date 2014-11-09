@@ -9,9 +9,8 @@
 //TODO: how to put items on the left instead of right, front instead of back etc
 SizeHelper = function(options)
 {
-  var options = options || {};
-  //Todo : auto adjust arrows : if not enough space, arrows shoud be outside
   BaseHelper.call( this );
+  var options = options || {};
   this.up = new THREE.Vector3(0,0,1);
   //this.start = start;
   //this.end = end;
