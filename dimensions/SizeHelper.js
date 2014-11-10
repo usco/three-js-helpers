@@ -76,6 +76,10 @@ SizeHelper = function(options)
   console.log("mid", this.mid,"cross", cross);
   this.leftArrowPos = this.mid.clone().add( cross );
   this.rightArrowPos = this.mid.clone().add( cross );
+  
+  this.flatNormal = cross.clone();
+  
+  this.debug = options.debug !== undefined ? options.debug : false;
 }
 
 SizeHelper.prototype = Object.create( BaseHelper.prototype );
@@ -93,9 +97,8 @@ SizeHelper.prototype.set = function(options){
 
   this._drawLabel();
   this._drawArrows();
-  //this._drawSideLines();
+  this._drawSideLines();
   
-  //this.position.copy( this._position );
 }
 
 SizeHelper.prototype._drawArrows = function(){
@@ -200,14 +203,18 @@ SizeHelper.prototype._drawSideLines = function(){
     var sideLengthExtra = this.sideLengthExtra;
     
     var sideLineGeometry = new THREE.Geometry();
-    sideLineGeometry.vertices.push( new THREE.Vector3( 0, 0, 0 ) );
-    sideLineGeometry.vertices.push( new THREE.Vector3( 0, sideLength+sideLengthExtra, 0 ) );
+    var sideLineStart  = this.start.clone();
+    var sideLineEnd    = sideLineStart.clone().add( this.flatNormal.clone().normalize().multiplyScalar( sideLength+sideLengthExtra ) );
+    
+    sideLineGeometry.vertices.push( sideLineStart );
+    sideLineGeometry.vertices.push( sideLineEnd );
     
     var leftSideLine = new THREE.Line( sideLineGeometry, new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.4, transparent:true } ) );
-    leftSideLine.position.x = -this.length / 2 ;
-
+    
+    var leftToRightOffset = this.end.clone().sub( this.start );
+    
     var rightSideLine = leftSideLine.clone();
-    rightSideLine.position.x = this.length / 2;
+    rightSideLine.position.add( leftToRightOffset );
     
     this.rightSideLine = rightSideLine;
     this.leftSideLine  = leftSideLine;
