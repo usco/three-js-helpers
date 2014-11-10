@@ -71,12 +71,9 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
 
 ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
   this.thicknessHelper = new SizeHelper({length:this.thickness, 
-  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
+  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint
   });
   this.thicknessHelper.set();
-  //this.thicknessHelper.lookAt( offsetPoint );
-  //this.thicknessHelper.rotation.x -= Math.PI/2;
-  //this.thicknessHelper.rotation.z -= Math.PI/2;
   this.add( this.thicknessHelper );
 }
 

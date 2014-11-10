@@ -65,9 +65,12 @@ SizeHelper = function(options)
   
   this.text   = options.text !== undefined ? options.text : this.length.toFixed(2);
   
-  
-  this.arrowSize = this.length/2;//size of arrows
-  
+  this.arrowSize = this.length/2;//size of arrows  
+  //HACK, for testing
+  if( ( (Math.abs( this.direction.z) - 1) <= 0.0001) && this.direction.x == 0 && this.direction.y ==0 )
+  {
+    this.up = new THREE.Vector3( 1,0, 0 );
+  }
   
   this.leftArrowDir = this.direction.clone();
   this.rightArrowDir = this.leftArrowDir.clone().negate();
@@ -122,15 +125,12 @@ SizeHelper.prototype._drawArrows = function(){
   //direction, origin, length, color, headLength, headRadius, headColor
   var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, 2);
   var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, 2);
-  mainArrowLeft.scale.z =0.1;
-  mainArrowRight.scale.z=0.1;
+  //mainArrowLeft.scale.z =0.1;
+  //mainArrowRight.scale.z=0.1;
   
   this.add( mainArrowLeft );
   this.add( mainArrowRight );
   
-  //general attributes
-  var angle = new THREE.Vector3(1,0,0).angleTo(direction);
-  //this.setRotationFromAxisAngle(direction, angle);
 
   //material settings : FIXME, move this elsewhere
   this.arrowLineMaterial = new THREE.LineBasicMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
@@ -149,8 +149,17 @@ SizeHelper.prototype._drawLabel = function(){
   //draw dimention / text
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
   this.label.position.copy( this.leftArrowPos );
-  this.label.rotation.z = Math.PI;
   //this.label.lookAt( this.direction );
+  //
+  //this.label.setRotationFromAxisAngle(this.direction.clone().normalize(), angle);
+  //console.log("dir,angl",this.direction, angle, this.label.up);
+  
+  var labelDefaultOrientation = new THREE.Vector3(1,0,0); 
+  
+  var quaternion = new THREE.Quaternion();
+  quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone().negate() );
+  this.label.rotation.setFromQuaternion( quaternion );
+  this.label.rotation.z += Math.PI;
   
   var labelWidth = this.label.width;
   var reqWith = labelWidth + 2 * this.arrowHeadSize;
@@ -161,7 +170,6 @@ SizeHelper.prototype._drawLabel = function(){
     this.label.position.copy( this.leftArrowPos );
     this.label.rotation.z = Math.PI;
   }
-  
   
   this.add( this.label );
   
