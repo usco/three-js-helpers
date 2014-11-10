@@ -23,8 +23,8 @@ SizeHelper = function(options)
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
-  this.sideLength    = options.sideLength!== undefined ? options.sideLength : 3; 
-  this.sideLengthExtra = options.sideLength!== undefined ? options.sideLength : 2; 
+  this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
+  this.sideLengthExtra = options.sideLengthExtra!== undefined ? options.sideLengthExtra : 2; 
   
   this.drawLeftArrow   = options.drawLeftArrow !== undefined ? options.drawLeftArrow: true  ;
   this.drawRightArrow  = options.drawRightArrow !== undefined ? options.drawRightArrow : true;
@@ -49,14 +49,14 @@ SizeHelper = function(options)
     var tmpV = end.clone().sub( start ) ;
     this.length = tmpV.length();
     //console.log("start",start,"end", end);
-    this.direction = tmpV.normalize();
+    //this.direction = tmpV.normalize();
     console.log("computed length", this.length, "dir", this.direction);
     this._position = start.clone().add( end.clone().sub( start ).divideScalar(2) ) ;
   }
   this.text   = options.text !== undefined ? options.text : this.length.toFixed(2);
   
   
-  this.arrowSize = this.length/2;//size of arrows, including their head
+  this.arrowSize = this.length/2;//size of arrows
   
   
   this.leftArrowDir = new THREE.Vector3( 1,0,0 );
@@ -85,7 +85,7 @@ SizeHelper.prototype._drawArrows = function(){
   var direction  = this.direction;
   
   var leftArrowDir = this.leftArrowDir;
-  var rightArrowDir = this.rightArrowDir 
+  var rightArrowDir= this.rightArrowDir 
   var leftArrowPos = this.leftArrowPos;
   var rightArrowPos= this.rightArrowPos;
   
@@ -169,18 +169,21 @@ SizeHelper.prototype._drawLabel = function(){
 SizeHelper.prototype._drawSideLines = function(){
   if( this.drawSideLines )
   {
-    var sideLength = this.sideLength;
+    var sideLength      = this.sideLength;
     var sideLengthExtra = this.sideLengthExtra;
     
     var sideLineGeometry = new THREE.Geometry();
     sideLineGeometry.vertices.push( new THREE.Vector3( 0, 0, 0 ) );
-    sideLineGeometry.vertices.push( new THREE.Vector3( 0, sideLength+sideLengthExtra , 0 ) );
+    sideLineGeometry.vertices.push( new THREE.Vector3( 0, sideLength+sideLengthExtra, 0 ) );
     
     var leftSideLine = new THREE.Line( sideLineGeometry, new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.4, transparent:true } ) );
     leftSideLine.position.x = -this.length / 2 ;
 
     var rightSideLine = leftSideLine.clone();
     rightSideLine.position.x = this.length / 2;
+    
+    this.rightSideLine = rightSideLine;
+    this.leftSideLine  = leftSideLine;
     
     this.add( rightSideLine );
     this.add( leftSideLine );
