@@ -21,6 +21,7 @@ SizeHelper = function(options)
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
@@ -43,26 +44,38 @@ SizeHelper = function(options)
   //either use provided length parameter , or compute things based on start/end parameters
   var start = options.start || this.position;
   var end = options.end ;
-  console.log("foo");
+  
   if(end && start)
   {
     var tmpV = end.clone().sub( start ) ;
     this.length = tmpV.length();
     //console.log("start",start,"end", end);
-    //this.direction = tmpV.normalize();
+    this.direction = tmpV.normalize();
     console.log("computed length", this.length, "dir", this.direction);
-    this._position = start.clone().add( end.clone().sub( start ).divideScalar(2) ) ;
+    //this._position = start.clone().add( end.clone().sub( start ).divideScalar(2) ) ;
+  }else
+  {
+    start = this.direction.clone().multiplyScalar( -this.length/2).add( this._position );
+    end   = this.direction.clone().multiplyScalar( this.length/2).add( this._position );
   }
+  
+  this.start = start;
+  this.end   = end;
+  this.mid   = this.direction.clone().multiplyScalar( this.length/2 ).add( this.start );
+  
   this.text   = options.text !== undefined ? options.text : this.length.toFixed(2);
   
   
   this.arrowSize = this.length/2;//size of arrows
   
   
-  this.leftArrowDir = new THREE.Vector3( 1,0,0 );
-  this.rightArrowDir = new THREE.Vector3( -1,0,0 );
-  this.leftArrowPos = new THREE.Vector3( 0, this.sideLength,0 );
-  this.rightArrowPos = new THREE.Vector3( 0, this.sideLength,0 );
+  this.leftArrowDir = this.direction.clone();
+  this.rightArrowDir = this.leftArrowDir.clone().negate();
+  var cross = this.direction.clone().cross( this.up );
+  cross.normalize().multiplyScalar(this.sideLength);
+  console.log("mid", this.mid,"cross", cross);
+  this.leftArrowPos = this.mid.clone().add( cross );
+  this.rightArrowPos = this.mid.clone().add( cross );
 }
 
 SizeHelper.prototype = Object.create( BaseHelper.prototype );
@@ -72,11 +85,17 @@ SizeHelper.prototype.set = function(options){
   var options = options || {};
   //this._position= options.position !== undefined ? options.position : new THREE.Vector3();
 
+  //for debugging only
+  if(this.debug){
+  this.add( new CrossHelper({position:this.start,color:0xFF0000}) );
+  this.add( new CrossHelper({position:this.end,color:0x00FF00}) );
+  this.add( new CrossHelper({position:this.mid,color:0x0000FF}) );}
+
   this._drawLabel();
   this._drawArrows();
-  this._drawSideLines();
+  //this._drawSideLines();
   
-  this.position.copy( this._position );
+  //this.position.copy( this._position );
 }
 
 SizeHelper.prototype._drawArrows = function(){
@@ -98,8 +117,8 @@ SizeHelper.prototype._drawArrows = function(){
   if(this.drawRightArrow) rightArrowHeadSize = arrowHeadSize;
   
   //direction, origin, length, color, headLength, headRadius, headColor
-  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir,leftArrowPos,arrowSize, this.arrowColor,leftArrowHeadSize, 2);
-  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir,rightArrowPos,arrowSize, this.arrowColor,rightArrowHeadSize, 2);
+  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, 2);
+  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, 2);
   mainArrowLeft.scale.z =0.1;
   mainArrowRight.scale.z=0.1;
   
@@ -108,7 +127,7 @@ SizeHelper.prototype._drawArrows = function(){
   
   //general attributes
   var angle = new THREE.Vector3(1,0,0).angleTo(direction);
-  this.setRotationFromAxisAngle(direction, angle);
+  //this.setRotationFromAxisAngle(direction, angle);
 
   //material settings : FIXME, move this elsewhere
   this.arrowLineMaterial = new THREE.LineBasicMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
@@ -126,15 +145,21 @@ SizeHelper.prototype._drawLabel = function(){
 
   //draw dimention / text
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
-  this.label.position.y = sideLength;
+  this.label.position.copy( this.leftArrowPos );
   this.label.rotation.z = Math.PI;
+  //this.label.lookAt( this.direction );
   
   var labelWidth = this.label.width;
   var reqWith = labelWidth + 2 * this.arrowHeadSize;
   
-  this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
-  this.label.position.y = sideLength;
-  this.label.rotation.z = Math.PI;
+  if(this.labelType == "frontFacing")
+  {
+    this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+    this.label.position.copy( this.leftArrowPos );
+    this.label.rotation.z = Math.PI;
+  }
+  
+  
   this.add( this.label );
   
   if( this.arrowsPlacement == "dynamic" )
@@ -142,7 +167,7 @@ SizeHelper.prototype._drawLabel = function(){
     if(reqWith>this.length)//if the label + arrows would not fit
     {
       this.arrowSize = Math.max( this.length/2, 6 );//we want arrows to be more than just arrowhead in all the cases
-      var arrowXPos  = this.length/2 +this.arrowSize;
+      var arrowXPos  = this.length/2 + this.arrowSize;
     
       this.leftArrowDir  = new THREE.Vector3( -1,0,0 );//reverse orientation of arrows
       this.rightArrowDir = new THREE.Vector3( 1,0,0 );
@@ -154,13 +179,15 @@ SizeHelper.prototype._drawLabel = function(){
       }
     }
   }else if( this.arrowsPlacement == "outside" ){
+    //put the arrows outside of measure, pointing "inwards" towards center
     this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
     var arrowXPos = this.length/2 + this.arrowSize;
   
-    this.leftArrowDir  = new THREE.Vector3( -1, 0, 0 );//reverse orientation of arrows
-    this.rightArrowDir = new THREE.Vector3( 1, 0, 0 );
-    this.leftArrowPos  = new THREE.Vector3( arrowXPos, sideLength, 0 );
-    this.rightArrowPos = new THREE.Vector3( -arrowXPos, sideLength, 0 );
+    this.leftArrowDir = this.direction.clone().negate().round();
+    this.rightArrowDir = this.leftArrowDir.clone().negate().round();
+    
+    this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
+    this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
   
   }
   

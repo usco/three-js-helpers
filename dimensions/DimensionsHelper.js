@@ -57,11 +57,11 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   
   //length, sideLength, position, direction, color, text, textSize,
   var widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,
-  position:widthArrowPos,direction:new THREE.Vector3(0,0,-1), textBgColor:this.textBgColor  });
+  position:widthArrowPos,direction:new THREE.Vector3(0,1,0), textBgColor:this.textBgColor  });
   var lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,
-  position:lengthArrowPos,direction:new THREE.Vector3(1,0,0), textBgColor:this.textBgColor  });
+  position:lengthArrowPos,direction:new THREE.Vector3(-1,0,0), textBgColor:this.textBgColor  });
   var heightArrow = new SizeHelper( {length:this.height,
-  sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,1,0), textBgColor:this.textBgColor });
+  sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,0,1), textBgColor:this.textBgColor });
   
   widthArrow.set();
   lengthArrow.set();

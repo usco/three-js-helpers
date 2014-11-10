@@ -65,13 +65,14 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
   this.thickness = escapePoint.clone().sub( point).length();
   
   this._drawThickness( point, offsetPoint, escapePoint, normal, flippedNormal );
-  this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
+  //this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
   //this._drawLabel( point, escapePoint);
 }
 
 ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
   this.thicknessHelper = new SizeHelper({length:this.thickness, 
-  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint});
+  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
+  });
   this.thicknessHelper.set();
   //this.thicknessHelper.lookAt( offsetPoint );
   //this.thicknessHelper.rotation.x -= Math.PI/2;

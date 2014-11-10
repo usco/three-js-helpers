@@ -9,7 +9,7 @@ CrossHelper = function(options)
 
   var position = options.position || new THREE.Vector3();
   var direction = this.direction = options.direction || new THREE.Vector3();
-  this.color = options.color || "#000000" ;
+  this.color = options.color || 0x000000 ;
   var opacity = this.opacity = options.opacity || 0.8;
   var size = this.size = options.size || 10;
   var id = this.innerDia = options.id || 0;
@@ -28,7 +28,7 @@ CrossHelper = function(options)
   startCrossGeometry.vertices.push( new THREE.Vector3( offsetPos, 0 , 0 ) );
   startCrossGeometry.vertices.push( new THREE.Vector3( id/2, 0 , 0 ) );
   
-  this.centerCross = new THREE.Line( startCrossGeometry, new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:opacity, transparent:true } ),THREE.LinePieces );
+  this.centerCross = new THREE.Line( startCrossGeometry, new THREE.LineBasicMaterial( { color: this.color,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:opacity, transparent:true } ),THREE.LinePieces );
   this.add( this.centerCross ) ;
   this.position.copy( position );
 }
