@@ -63,6 +63,9 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   var heightArrow = new SizeHelper( {length:this.height,
   sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,1,0), textBgColor:this.textBgColor });
   
+  widthArrow.set();
+  lengthArrow.set();
+  heightArrow.set();
   
   this.arrows = new THREE.Object3D();
   this.arrows.add( widthArrow );

@@ -202,7 +202,6 @@ AngularDimHelper.prototype.set = function(){
   leftArrowDir = startPos.clone().sub( leftArrowPos );
 
   //draw dimention / text
-  //var labelPosition = new THREE.Vector3(0,
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize,bgColor:this.textBgColor});
   this.label.position.copy( arcMidPosition );
   this.label.rotation.z = Math.PI;

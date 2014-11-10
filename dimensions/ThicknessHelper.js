@@ -14,8 +14,7 @@ ThicknessHelper = function(options)
   
   
   this.debug      = options.debug!== undefined ? options.debug : false;
-  
-  this.thickness = undefined;
+  this.thickness  = options.thickness!== undefined ? options.thickness : undefined;
 }
 
 ThicknessHelper.prototype = Object.create( BaseHelper.prototype );
@@ -65,9 +64,26 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
   //compute actual thickness
   this.thickness = escapePoint.clone().sub( point).length();
   
-  
+  this._drawThickness( point, offsetPoint, escapePoint, normal, flippedNormal );
   this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
-  this._drawLabel( point, escapePoint);
+  //this._drawLabel( point, escapePoint);
+}
+
+ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
+  this.thicknessHelper = new SizeHelper({length:this.thickness, 
+  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint});
+  this.thicknessHelper.set();
+  //this.thicknessHelper.lookAt( offsetPoint );
+  //this.thicknessHelper.rotation.x -= Math.PI/2;
+  //this.thicknessHelper.rotation.z -= Math.PI/2;
+  this.add( this.thicknessHelper );
+}
+
+ThicknessHelper.prototype._drawLabel = function(point, escapePoint){
+  var labelPosition =  point.clone().add( escapePoint.clone().sub( point).divideScalar(2) ) ;
+  var label = new LabelHelperPlane({text:this.thickness.toFixed(2),fontSize:this.fontSize,bgColor:this.textBgColor});
+  label.position.copy( labelPosition );
+  this.add( label );
 }
 
 ThicknessHelper.prototype._drawDebugHelpers = function(point, offsetPoint, escapePoint, normal, flippedNormal){
@@ -80,11 +96,4 @@ ThicknessHelper.prototype._drawDebugHelpers = function(point, offsetPoint, escap
   this.add( faceNormalHelper2 );
   this.add( remotePointHelper );
   this.add( escapePointHelper );
-}
-
-ThicknessHelper.prototype._drawLabel = function(point, escapePoint){
-  var labelPosition =  point.clone().add( escapePoint.clone().sub( point).divideScalar(2) ) ;
-  var label = new LabelHelperPlane({text:this.thickness.toFixed(2),fontSize:this.fontSize,bgColor:this.textBgColor});
-  label.position.copy( labelPosition );
-  this.add( label );
 }
