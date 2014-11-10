@@ -127,10 +127,8 @@ SizeHelper.prototype._drawArrows = function(){
   var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, 2);
   //mainArrowLeft.scale.z =0.1;
   //mainArrowRight.scale.z=0.1;
-  
   this.add( mainArrowLeft );
   this.add( mainArrowRight );
-  
 
   //material settings : FIXME, move this elsewhere
   this.arrowLineMaterial = new THREE.LineBasicMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
@@ -149,8 +147,6 @@ SizeHelper.prototype._drawLabel = function(){
   //draw dimention / text
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
   this.label.position.copy( this.leftArrowPos );
-  //this.label.lookAt( this.direction );
-  //
   //this.label.setRotationFromAxisAngle(this.direction.clone().normalize(), angle);
   //console.log("dir,angl",this.direction, angle, this.label.up);
   

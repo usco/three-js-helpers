@@ -23,7 +23,7 @@ AngularDimHelper = function(options)
   this.linesColor = options.linesColor !== undefined ? options.linesColor : 0x000000;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
   
-  var textSize  = options.textSize  !== undefined? options.textSize: 10;
+  var fontSize  = options.fontSize  !== undefined? options.fontSize: 10;
   var precision = options.precision !== undefined? options.precision: 2;
   var text      = options.text      !== undefined? options.text   : angle.toFixed(precision) + "";//coerce as str
   
@@ -34,6 +34,7 @@ AngularDimHelper = function(options)
   
   this.leftArrow = options.leftArrow !== undefined ? options.leftArrow: true  ;
   this.rightArrow = options.rightArrow !== undefined ? options.rightArrow : true;
+  this.arrowHeadSize   = 4;
 
   this.lineWidth = options.lineWidth || 1;//TODO: how to ? would require not using simple lines but strips
   //see ANGLE issue on windows platforms
@@ -59,14 +60,14 @@ AngularDimHelper.prototype.computeAngle = function(start, mid, end){
 AngularDimHelper.prototype.setStart = function(start){
   this.start = start;
   
-  this.startCross = new CrossHelper({position:start});
+  this.startCross = new CrossHelper({position:start, color:0xFF0000});
   this.add( this.startCross );
 }
 
 AngularDimHelper.prototype.setMid = function(mid){
   this.mid = mid;
   
-  this.midCross = new CrossHelper({position:mid});
+  this.midCross = new CrossHelper({position:mid, color:0x0000FF});
   this.add( this.midCross );
   
   //draw line from start to mid
@@ -83,7 +84,7 @@ AngularDimHelper.prototype.setMid = function(mid){
 AngularDimHelper.prototype.setEnd = function(end){
   this.end = end;
   
-  this.endCross = new CrossHelper({position:end});
+  this.endCross = new CrossHelper({position:end, color:0x00FF00});
   this.add( this.endCross );
   
   //draw line from start to mid
@@ -101,29 +102,96 @@ AngularDimHelper.prototype.setEnd = function(end){
     this.angle = this.computeAngle( this.start, this.mid, this.end );
   }
   
+  
+  //EXPERIMENTAL
   //draw arc
   //get the plane from the 3 points
   var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
   
-  var foo = this.mid.clone().sub( this.start );
-  foo.normalize();
-  var adj = foo.x;
-  var hyp= foo.y;
-  var bar = (Math.acos( adj /hyp))
-  angleStart =  bar;//Math.PI/2 - (Math.acos( adj /hyp))
+  var midToStart = this.start.clone().sub( this.mid );
+  var midToEnd  = this.end.clone().sub( this.mid );
+  midToStart.normalize();
+  midToEnd.normalize();
   
-  angleStart = 0;
+  
+  var adj = midToStart.x;
+  var hyp = midToStart.y;
+  var angleStart = (Math.acos( adj /hyp));
+  
+  angleStart = midToStart.angleTo( new THREE.Vector3(1,0,0 ) );//this.mid );
+    console.log(angleStart);
+  //Math.PI/2 - (Math.acos( adj /hyp))
+  //console.log("computed angle", this.angle, "angleStart",angleStart, "plane normal", plane.normal);
+    
+  //angleStart = 0;
   angle = this.angle;
   radius = (this.end.clone().sub( this.mid ) ).length();
   var arcGeom = new THREE.CircleGeometry( radius, 30, angleStart, angle  );
   arcGeom.vertices.shift();
   this.arcLine = new THREE.Line( arcGeom, lineMaterial ); 
-  this.add( this.arcLine );
-  this.arcLine.position.copy( this.mid );
+  
   //this.arcLine.lookAt( plane.normal.clone().normalize() );
   
-  console.log("computed angle", this.angle, "angleStart",angleStart, foo, "plane normal", plane.normal);
+  //alt
+  
+  var start2d = this.start.clone().projectOnPlane( plane.normal );
+  var end2d = this.end.clone().projectOnPlane( plane.normal );
+  //console.log("2d projection", start2d, end2d);
+  
+  /*circleShape = new THREE.Shape();
+	circleShape.moveTo( 0, radius );
+	circleShape.quadraticCurveTo( radius, radius, radius, 0 );
+	circleShape.quadraticCurveTo( radius, -radius, 0, -radius );
+	circleShape.quadraticCurveTo( -radius, -radius, -radius, 0 );
+	circleShape.quadraticCurveTo( -radius, radius, 0, radius );*/
+	
+	
+	var arcOuterRadius = radius /2;
+	var arcInnerRadius = radius /3;
+	
+	
+	var insetPos = midToEnd.clone().multiplyScalar( arcInnerRadius ); 
+	var outsetPos= midToStart.clone().multiplyScalar( arcOuterRadius );
+	
+	var circleShape = new THREE.Shape();
+	//circleShape.moveTo( outsetPos.x, outsetPos.y );
+	circleShape.absarc( 0, 0, arcOuterRadius, -this.angle/2, this.angle/2, true );
+  //circleShape.lineTo( insetPos.x, insetPos.y );
+	circleShape.absarc( 0, 0, arcInnerRadius, this.angle/2, -this.angle/2, true );
+	//circleShape.lineTo( arcOuterRadius, 0 );
+	//circleShape.lineTo( outsetPos.x, outsetPos.y );
+  
+	
+  var points = circleShape.createPointsGeometry();
+  //points.vertices.shift();
+	this.arcLine = new THREE.Line( points, new THREE.LineBasicMaterial( { color: 0xFF0000, linewidth: 2 } ) );
+	
+  //this.arcLine.add( new CrossHelper({position:insetPos,color:0x0000FF} ) );
+  //this.arcLine.add( new CrossHelper({position:outsetPos,color:0xFF0000} ) );
+	
+	var gna = this.end.clone().sub( this.start ).divideScalar( 2 ).add( this.start );
+	console.log("start", this.start, "end", this.end, "gna", gna);
+	var direction = (gna.clone()).sub( this.mid ).normalize();
+	var defaultOrientation = new THREE.Vector3(1,0,0); 
+  
+  var quaternion = new THREE.Quaternion();
+  quaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
+  this.arcLine.rotation.setFromQuaternion( quaternion );
+  
+  //this.arcLine.rotation.z += (Math.PI-0.3);
+	
+	//this.add( new THREE.ArrowHelper(direction,this.mid,20,0XFF0000) );
+	//this.add( new CrossHelper({position:gna,color:0x0000FF} ) );
+	
+	
+	this.add( this.arcLine );
+  this.arcLine.position.copy( this.mid );
+
+  
+
   //this.set(); 
+  
+  this._drawLabel();
 }
 
 AngularDimHelper.prototype.set = function(){
@@ -182,8 +250,7 @@ AngularDimHelper.prototype.set = function(){
   var arrowHeadSize = 4;
   var arrowSize = arrowHeadSize;//length/2;
   
-  degAngle = angle*180/Math.PI;
-  this.text = new String(degAngle.toFixed(2))+"°";
+  
   var arcMidPosition = arcMidOrientation.clone().multiplyScalar(radius);
   
   //sin(ang/2) = (arrowHeadSize/2) / radius
@@ -201,30 +268,6 @@ AngularDimHelper.prototype.set = function(){
   //var leftADirTest = Math.cos(angle/2)*radius;
   leftArrowDir = startPos.clone().sub( leftArrowPos );
 
-  //draw dimention / text
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.textSize,bgColor:this.textBgColor});
-  this.label.position.copy( arcMidPosition );
-  this.label.rotation.z = Math.PI;
-  
-  var labelWidth = this.label.width;
-  var reqWith = labelWidth + 2*arrowHeadSize;
-  
-  /*if(reqWith>length)//if the labe + arrows would not fit
-  {
-    arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
-    var arrowXPos = length/2+arrowSize;
-  
-    leftArrowDir = new THREE.Vector3(-1,0,0);//reverse orientation of arrows
-    rightArrowDir = new THREE.Vector3(1,0,0);
-    leftArrowPos = new THREE.Vector3(arrowXPos,sideLength,0);
-    rightArrowPos = new THREE.Vector3(-arrowXPos,sideLength,0);
-    if(labelWidth>length)//if even the label itself does not fit
-    {
-      this.label.position.y += 5;
-    }
-  }*/
-  this.add( this.label );
-  
   var leftArrowHeadSize = rightArrowHeadSize = 0;
   if(this.leftArrow) leftArrowHeadSize = arrowHeadSize;
   if(this.rightArrow) rightArrowHeadSize = arrowHeadSize;
@@ -289,4 +332,37 @@ AngularDimHelper.prototype.unset = function(){
 AngularDimHelper.prototype.drawArc = function(){
 
 }
+
+
+AngularDimHelper.prototype._drawLabel = function(){
+  //draw angle / text
+  
+  var degAngle = this.angle*180/Math.PI;
+  this.text = new String(degAngle.toFixed(2))+"°";
+  
+  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+  this.label.position.copy( this.mid );
+  //this.label.rotation.z = Math.PI;
+  
+  //var labelWidth = this.label.width;
+  //var reqWith = labelWidth + 2*arrowHeadSize;
+  
+  /*if(reqWith>length)//if the labe + arrows would not fit
+  {
+    arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
+    var arrowXPos = length/2+arrowSize;
+  
+    leftArrowDir = new THREE.Vector3(-1,0,0);//reverse orientation of arrows
+    rightArrowDir = new THREE.Vector3(1,0,0);
+    leftArrowPos = new THREE.Vector3(arrowXPos,sideLength,0);
+    rightArrowPos = new THREE.Vector3(-arrowXPos,sideLength,0);
+    if(labelWidth>length)//if even the label itself does not fit
+    {
+      this.label.position.y += 5;
+    }
+  }*/
+  this.add( this.label );
+}
+
+  
 
