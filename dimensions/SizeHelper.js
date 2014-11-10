@@ -183,8 +183,8 @@ SizeHelper.prototype._drawLabel = function(){
     this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
     var arrowXPos = this.length/2 + this.arrowSize;
   
-    this.leftArrowDir = this.direction.clone().negate().round();
-    this.rightArrowDir = this.leftArrowDir.clone().negate().round();
+    this.leftArrowDir = this.direction.clone().negate();
+    this.rightArrowDir = this.leftArrowDir.clone().negate();
     
     this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
     this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
