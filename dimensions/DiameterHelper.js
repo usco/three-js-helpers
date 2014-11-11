@@ -15,8 +15,8 @@ DiameterHelper = function(options)
   this.endLength = options.endLength || 20;
   this.color = options.color || "#000000" ;
   
-  this._position= options.position !== undefined ? options.position : new THREE.Vector3();
-  this.orientation = 
+  this._position   = options.position !== undefined ? options.position : new THREE.Vector3();
+  this.orientation = options.orientation !== undefined ? options.orientation : new THREE.Vector3();
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
@@ -73,7 +73,20 @@ DiameterHelper.prototype.setRadius = function(radius){
   this.drawLeaderLine();
 }
 
-DiameterHelper.prototype.setRadiusPoint = function(point){
+DiameterHelper.prototype.setOrientation = function(orientation){
+  this.orientation = orientation;
+  console.log("this.orientation",this.orientation);
+  
+  var defaultOrientation = new THREE.Vector3(0,0,1); 
+  var quaternion = new THREE.Quaternion();
+  quaternion.setFromUnitVectors ( defaultOrientation, this.orientation.clone() );
+  this.rotation.setFromQuaternion( quaternion );
+}
+
+/*Allows setting the radius/diameter from a 3d point
+
+*/
+DiameterHelper.prototype.setRadiusPoint = function(point, normal){
   
   var radius = point.clone().sub( this.position ).length();
   //var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
