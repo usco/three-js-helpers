@@ -9,7 +9,10 @@ LeaderLineHelper = function(options)
   this.distance = options.distance || 30;
   this.color = options.color || "#000000" ;
   this.text = options.text !== undefined ? options.text : " ";
-  this.fontSize = options.fontSize || 20;
+  
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   
   var angle = options.angle !== undefined ? options.angle : 45;
   var radius = options.radius !== undefined ? options.radius : 0;
@@ -41,10 +44,10 @@ LeaderLineHelper = function(options)
   horizGeom.vertices.push( angleEndPoint );
   horizGeom.vertices.push( horizEndPoint );
   
-  var horizLine = new THREE.Line( horizGeom, material );
+  this.horizLine = new THREE.Line( horizGeom, material );
   
   //draw dimention / text
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:false});
+  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
   this.label.rotation.z = Math.PI;
   var labelSize=this.label.width/2 + 2 //label size, plus some extra
   var labelPosition = horizEndPoint.clone().sub(new THREE.Vector3(labelSize,0,0))
@@ -66,7 +69,7 @@ LeaderLineHelper = function(options)
   }
  
   this.add( this.angleArrow );
-  this.add( horizLine );
+  this.add( this.horizLine );
   this.add( this.label );
 }
 

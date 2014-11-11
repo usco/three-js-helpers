@@ -16,6 +16,7 @@ DiameterHelper = function(options)
   this.color = options.color || "#000000" ;
   
   this._position= options.position !== undefined ? options.position : new THREE.Vector3();
+  this.orientation = 
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
@@ -72,6 +73,17 @@ DiameterHelper.prototype.setRadius = function(radius){
   this.drawLeaderLine();
 }
 
+DiameterHelper.prototype.setRadiusPoint = function(point){
+  
+  var radius = point.clone().sub( this.position ).length();
+  //var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
+  this.diameter = radius*2;
+  this.text     = this.diameter.toFixed(2);
+  
+  this.drawCircle();
+  this.drawLeaderLine();
+}
+
 
 DiameterHelper.prototype.drawCircle = function(){
   //draw main circle
@@ -88,7 +100,8 @@ DiameterHelper.prototype.drawCircle = function(){
 
 DiameterHelper.prototype.drawLeaderLine = function(){
   //leader line
-  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2});
+  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
+  fontSize:this.fontSize,textBgColor:this.textBgColor});
   
   if(this.leaderLine) this.remove( this.leaderLine );
   this.add( this.leaderLine );
