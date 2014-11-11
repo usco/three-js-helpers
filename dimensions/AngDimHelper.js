@@ -106,92 +106,105 @@ AngularDimHelper.prototype.setEnd = function(end){
   //EXPERIMENTAL
   //draw arc
   //get the plane from the 3 points
+  this.opositeAngle = false;
+  this.debug = false;
+  if(this.opositeAngle)
+  {
+    this.angle = Math.PI*2 - this.angle;
+  }
+  var angle = this.angle;
   var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
   
-  var midToStart = this.start.clone().sub( this.mid );
-  var midToEnd  = this.end.clone().sub( this.mid );
-  midToStart.normalize();
-  midToEnd.normalize();
+  var midToStart    = this.start.clone().sub( this.mid );
+  var midToEnd      = this.end.clone().sub( this.mid );
+  var midToStartDir = midToStart.clone().normalize();
+  var midToEndDir   = midToEnd.clone().normalize();
   
+  var side = midToEnd;
+	var sideLength = side.length();
+  //offset start is a point on the vector mid -> start that is a far away from mid as end is
+  var offsetStart = midToStartDir.clone().multiplyScalar( sideLength );
+	offsetStart.add( this.mid);
+  var endToOffsetStart = this.end.clone().sub( offsetStart );
   
-  var adj = midToStart.x;
-  var hyp = midToStart.y;
-  var angleStart = (Math.acos( adj /hyp));
+  var radius = midToEnd.length();
+  var arcOuterRadius = radius /1.5;
+	var arcInnerRadius = radius /2;
   
-  angleStart = midToStart.angleTo( new THREE.Vector3(1,0,0 ) );//this.mid );
-    console.log(angleStart);
-  //Math.PI/2 - (Math.acos( adj /hyp))
-  //console.log("computed angle", this.angle, "angleStart",angleStart, "plane normal", plane.normal);
-    
-  //angleStart = 0;
-  angle = this.angle;
-  radius = (this.end.clone().sub( this.mid ) ).length();
-  var arcGeom = new THREE.CircleGeometry( radius, 30, angleStart, angle  );
-  arcGeom.vertices.shift();
-  this.arcLine = new THREE.Line( arcGeom, lineMaterial ); 
-  
-  //this.arcLine.lookAt( plane.normal.clone().normalize() );
-  
-  //alt
-  
-  var start2d = this.start.clone().projectOnPlane( plane.normal );
-  var end2d = this.end.clone().projectOnPlane( plane.normal );
-  //console.log("2d projection", start2d, end2d);
-  
-  /*circleShape = new THREE.Shape();
-	circleShape.moveTo( 0, radius );
-	circleShape.quadraticCurveTo( radius, radius, radius, 0 );
-	circleShape.quadraticCurveTo( radius, -radius, 0, -radius );
-	circleShape.quadraticCurveTo( -radius, -radius, -radius, 0 );
-	circleShape.quadraticCurveTo( -radius, radius, 0, radius );*/
+  console.log("start", this.start, "offsetStart", offsetStart, "end", this.end);
 	
+	//first parallel is :
+	//endToOffsetStart
+	//make a second, going through mid
+	var paral = endToOffsetStart.clone().normalize();//.add( this.mid );
+	paral = new THREE.Vector3(0,-1, 0 );
+	var midToStartAngle = paral.angleTo( midToStart );
+	console.log("midToStartAngle",midToStartAngle*180/Math.PI); 
 	
-	var arcOuterRadius = radius /2;
-	var arcInnerRadius = radius /3;
+	var arcAngle = this.angle;
+	var arcAngleStart= - Math.PI/2 + midToStartAngle;
+	var arcAngleEnd = arcAngleStart + arcAngle;
 	
-	
-	var insetPos = midToEnd.clone().multiplyScalar( arcInnerRadius ); 
-	var outsetPos= midToStart.clone().multiplyScalar( arcOuterRadius );
+	//var insetPos = midToEnd.clone().multiplyScalar( arcInnerRadius ); 
+	//var outsetPos= midToStart.clone().multiplyScalar( arcOuterRadius );
 	
 	var circleShape = new THREE.Shape();
 	//circleShape.moveTo( outsetPos.x, outsetPos.y );
-	circleShape.absarc( 0, 0, arcOuterRadius, -this.angle/2, this.angle/2, true );
-  //circleShape.lineTo( insetPos.x, insetPos.y );
-	circleShape.absarc( 0, 0, arcInnerRadius, this.angle/2, -this.angle/2, true );
+	//circleShape.absarc( 0, 0, arcOuterRadius, -this.angle/2*1.1, this.angle/2, true );
+	//circleShape.absarc( 0, 0, arcInnerRadius, -this.angle/2, this.angle/2*1.1,  false );
+	
+  circleShape.absarc( 0, 0, arcOuterRadius, arcAngleStart, arcAngleEnd, true );
+	circleShape.absarc( 0, 0, arcInnerRadius, arcAngleStart, arcAngleEnd,  false );
+	
 	//circleShape.lineTo( arcOuterRadius, 0 );
 	//circleShape.lineTo( outsetPos.x, outsetPos.y );
-  
 	
   var points = circleShape.createPointsGeometry();
   //points.vertices.shift();
-	this.arcLine = new THREE.Line( points, new THREE.LineBasicMaterial( { color: 0xFF0000, linewidth: 2 } ) );
+  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0xFF0000,depthTest:false,depthWrite:false, opacity:0.4, transparent:true, linewidth: 2 } )
+	this.arcLine = new THREE.Line( points, this.lineMaterial );
 	
-  //this.arcLine.add( new CrossHelper({position:insetPos,color:0x0000FF} ) );
-  //this.arcLine.add( new CrossHelper({position:outsetPos,color:0xFF0000} ) );
+	var filledArcGeometry = new THREE.ShapeGeometry( circleShape, {curveSegments:30} );
+	this.arcLine = new THREE.Mesh( filledArcGeometry, new THREE.MeshBasicMaterial({color:this.textBgColor,depthTest:false,depthWrite:false } ) );
+	this.arcLine.renderDepth = 1e20;
 	
-	var gna = this.end.clone().sub( this.start ).divideScalar( 2 ).add( this.start );
-	console.log("start", this.start, "end", this.end, "gna", gna);
-	var direction = (gna.clone()).sub( this.mid ).normalize();
+	var arcCenter = this.end.clone().sub( offsetStart ).divideScalar( 2 ).add( offsetStart );
+	var direction = (arcCenter.clone()).sub( this.mid ).normalize();
+	if(this.opositeAngle){
+	  direction.negate();
+	}
+	
 	var defaultOrientation = new THREE.Vector3(1,0,0); 
-  
   var quaternion = new THREE.Quaternion();
-  quaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
+  quaternion.setFromUnitVectors ( new THREE.Vector3(0,0,1), plane.normal.clone() );
   this.arcLine.rotation.setFromQuaternion( quaternion );
   
-  //this.arcLine.rotation.z += (Math.PI-0.3);
+  /*var quaternion = new THREE.Quaternion();
+  quaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
+  this.arcLine.rotation.setFromQuaternion( quaternion );*/
+  
+	if( this.debug ){
+	  this.debugHelpers = new THREE.Object3D();
+	  //this.debugHelpers.add( new THREE.ArrowHelper(direction,this.mid,20,0XFF0000) );
+	  this.debugHelpers.add( new CrossHelper({position:offsetStart,color:0xFF00FF} ) );
+	  //this.debugHelpers.add( new CrossHelper({position:this.start,color:0x0000FF} ) );
 	
-	//this.add( new THREE.ArrowHelper(direction,this.mid,20,0XFF0000) );
-	//this.add( new CrossHelper({position:gna,color:0x0000FF} ) );
+	  this.debugHelpers.add( new CrossHelper({position:arcCenter,color:0x0000FF} ) );
+	  this.debugHelpers.add( new THREE.ArrowHelper(plane.normal,arcCenter,20,0XFF0000) ); 
+    this.debugHelpers.add( new THREE.ArrowHelper(midToStartDir,this.mid,20,0XFF0000) ); 
+    
+	  this.debugHelpers.add( new THREE.ArrowHelper(paral,this.mid,20,0XFFFF00) ); 
+    this.debugHelpers.add( new THREE.ArrowHelper(endToOffsetStart.clone().normalize(),offsetStart,20,0XFFFF00) ); 
 	
+	  this.add( this.debugHelpers );
+	}
 	
 	this.add( this.arcLine );
   this.arcLine.position.copy( this.mid );
-
-  
-
   //this.set(); 
   
   this._drawLabel();
+  this.label.position.copy( arcCenter );
 }
 
 AngularDimHelper.prototype.set = function(){
@@ -327,6 +340,8 @@ AngularDimHelper.prototype.unset = function(){
   
   if( this.startMidLine ) this.remove( this.startMidLine );
   if( this.midEndLine )   this.remove( this.midEndLine );
+  
+  if( this.debugHelpers ) this.remove( this.debugHelpers );
 }
 
 AngularDimHelper.prototype.drawArc = function(){
