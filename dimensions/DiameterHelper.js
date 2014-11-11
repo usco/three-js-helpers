@@ -1,5 +1,9 @@
 /*
   Made of one main arrow, and two lines perpendicular to the main arrow, at both its ends
+  
+  Two step interactive version : 
+    - place center
+    - place diameter
 */
 DiameterHelper = function(options)
 {
@@ -10,34 +14,85 @@ DiameterHelper = function(options)
   this.diameter = options.diameter || 10;
   this.endLength = options.endLength || 20;
   this.color = options.color || "#000000" ;
-  this.text = this.diameter;
-  this.fontSize = options.fontSize || 20;
-
-  var material = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false,depthWrite:false,renderDepth : 1e20});
- 
-  //center cross
-  var centerCrossSize = 10;
-  var centerCross = new CrossHelper({size:3});
-
-  //leader line
-  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2});
   
+  this._position= options.position !== undefined ? options.position : new THREE.Vector3();
+  
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
+  this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  
+  this.text   = options.text !== undefined ? options.text : this.diameter.toFixed(2);
+  
+  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false, depthWrite:false,renderDepth : 1e20});
+ 
+}
+
+DiameterHelper.prototype = Object.create( BaseHelper.prototype );
+DiameterHelper.prototype.constructor = DiameterHelper;
+
+DiameterHelper.prototype.set = function(){
+  this.setCenter();
+  this.setDiameter();
+}
+
+DiameterHelper.prototype.unset = function(){
+  this.remove( this.centerCross );
+  this.remove( this.diaCircle );
+  this.remove( this.leaderLine );
+}
+
+DiameterHelper.prototype.setCenter = function(centerPosition){
+  if(centerPosition)  this.position.copy( centerPosition );
+  if(this.centerCross) this.remove( this.centerCross );
+   //center cross
+  this.centerCross = new CrossHelper({size:this.centerCrossSize});
+  this.add( this.centerCross );
+}
+
+DiameterHelper.prototype.setDiameter = function(diameter){
+  if(!diameter && ! this.diameter){ 
+    return
+  }  
+  this.diameter = diameter;
+  this.text     = this.diameter.toFixed(2);
+  
+  this.drawCircle();
+  this.drawLeaderLine();
+}
+
+DiameterHelper.prototype.setRadius = function(radius){
+  if(!radius && ! this.diameter){ 
+    return
+  }  
+  this.diameter = radius*2;
+  this.text     = this.diameter.toFixed(2);
+  
+  this.drawCircle();
+  this.drawLeaderLine();
+}
+
+
+DiameterHelper.prototype.drawCircle = function(){
   //draw main circle
   var circleRadius = this.diameter/2;
   var circleShape = new THREE.Shape();
 	circleShape.moveTo( 0, 0 );
 	circleShape.absarc( 0, 0, circleRadius, 0, Math.PI*2, false );
   var points  = circleShape.createSpacedPointsGeometry( 100 );
-  var diaCircle = new THREE.Line(points, material );
-
-  //add all
-  this.add( centerCross );
-  this.add( diaCircle );
-  this.add( this.leaderLine );
+  this.diaCircle = new THREE.Line(points, this.lineMaterial );
   
+  if(this.diaCircle) this.remove( this.diaCircle );
+  this.add( this.diaCircle );
 }
 
-DiameterHelper.prototype = Object.create( BaseHelper.prototype );
-DiameterHelper.prototype.constructor = DiameterHelper;
+DiameterHelper.prototype.drawLeaderLine = function(){
+  //leader line
+  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2});
+  
+  if(this.leaderLine) this.remove( this.leaderLine );
+  this.add( this.leaderLine );
+}
+
 
 
