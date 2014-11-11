@@ -4,6 +4,8 @@ DistanceHelper = function(options)
   var options = options || {};
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0xFF0000;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
+  
+  this.arrowHeadSize   = 4;
 }
 
 DistanceHelper.prototype = Object.create( BaseHelper.prototype );
@@ -54,7 +56,7 @@ DistanceHelper.prototype.set = function( options )
   this.add( this.startCross ) ;
   
   //main arrow
-  this.arrow = new THREE.ArrowHelper(direction.normalize(), start, length ,this.arrowColor, 3, 1);
+  this.arrow = new THREE.ArrowHelper(direction.normalize(), start, length ,this.arrowColor, this.arrowHeadSize, 2)//, 3, 1);
   this.arrow.line.geometry.computeLineDistances();
   this.arrow.line.material = new THREE.LineDashedMaterial( { color: this.arrowColor,
    linewidth:1,depthTest:false,depthWrite:false,renderDepth : 1e20,} );
