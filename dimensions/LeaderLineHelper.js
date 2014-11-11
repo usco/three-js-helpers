@@ -10,6 +10,11 @@ LeaderLineHelper = function(options)
   this.color = options.color || "#000000" ;
   this.text = options.text !== undefined ? options.text : " ";
   
+  
+  this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0x000000;
+  this.linesColor = options.linesColor !== undefined ? options.linesColor : 0x000000;
+  this.lineWidth  = options.lineWidth !== undefined ? options.lineWidth : 1;
+  
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
@@ -20,7 +25,7 @@ LeaderLineHelper = function(options)
   var horizLength = options.horizLength || 10;
   var textBorder = options.textBorder || null;
 
-  var material = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false,depthWrite:false,renderDepth : 1e20});
+  var material = new THREE.LineBasicMaterial( { color: this.linesColor, depthTest:false,depthWrite:false});
  
   var rAngle = angle;
   rAngle = rAngle*Math.PI/180;
@@ -45,6 +50,7 @@ LeaderLineHelper = function(options)
   horizGeom.vertices.push( horizEndPoint );
   
   this.horizLine = new THREE.Line( horizGeom, material );
+  this.horizLine.renderDepth = 1e20;
   
   //draw dimention / text
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
@@ -71,6 +77,16 @@ LeaderLineHelper = function(options)
   this.add( this.angleArrow );
   this.add( this.horizLine );
   this.add( this.label );
+  
+  //material settings : FIXME, move this elsewhere
+  this.arrowLineMaterial = new THREE.LineBasicMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
+  this.arrowConeMaterial = new THREE.MeshBasicMaterial({color:this.arrowColor, 
+depthTest:false, depthWrite:false});
+  
+  this.angleArrow.line.material = this.arrowLineMaterial;
+  this.angleArrow.cone.material =  this.arrowConeMaterial;
+  this.angleArrow.renderDepth = 1e20;
+  
 }
 
 LeaderLineHelper.prototype = Object.create( BaseHelper.prototype );
