@@ -26,6 +26,7 @@ AngularDimHelper = function(options)
   var fontSize  = options.fontSize  !== undefined? options.fontSize: 10;
   var precision = options.precision !== undefined? options.precision: 2;
   var text      = options.text      !== undefined? options.text   : angle.toFixed(precision) + "";//coerce as str
+  this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
   
   this.sideLength      = options.sideLength!== undefined ? options.sideLength : 3;
@@ -165,7 +166,8 @@ AngularDimHelper.prototype.setEnd = function(end){
 	this.arcLine = new THREE.Line( points, this.lineMaterial );
 	
 	var filledArcGeometry = new THREE.ShapeGeometry( circleShape, {curveSegments:30} );
-	this.arcLine = new THREE.Mesh( filledArcGeometry, new THREE.MeshBasicMaterial({color:this.textBgColor,depthTest:false,depthWrite:false } ) );
+	this.arcLine = new THREE.Mesh( filledArcGeometry, new THREE.MeshBasicMaterial({color:this.textBgColor,
+	depthTest:false,depthWrite:false,side : THREE.DoubleSide } ) );
 	this.arcLine.renderDepth = 1e20;
 	
 	var arcCenter = this.end.clone().sub( offsetStart ).divideScalar( 2 ).add( offsetStart );
@@ -355,8 +357,21 @@ AngularDimHelper.prototype._drawLabel = function(){
   var degAngle = this.angle*180/Math.PI;
   this.text = new String(degAngle.toFixed(2))+"°";
   
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+  switch(this.labelType)
+  {
+    case "flat":
+      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+    break;
+    case "frontFacing":
+      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+    break;
+  }
+  
+  
   this.label.position.copy( this.mid );
+  
+  
+  
   //this.label.rotation.z = Math.PI;
   
   //var labelWidth = this.label.width;

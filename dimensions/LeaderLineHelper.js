@@ -17,7 +17,7 @@ LeaderLineHelper = function(options)
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
-  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
   var angle = options.angle !== undefined ? options.angle : 45;
   var radius = options.radius !== undefined ? options.radius : 0;
@@ -53,11 +53,20 @@ LeaderLineHelper = function(options)
   this.horizLine.renderDepth = 1e20;
   
   //draw dimention / text
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
+  switch(this.labelType)
+  {
+    case "flat":
+      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
+    break;
+    case "frontFacing":
+      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+    break;
+  }
   this.label.rotation.z = Math.PI;
   var labelSize=this.label.width/2 + 2 //label size, plus some extra
   var labelPosition = horizEndPoint.clone().sub(new THREE.Vector3(labelSize,0,0))
   this.label.position.add( labelPosition );
+  
  
   var crossHelper = new CrossHelper({size:3});
   this.add( crossHelper );

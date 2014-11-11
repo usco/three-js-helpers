@@ -160,12 +160,17 @@ SizeHelper.prototype._drawLabel = function(){
   var labelWidth = this.label.width;
   var reqWith = labelWidth + 2 * this.arrowHeadSize;
   
-  if(this.labelType == "frontFacing")
+  switch(this.labelType)
   {
-    this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
-    this.label.position.copy( this.leftArrowPos );
-    this.label.rotation.z = Math.PI;
+    case "flat":
+      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
+    break;
+    case "frontFacing":
+      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+    break;
   }
+  this.label.position.copy( this.leftArrowPos );
+  this.label.rotation.z = Math.PI;
   
   this.add( this.label );
   

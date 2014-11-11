@@ -11,6 +11,7 @@ ThicknessHelper = function(options)
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
   
   this.debug      = options.debug!== undefined ? options.debug : false;
@@ -71,7 +72,8 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
 
 ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
   this.thicknessHelper = new SizeHelper({length:this.thickness, 
-  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint
+  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
+  labelType:"frontFacing"
   });
   this.thicknessHelper.set();
   this.add( this.thicknessHelper );
@@ -79,9 +81,19 @@ ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePo
 
 ThicknessHelper.prototype._drawLabel = function(point, escapePoint){
   var labelPosition =  point.clone().add( escapePoint.clone().sub( point).divideScalar(2) ) ;
-  var label = new LabelHelperPlane({text:this.thickness.toFixed(2),fontSize:this.fontSize,bgColor:this.textBgColor});
-  label.position.copy( labelPosition );
-  this.add( label );
+  
+  switch(this.labelType)
+  {
+    case "flat":
+      this.label = new LabelHelperPlane({text:this.thickness.toFixed(2),fontSize:this.fontSize,bgColor:this.textBgColor});
+    break;
+    case "frontFacing":
+      this.label = new LabelHelper3d({text:this.thickness.toFixed(2),fontSize:this.fontSize,bgColor:this.textBgColor});
+    break;
+  }
+  
+  this.label.position.copy( labelPosition );
+  this.add( this.label );
 }
 
 ThicknessHelper.prototype._drawDebugHelpers = function(point, offsetPoint, escapePoint, normal, flippedNormal){
