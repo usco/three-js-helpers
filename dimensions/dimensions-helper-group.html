@@ -1,0 +1,26 @@
+<polymer-element name="dimensions-helper-group" attributes="selectedObject" >
+  <template>
+  
+    <core-selection id="selection" on-core-select="{{selectAction}}"></core-selection>
+  </template>
+  <script>
+    Polymer('angle-helper', {
+      active:null,
+      pointerPosition:null,
+      helper:null,
+      selectedObject:null,
+      ready:function(){
+      },
+      itemTapAction: function(e, detail, sender) {
+        this.$.selection.select(e.target);
+      },
+      selectAction: function(e, detail, sender) {
+        console.log("selectAction", e, detail);
+        //detail.item.classList.toggle('selected', detail.isSelected);
+      }
+      onPicked:function(e){
+      }
+     });
+  </script>
+  
+</polymer-element>

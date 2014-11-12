@@ -11,8 +11,8 @@ AngularDimHelper = function(options)
   var options = options || {};
   //Todo : auto adjust arrows : if not enough space, arrows shoud be outside
   this.up = new THREE.Vector3(0,0,1);
-  //this.start = start;
-  //this.end = end;
+  this.start = undefined;
+  this.end   = undefined;
 
   var position  = this.position  = options.position !== undefined ? options.position : new THREE.Vector3();
   this.direction = options.direction !== undefined ? options.direction : new THREE.Vector3(1,0,0);//should this be oposite angle ?

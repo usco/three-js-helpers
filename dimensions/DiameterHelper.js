@@ -28,6 +28,8 @@ DiameterHelper = function(options)
   this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false, depthWrite:false,renderDepth : 1e20});
  
   this.dimDisplayType = options.dimDisplayType!== undefined ? options.dimDisplayType : "offsetLine";
+  
+  this.center = undefined;
 }
 
 DiameterHelper.prototype = Object.create( BaseHelper.prototype );
@@ -41,11 +43,12 @@ DiameterHelper.prototype.set = function(){
 DiameterHelper.prototype.unset = function(){
   this.remove( this.centerCross );
   this.remove( this.diaCircle );
-  this.remove( this.leaderLine );
+  this.remove( this.dimensionHelper );
 }
 
-DiameterHelper.prototype.setCenter = function(centerPosition){
-  if(centerPosition)  this.position.copy( centerPosition );
+DiameterHelper.prototype.setCenter = function(center){
+  if(center)  this.position.copy( center );
+  if(center)  this.center = center;
   if(this.centerCross) this.remove( this.centerCross );
    //center cross
   this.centerCross = new CrossHelper({size:this.centerCrossSize});
@@ -120,21 +123,21 @@ DiameterHelper.prototype.drawDimension = function(){
 
 DiameterHelper.prototype.drawLeaderLine = function(){
   //leader line
-  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
+  this.dimensionHelper = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
   fontSize:this.fontSize,textBgColor:this.textBgColor});
   
-  if(this.leaderLine) this.remove( this.leaderLine );
-  this.add( this.leaderLine );
+  if(this.dimensionHelper) this.remove( this.dimensionHelper );
+  this.add( this.dimensionHelper );
 }
 
 DiameterHelper.prototype.drawOffsetLine = function(){
   //offset line
-  this.offsetLine = new SizeHelper({length:this.diameter, 
+  this.dimensionHelper = new SizeHelper({length:this.diameter, 
   textBgColor:this.textBgColor, labelType:"frontFacing",sideLength:this.diameter/2+10
   });
-  this.offsetLine.set();
+  this.dimensionHelper.set();
   
-  if(this.offsetLine) this.remove( this.offsetLine );
-  this.add( this.offsetLine );
+  if(this.dimensionHelper) this.remove( this.dimensionHelper );
+  this.add( this.dimensionHelper );
 }
 

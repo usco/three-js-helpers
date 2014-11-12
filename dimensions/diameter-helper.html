@@ -1,0 +1,39 @@
+<link rel="import" href="dimension-helper-base.html">
+<script src="DiameterHelper.js"></script>
+
+<polymer-element name="diameter-helper" attributes="selectedObject" extends="dimension-helper-base">
+  <script>
+    Polymer('diameter-helper', {
+      active:null,
+      pointerPosition:null,
+      helper:null,
+      selectedObject:null,
+      ready:function(){
+        this.helper = new DiameterHelper({textBgColor:"#ffd200"});
+      },
+      onPicked:function(e){
+        console.log("picked", this.localName);
+        pickingDatas = e.detail.pickingInfos;
+        if(pickingDatas.length == 0 || !this.selectedObject) return;
+        
+        var point = pickingDatas[0].point;//closest point
+        if( !this.helper.center )
+        {
+          console.log("measureDiaSetCenter")
+          this.helper.unset();
+          var normal  = pickingDatas[0].face.normal.clone();
+          this.helper.setCenter(point);
+          this.helper.setOrientation( normal );
+          //TODO : move this into helper
+          //this.measureDiaCenter = point.clone();
+          return;
+        }else
+        {
+          var dia = point.clone().sub( this.helper.center ).length();
+          this.helper.setRadius(dia);
+          this.helper.center = undefined;
+        }
+      }
+     });
+  </script>
+</polymer-element>

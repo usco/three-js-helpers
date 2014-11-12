@@ -1,0 +1,27 @@
+<link rel="import" href="dimension-helper-base.html">
+
+<script src="ThicknessHelper.js"></script>
+
+<polymer-element name="thickness-helper" attributes="selectedObject" extends="dimension-helper-base">
+  <script>
+    Polymer('thickness-helper', {
+      active:null,
+      pointerPosition:null,
+      helper:null,
+      selectedObject:null,
+      ready:function(){
+        this.helper = new ThicknessHelper();
+      },
+      onPicked:function(e){
+        console.log("picked", this.localName);
+        pickingDatas = e.detail.pickingInfos;
+        if(pickingDatas.length == 0 || !this.selectedObject) return;
+        var entryInteresect = pickingDatas[0];
+        
+        this.helper.unset();
+        this.helper.set( entryInteresect, this.selectedObject );
+        //		    this.addToScene( this.thicknessHelper, "helpers", {autoCenter:false,autoResize:false,select:false, persistent:true} );
+      }
+     });
+  </script>
+</polymer-element>

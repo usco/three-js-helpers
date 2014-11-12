@@ -1,0 +1,40 @@
+<link rel="import" href="dimension-helper-base.html">
+
+<script src="DistanceHelper.js"></script>
+
+<polymer-element name="distance-helper" attributes="selectedObject" extends="dimension-helper-base">
+  <script>
+    Polymer('distance-helper', {
+      active:null,
+      pointerPosition:null,
+      helper:null,
+      selectedObject:null,
+      
+      distance:null,
+      ready:function(){
+        this.helper = new DistanceHelper({arrowColor:0x000000,textBgColor:"#ffd200"});
+      },
+      onPicked:function(e){
+        console.log("picked", this.localName);
+        pickingDatas = e.detail.pickingInfos;
+        if(pickingDatas.length == 0) return;
+        
+        var point = pickingDatas[0].point;//closest point
+      
+        if(! this.helper.start){
+          this.helper.unset();
+          this.helper.setStart(point);
+          return;
+        }else
+        {
+          this.helper.setEnd( point );
+          this.distance = this.helper.distance;
+          this.helper.start = undefined;
+          /*this.measurements.push( {type:"distance",start:this.measureDistanceStart.toArray(), 
+          end:point.toArray() } );*/
+          //this.measureDistanceStart = undefined;
+        }
+      }
+     });
+  </script>
+</polymer-element>

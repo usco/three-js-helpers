@@ -72,6 +72,10 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
   //this._drawLabel( point, escapePoint);
 }
 
+ThicknessHelper.prototype.unset = function(){
+  this.remove( this.thicknessHelper );
+}
+
 ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
   this.thicknessHelper = new SizeHelper({length:this.thickness, 
   textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,

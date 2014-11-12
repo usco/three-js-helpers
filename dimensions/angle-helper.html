@@ -1,0 +1,52 @@
+<link rel="import" href="dimension-helper-base.html">
+<script src="AngDimHelper.js"></script>
+
+<polymer-element name="angle-helper" attributes="selectedObject" extends="dimension-helper-base">
+  <script>
+    Polymer('angle-helper', {
+      active:null,
+      pointerPosition:null,
+      helper:null,
+      selectedObject:null,
+      ready:function(){
+        this.helper = new AngularDimHelper({angle:undefined,textBgColor:"#ffd200"});
+      },
+      onPicked:function(e){
+        console.log("picked", this.localName);
+        pickingDatas = e.detail.pickingInfos;
+        if(pickingDatas.length == 0 || !this.selectedObject) return;
+        
+        var point = pickingDatas[0].point;//closest point
+        
+        if(! this.helper.start){
+            this.helper.unset();
+            console.log("setting angle start point");
+            //this.measureAngleStart = point;
+            this.helper.setStart(point);
+            return;
+          }
+          else
+          {
+            if(! this.helper.mid )
+            {
+              console.log("setting angle mid point");
+              //this.measureAngleMid = point;
+              this.helper.setMid(point);
+              return;
+            }else
+            {
+                      console.log("setting angle end point");
+              /*this.distanceHelper.set({start:this.measureDistanceStart, end:point.clone() });
+              this.measurements.push( {type:"distance",start:this.measureDistanceStart.toArray(), 
+              end:point.toArray() } );*/
+              this.helper.setEnd(point);
+              
+              this.helper.start = undefined;
+              this.helper.end   = undefined;
+              this.helper.mid   = undefined;
+            }
+          }
+      }
+     });
+  </script>
+</polymer-element>
