@@ -32,6 +32,7 @@ SizeHelper = function(options)
   //can be either, dynamic, inside, outside
   this.arrowsPlacement = options.arrowsPlacement!== undefined ? options.arrowsPlacement : 'dynamic';
   this.arrowHeadSize   = 4;
+  this.arrowHeadWidth  = 1;
   
   
   //this.start = start;
@@ -123,8 +124,8 @@ SizeHelper.prototype._drawArrows = function(){
   if(this.drawRightArrow) rightArrowHeadSize = arrowHeadSize;
   
   //direction, origin, length, color, headLength, headRadius, headColor
-  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, 2);
-  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, 2);
+  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, this.arrowHeadWidth);
+  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, this.arrowHeadWidth);
   //mainArrowLeft.scale.z =0.1;
   //mainArrowRight.scale.z=0.1;
   this.add( mainArrowLeft );
@@ -178,17 +179,28 @@ SizeHelper.prototype._drawLabel = function(){
   {
     if(reqWith>this.length)//if the label + arrows would not fit
     {
-      this.arrowSize = Math.max( this.length/2, 6 );//we want arrows to be more than just arrowhead in all the cases
+      this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
+      var arrowXPos = this.length/2 + this.arrowSize;
+    
+      this.leftArrowDir = this.direction.clone().negate();
+      this.rightArrowDir = this.leftArrowDir.clone().negate();
+      
+      this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
+      this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
+    
+      if( labelWidth > this.length)//if even the label itself does not fit
+      {
+        this.label.position.y -= 5;
+        //this.label.position.add( this.direction.clone().multiplyScalar( 5 ) );
+      }
+      /*this.arrowSize = Math.max( this.length/2, 6 );//we want arrows to be more than just arrowhead in all the cases
       var arrowXPos  = this.length/2 + this.arrowSize;
     
       this.leftArrowDir  = new THREE.Vector3( -1,0,0 );//reverse orientation of arrows
       this.rightArrowDir = new THREE.Vector3( 1,0,0 );
       this.leftArrowPos  = new THREE.Vector3( arrowXPos, sideLength, 0 );
       this.rightArrowPos = new THREE.Vector3( -arrowXPos, sideLength, 0 );
-      if( labelWidth > this.length)//if even the label itself does not fit
-      {
-        this.label.position.y += 5;
-      }
+      */
     }
   }else if( this.arrowsPlacement == "outside" ){
     //put the arrows outside of measure, pointing "inwards" towards center

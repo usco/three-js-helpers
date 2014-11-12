@@ -27,6 +27,7 @@ DiameterHelper = function(options)
   
   this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false, depthWrite:false,renderDepth : 1e20});
  
+  this.dimDisplayType = options.dimDisplayType!== undefined ? options.dimDisplayType : "offsetLine";
 }
 
 DiameterHelper.prototype = Object.create( BaseHelper.prototype );
@@ -59,18 +60,24 @@ DiameterHelper.prototype.setDiameter = function(diameter){
   this.text     = this.diameter.toFixed(2);
   
   this.drawCircle();
-  this.drawLeaderLine();
+  this.drawDimension();
 }
 
 DiameterHelper.prototype.setRadius = function(radius){
   if(!radius && ! this.diameter){ 
     return
   }  
-  this.diameter = radius*2;
-  this.text     = this.diameter.toFixed(2);
+  this.setDiameter( radius*2 );
+}
+
+/*Allows setting the radius/diameter from a 3d point
+
+*/
+DiameterHelper.prototype.setRadiusPoint = function(point, normal){
   
-  this.drawCircle();
-  this.drawLeaderLine();
+  var radius = point.clone().sub( this.position ).length();
+  //var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
+  this.setDiameter( radius*2 );
 }
 
 DiameterHelper.prototype.setOrientation = function(orientation){
@@ -81,20 +88,6 @@ DiameterHelper.prototype.setOrientation = function(orientation){
   var quaternion = new THREE.Quaternion();
   quaternion.setFromUnitVectors ( defaultOrientation, this.orientation.clone() );
   this.rotation.setFromQuaternion( quaternion );
-}
-
-/*Allows setting the radius/diameter from a 3d point
-
-*/
-DiameterHelper.prototype.setRadiusPoint = function(point, normal){
-  
-  var radius = point.clone().sub( this.position ).length();
-  //var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
-  this.diameter = radius*2;
-  this.text     = this.diameter.toFixed(2);
-  
-  this.drawCircle();
-  this.drawLeaderLine();
 }
 
 
@@ -111,6 +104,20 @@ DiameterHelper.prototype.drawCircle = function(){
   this.add( this.diaCircle );
 }
 
+DiameterHelper.prototype.drawDimension = function(){
+
+  console.log("drawDimension");
+  switch(this.dimDisplayType)
+  {
+    case "leaderLine":
+      this.drawLeaderLine();
+    break;
+    case "offsetLine":
+      this.drawOffsetLine();
+    break;
+  }
+}
+
 DiameterHelper.prototype.drawLeaderLine = function(){
   //leader line
   this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
@@ -120,5 +127,14 @@ DiameterHelper.prototype.drawLeaderLine = function(){
   this.add( this.leaderLine );
 }
 
-
+DiameterHelper.prototype.drawOffsetLine = function(){
+  //offset line
+  this.offsetLine = new SizeHelper({length:this.diameter, 
+  textBgColor:this.textBgColor, labelType:"frontFacing",sideLength:this.diameter/2+10
+  });
+  this.offsetLine.set();
+  
+  if(this.offsetLine) this.remove( this.offsetLine );
+  this.add( this.offsetLine );
+}
 
