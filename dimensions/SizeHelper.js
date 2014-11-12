@@ -19,6 +19,7 @@ SizeHelper = function(options)
   this.lineWidth  = options.lineWidth !== undefined ? options.lineWidth : 1;
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
@@ -77,7 +78,7 @@ SizeHelper = function(options)
   this.rightArrowDir = this.leftArrowDir.clone().negate();
   var cross = this.direction.clone().cross( this.up );
   cross.normalize().multiplyScalar(this.sideLength);
-  console.log("mid", this.mid,"cross", cross);
+  //console.log("mid", this.mid,"cross", cross);
   this.leftArrowPos = this.mid.clone().add( cross );
   this.rightArrowPos = this.mid.clone().add( cross );
   
@@ -146,7 +147,7 @@ SizeHelper.prototype._drawLabel = function(){
   var length = this.length;
 
   //draw dimention / text
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,color:this.textColor,bgColor:this.textBgColor});
   this.label.position.copy( this.leftArrowPos );
   //this.label.setRotationFromAxisAngle(this.direction.clone().normalize(), angle);
   //console.log("dir,angl",this.direction, angle, this.label.up);
@@ -164,10 +165,10 @@ SizeHelper.prototype._drawLabel = function(){
   switch(this.labelType)
   {
     case "flat":
-      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
+      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize, color:this.textColor, background:(this.textBgColor!=null),bgColor:this.textBgColor});
     break;
     case "frontFacing":
-      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize, color:this.textColor, bgColor:this.textBgColor});
     break;
   }
   this.label.position.copy( this.leftArrowPos );

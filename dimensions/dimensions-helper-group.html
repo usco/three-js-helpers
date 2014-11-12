@@ -40,7 +40,7 @@
         this.$.selection.select(e.target);
       },
       selectAction: function(e, detail, sender) {
-        //console.log("selectAction", e, detail);
+        console.log("selectAction", detail.item);
         this._selectedHelper = detail.item;
         //this.selectedMeasurement = detail.item.localName.split("-").shift();
         //console.log("this.selectedMeasurement",this.selectedMeasurement,this._selectedHelper);
@@ -49,13 +49,17 @@
       //attribute change handlers
       selectedMeasurementChanged:function(){
         //console.log("selectedMeasurement", this.selectedMeasurement);
-        this.$.selection.select( this._helpers[this.selectedMeasurement] );
+        var helper = this._helpers[this.selectedMeasurement];
+        this._selectedHelper = helper
+        //console.log("helper",helper);
+        //this.$.selection.select( helper );
       },
       _selectedHelperChanged:function(oldHelper, newHelper){
         //console.log("oldHelper", oldHelper, "newhelper", newHelper);
         if(oldHelper) oldHelper.unset();
       },
       onPicked:function(e){
+        if(!this._selectedHelper) return 
         this._selectedHelper.onPicked( e );
       },
       getSelection:function(){

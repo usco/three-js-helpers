@@ -12,6 +12,7 @@ ThicknessHelper = function(options)
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 10; 
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
   this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
@@ -78,7 +79,7 @@ ThicknessHelper.prototype.unset = function(){
 
 ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
   this.thicknessHelper = new SizeHelper({length:this.thickness, 
-  textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
+  textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
   labelType:"frontFacing",sideLength:this.sideLength
   });
   this.thicknessHelper.set();

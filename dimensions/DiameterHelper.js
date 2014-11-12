@@ -19,6 +19,7 @@ DiameterHelper = function(options)
   this.orientation = options.orientation !== undefined ? options.orientation : new THREE.Vector3();
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
@@ -124,7 +125,7 @@ DiameterHelper.prototype.drawDimension = function(){
 DiameterHelper.prototype.drawLeaderLine = function(){
   //leader line
   this.dimensionHelper = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
-  fontSize:this.fontSize,textBgColor:this.textBgColor});
+  fontSize:this.fontSize, textColor: this.textColor, textBgColor:this.textBgColor});
   
   if(this.dimensionHelper) this.remove( this.dimensionHelper );
   this.add( this.dimensionHelper );
@@ -132,8 +133,9 @@ DiameterHelper.prototype.drawLeaderLine = function(){
 
 DiameterHelper.prototype.drawOffsetLine = function(){
   //offset line
+  console.log("textColor",this.textColor);
   this.dimensionHelper = new SizeHelper({length:this.diameter, 
-  textBgColor:this.textBgColor, labelType:"frontFacing",sideLength:this.diameter/2+10
+  textColor: this.textColor, textBgColor:this.textBgColor, labelType:"frontFacing",sideLength:this.diameter/2+10
   });
   this.dimensionHelper.set();
   
