@@ -1,24 +1,69 @@
-<polymer-element name="dimensions-helper-group" attributes="selectedObject" >
+<polymer-element name="dimensions-helper-group" attributes="selectedObject selectedMeasurement" >
   <template>
-  
     <core-selection id="selection" on-core-select="{{selectAction}}"></core-selection>
   </template>
   <script>
-    Polymer('angle-helper', {
+    Polymer('dimensions-helper-group', {
       active:null,
       pointerPosition:null,
-      helper:null,
       selectedObject:null,
+      selectedMeasurement:null,
+      _selectedHelper:null,
+      _helpers: null,
+      
+      //TODO: add "unselection effect before switching to another helper
+      
       ready:function(){
+        this._helpers = {};
+      },
+      attached:function(){
+        this.injectInParent();
+      },
+      injectPlugin: function(plugin){
+        //this.$.selection.select(plugin);
+        var measureName = plugin.localName.split("-").shift();
+        this._helpers[measureName] = plugin ;
+      },
+      injectInParent: function() {
+        var parentNode = undefined;
+        //this tricks allows plugins to be added both at the <template> level 
+        //of an element, and at its instanciation
+        if(this.parentNode)      parentNode = this.parentNode;
+        if(this.parentNode.host) parentNode = this.parentNode.host;
+        
+        if (parentNode.injectPlugin && !this.objectParent) {
+          this.objectParent = parentNode;
+          //console.log('[%s]: request adding to [%s]', this.localName + (this.id ? '#' + this.id : ''), parentName);
+        }
       },
       itemTapAction: function(e, detail, sender) {
         this.$.selection.select(e.target);
       },
       selectAction: function(e, detail, sender) {
-        console.log("selectAction", e, detail);
+        //console.log("selectAction", e, detail);
+        this._selectedHelper = detail.item;
+        //this.selectedMeasurement = detail.item.localName.split("-").shift();
+        //console.log("this.selectedMeasurement",this.selectedMeasurement,this._selectedHelper);
         //detail.item.classList.toggle('selected', detail.isSelected);
-      }
+      },
+      //attribute change handlers
+      selectedMeasurementChanged:function(){
+        //console.log("selectedMeasurement", this.selectedMeasurement);
+        this.$.selection.select( this._helpers[this.selectedMeasurement] );
+      },
+      _selectedHelperChanged:function(oldHelper, newHelper){
+        //console.log("oldHelper", oldHelper, "newhelper", newHelper);
+        if(oldHelper) oldHelper.unset();
+      },
       onPicked:function(e){
+        this._selectedHelper.onPicked( e );
+      },
+      getSelection:function(){
+        return this.$.selection.getSelection();
+      },
+      //FIXME: hack
+      addToScene:function(object, sceneName, options){
+        this.objectParent.addToScene( object, sceneName, options );
       }
      });
   </script>

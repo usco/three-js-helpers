@@ -17,11 +17,15 @@
         if (parentNode.injectPlugin && !this.objectParent) {
           this.objectParent = parentNode;
           this.async(function(){
-          parentNode.addToScene( this.helper, "helpers", {autoCenter:false,autoResize:false,select:false, persistent:true} );
-          },null,5000);
+            parentNode.addToScene( this.helper, "helpers", {autoCenter:false,autoResize:false,select:false, persistent:true} );
+          },null,1000);
+          parentNode.injectPlugin( this );
           //console.log('[%s]: request adding to [%s]', this.localName + (this.id ? '#' + this.id : ''), parentName);
         }
       },
+      unset:function(){
+        this.helper.unset();
+      }
     });
     </script>
 </polymer>
