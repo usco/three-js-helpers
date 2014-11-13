@@ -3,7 +3,13 @@ DistanceHelper = function(options)
   BaseHelper.call( this );
   var options = options || {};
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0xFF0000;
-  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
+
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
+  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
+  this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  
   
   this.arrowHeadSize   = 4;
   this.start = undefined;
@@ -47,16 +53,12 @@ DistanceHelper.prototype.set = function( options )
   this.text = text;
   
   //main arrow
-  this.arrow = new THREE.ArrowHelper(direction.normalize(), start, length ,this.arrowColor, this.arrowHeadSize, 2)//, 3, 1);
-  this.arrow.line.geometry.computeLineDistances();
-  this.arrow.line.material = new THREE.LineDashedMaterial( { color: this.arrowColor,
-   linewidth:1,depthTest:false,depthWrite:false,renderDepth : 1e20,} );
-  this.arrow.cone.material = new THREE.MeshBasicMaterial({color:this.arrowColor,depthTest:false,depthWrite:false,renderDepth : 1e20});
-  this.arrow.position.copy( start );
+  var dirNorm = direction.clone().normalize();
+  this.arrow = new SizeHelper( {start:start,length:length,direction:dirNorm,
+  drawRightArrow:false,textBgColor:this.textBgColor,textColor:this.textColor, labelType:
+  this.labelType} );
+  this.arrow.set();
   this.add( this.arrow ) ;
-  
-  this.drawLabel();
-  
 }
 
 DistanceHelper.prototype.setStart = function( start )
@@ -81,17 +83,4 @@ DistanceHelper.prototype.unset = function( )
 {
   this.remove( this.startCross );
   this.remove( this.arrow );
-  this.remove( this.label );
-}
-
-DistanceHelper.prototype.drawLabel = function( )
-{
-  //length label
-  this.label = new LabelHelper3d({text:this.text,fontSize:this.textSize,bgColor:this.textBgColor});
-  //new LabelHelperPlane({text:this.text,fontSize:this.textSize});
-  //at midpoint
-  var labelPos = this.start.clone().add( this.direction.clone().multiplyScalar( this.length/2 ) );
-  this.label.position.copy( labelPos );  //.x = length/2;
-  
-  this.add( this.label );
 }

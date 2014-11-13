@@ -4,7 +4,10 @@ ObjectDimensionsHelper = function (options) {
   var options = options || {};
   var color = this.color = options.color || 0x000000;
   var mesh = options.mesh || this.parent || null;
+  
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
 }
 
 ObjectDimensionsHelper.prototype = Object.create( BaseHelper.prototype );
@@ -57,11 +60,14 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   
   //length, sideLength, position, direction, color, text, textSize,
   var widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,
-  position:widthArrowPos,direction:new THREE.Vector3(0,1,0), textBgColor:this.textBgColor  });
+  position:widthArrowPos,direction:new THREE.Vector3(0,1,0), 
+  textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
   var lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,
-  position:lengthArrowPos,direction:new THREE.Vector3(-1,0,0), textBgColor:this.textBgColor  });
+  position:lengthArrowPos,direction:new THREE.Vector3(-1,0,0), 
+  textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
   var heightArrow = new SizeHelper( {length:this.height,
-  sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,0,1), textBgColor:this.textBgColor });
+  sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,0,1), 
+  textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType });
   
   widthArrow.set();
   lengthArrow.set();

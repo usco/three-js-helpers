@@ -44,8 +44,8 @@ SizeHelper = function(options)
   
   this.length = options.length !== undefined ? options.length : 10;
   //either use provided length parameter , or compute things based on start/end parameters
-  var start = options.start || this.position;
-  var end = options.end ;
+  var start   = options.start;// !== undefined ? options.start : this._position;
+  var end     = options.end ;
   
   if(end && start)
   {
@@ -55,6 +55,11 @@ SizeHelper = function(options)
     this.direction = tmpV.normalize();
     console.log("computed length", this.length, "dir", this.direction);
     //this._position = start.clone().add( end.clone().sub( start ).divideScalar(2) ) ;
+  }else if(start && !end){
+    end = this.direction.clone().multiplyScalar( this.length ).add( start );
+  }
+  else if(end && !start){
+    start = this.direction.clone().negate().multiplyScalar( this.length ).add( end );
   }else
   {
     start = this.direction.clone().multiplyScalar( -this.length/2).add( this._position );
@@ -95,10 +100,7 @@ SizeHelper.prototype.set = function(options){
   //this._position= options.position !== undefined ? options.position : new THREE.Vector3();
 
   //for debugging only
-  if(this.debug){
-  this.add( new CrossHelper({position:this.start,color:0xFF0000}) );
-  this.add( new CrossHelper({position:this.end,color:0x00FF00}) );
-  this.add( new CrossHelper({position:this.mid,color:0x0000FF}) );}
+  if(this.debug) this._drawDebugHelpers();
 
   this._drawLabel();
   this._drawArrows();
@@ -120,13 +122,14 @@ SizeHelper.prototype._drawArrows = function(){
   var arrowSize     = this.arrowSize; 
   
     
-  var leftArrowHeadSize = rightArrowHeadSize = 0;
-  if(this.drawLeftArrow) leftArrowHeadSize = arrowHeadSize;
-  if(this.drawRightArrow) rightArrowHeadSize = arrowHeadSize;
+  var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
+  var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
+  if(this.drawLeftArrow){ leftArrowHeadSize = arrowHeadSize; leftArrowHeadWidth=this.arrowHeadWidth}
+  if(this.drawRightArrow){ rightArrowHeadSize = arrowHeadSize; rightArrowHeadWidth= this.arrowHeadWidth}
   
   //direction, origin, length, color, headLength, headRadius, headColor
-  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, this.arrowHeadWidth);
-  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, this.arrowHeadWidth);
+  var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, leftArrowHeadWidth);
+  var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, rightArrowHeadWidth);
   //mainArrowLeft.scale.z =0.1;
   //mainArrowRight.scale.z=0.1;
   this.add( mainArrowLeft );
@@ -147,15 +150,17 @@ SizeHelper.prototype._drawLabel = function(){
   var length = this.length;
 
   //draw dimention / text
+  //this first one is used to get some labeling metrics, and is
+  //not always displayed
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,color:this.textColor,bgColor:this.textBgColor});
   this.label.position.copy( this.leftArrowPos );
   //this.label.setRotationFromAxisAngle(this.direction.clone().normalize(), angle);
   //console.log("dir,angl",this.direction, angle, this.label.up);
   
-  var labelDefaultOrientation = new THREE.Vector3(1,0,0); 
+  var labelDefaultOrientation = new THREE.Vector3(-1,0,0); 
   
   var quaternion = new THREE.Quaternion();
-  quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone().negate() );
+  quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone() );
   this.label.rotation.setFromQuaternion( quaternion );
   this.label.rotation.z += Math.PI;
   
@@ -165,14 +170,14 @@ SizeHelper.prototype._drawLabel = function(){
   switch(this.labelType)
   {
     case "flat":
-      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize, color:this.textColor, background:(this.textBgColor!=null),bgColor:this.textBgColor});
+      /*this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize, color:this.textColor, background:(this.textBgColor!=null),bgColor:this.textBgColor});*/
     break;
     case "frontFacing":
       this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize, color:this.textColor, bgColor:this.textBgColor});
     break;
   }
   this.label.position.copy( this.leftArrowPos );
-  this.label.rotation.z = Math.PI;
+  //this.label.rotation.z = Math.PI;
   
   this.add( this.label );
   
@@ -194,14 +199,6 @@ SizeHelper.prototype._drawLabel = function(){
         this.label.position.y -= 5;
         //this.label.position.add( this.direction.clone().multiplyScalar( 5 ) );
       }
-      /*this.arrowSize = Math.max( this.length/2, 6 );//we want arrows to be more than just arrowhead in all the cases
-      var arrowXPos  = this.length/2 + this.arrowSize;
-    
-      this.leftArrowDir  = new THREE.Vector3( -1,0,0 );//reverse orientation of arrows
-      this.rightArrowDir = new THREE.Vector3( 1,0,0 );
-      this.leftArrowPos  = new THREE.Vector3( arrowXPos, sideLength, 0 );
-      this.rightArrowPos = new THREE.Vector3( -arrowXPos, sideLength, 0 );
-      */
     }
   }else if( this.arrowsPlacement == "outside" ){
     //put the arrows outside of measure, pointing "inwards" towards center
@@ -213,7 +210,6 @@ SizeHelper.prototype._drawLabel = function(){
     
     this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
     this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-  
   }
   
 }
@@ -244,4 +240,21 @@ SizeHelper.prototype._drawSideLines = function(){
     this.add( rightSideLine );
     this.add( leftSideLine );
   }
+}
+
+SizeHelper.prototype._drawDebugHelpers = function(){
+  if(this.debugHelpers) this.remove( this.debugHelpers );
+
+  this.debugHelpers = new THREE.Object3D();
+  var directionHelper  = new THREE.ArrowHelper(this.direction.clone().normalize(), this.start, 15, 0XFF0000);
+  var startHelper      = new CrossHelper({position:this.start,color:0xFF0000});
+  var midHelper        = new CrossHelper({position:this.mid,color:0x0000FF});
+  var endHelper        = new CrossHelper({position:this.end,color:0x00FF00});
+
+  this.debugHelpers.add( directionHelper );
+  this.debugHelpers.add( startHelper );
+  this.debugHelpers.add( midHelper );
+  this.debugHelpers.add( endHelper );
+  
+  this.add( this.debugHelpers );
 }
