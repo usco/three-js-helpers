@@ -18,10 +18,6 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   var color = this.color;
   var mesh = this.mesh = mesh;
   var lineMat = new THREE.MeshBasicMaterial({color: color, wireframe: true, shading:THREE.FlatShading});
-  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: false,linewidth:1, opacity:0.2} );
-  
-  dashMaterial.transparent = true;
-  //dashMaterial.blending = THREE.SubtractiveBlending
   /*mesh.updateMatrixWorld();
   var matrixWorld = new THREE.Vector3();
   matrixWorld.setFromMatrixPosition( mesh.matrixWorld );
@@ -47,18 +43,24 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
   baseOutlineGeometry.computeLineDistances();
 
-  var baseOutline = new THREE.Line( baseOutlineGeometry, dashMaterial, THREE.Lines );
-  baseOutline.renderDepth = 1e20
-  baseOutline.position.copy( new THREE.Vector3(delta.x,delta.y,delta.z-this.height/2) );
+  var baseOutline = new THREE.Object3D();
+  
+  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, 
+  gapSize: 2, depthTest: false,linewidth:1, opacity:0.2,transparent:true} );
+  var baseOutlineBack = new THREE.Line( baseOutlineGeometry, dashMaterial, THREE.Lines );
+  baseOutlineBack.renderDepth = 1e20
+  baseOutlineBack.position.copy( new THREE.Vector3(delta.x,delta.y,delta.z-this.height/2) );
+  
+  var dashMaterial2 = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5,
+   gapSize: 2, depthTest: true,linewidth:1} );
+  var baseOutlineFront = baseOutlineBack.clone();
+  baseOutlineFront.material = dashMaterial2;
+  
+  baseOutline.add(baseOutlineBack);
+  baseOutline.add(baseOutlineFront);
+  
   this.baseOutline = baseOutline; 
   this.add(baseOutline);
-  
-  
-  var dashMaterial2 = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: true,linewidth:1} );
-  var baseOutline2 = baseOutline.clone();
-  baseOutline2.material = dashMaterial2;
-  this.baseOutline2 = baseOutline2; 
-  this.add(baseOutline2);
   
 
   var widthArrowPos = new THREE.Vector3(delta.x+this.length/2,delta.y,delta.z-this.height/2); 
