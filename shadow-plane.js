@@ -63,6 +63,7 @@ ShadowPlane.prototype._drawPlane=function(){
       this.plane.position.z = -0.2;
       this.name = "shadowPlane";
       this.plane.receiveShadow = true;
+      this.plane.castShadow    = false;
       
       this.add(this.plane);
 }
