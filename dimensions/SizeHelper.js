@@ -22,7 +22,7 @@ SizeHelper = function(options)
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
-  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";//frontFacing
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
