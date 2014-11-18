@@ -18,8 +18,10 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   var color = this.color;
   var mesh = this.mesh = mesh;
   var lineMat = new THREE.MeshBasicMaterial({color: color, wireframe: true, shading:THREE.FlatShading});
-  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: false,linewidth:1} );
+  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: false,linewidth:1, opacity:0.2} );
   
+  dashMaterial.transparent = true;
+  //dashMaterial.blending = THREE.SubtractiveBlending
   /*mesh.updateMatrixWorld();
   var matrixWorld = new THREE.Vector3();
   matrixWorld.setFromMatrixPosition( mesh.matrixWorld );
@@ -50,6 +52,13 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   baseOutline.position.copy( new THREE.Vector3(delta.x,delta.y,delta.z-this.height/2) );
   this.baseOutline = baseOutline; 
   this.add(baseOutline);
+  
+  
+  var dashMaterial2 = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, gapSize: 2, depthTest: true,linewidth:1} );
+  var baseOutline2 = baseOutline.clone();
+  baseOutline2.material = dashMaterial2;
+  this.baseOutline2 = baseOutline2; 
+  this.add(baseOutline2);
   
 
   var widthArrowPos = new THREE.Vector3(delta.x+this.length/2,delta.y,delta.z-this.height/2); 
