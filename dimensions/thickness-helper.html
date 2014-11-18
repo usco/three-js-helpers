@@ -13,14 +13,14 @@
         this.helper = new ThicknessHelper();
       },
       onPicked:function(e){
-        console.log("picked", this.localName);
+        //console.log("picked", this.localName);
         pickingDatas = e.detail.pickingInfos;
         if(pickingDatas.length == 0 || !this.selectedObject) return;
         var entryInteresect = pickingDatas[0];
         
         this.helper.unset();
         this.helper.set( entryInteresect, this.selectedObject );
-        //		    this.addToScene( this.thicknessHelper, "helpers", {autoCenter:false,autoResize:false,select:false, persistent:true} );
+        this.measureDone({type:"thickness", value:this.helper.thickness});
       }
      });
   </script>

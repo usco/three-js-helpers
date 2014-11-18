@@ -10,7 +10,6 @@ DistanceHelper = function(options)
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
-  
   this.arrowHeadSize   = 4;
   this.start = undefined;
   this.end   = undefined;

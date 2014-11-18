@@ -8,6 +8,14 @@
       attached:function(){
         this.injectInParent();
       },
+      domReady:function(){
+        if(this.cssStyling) this.setStyle();
+      },
+      //attribute change callbacks
+      cssStylingChanged:function(){
+        if(this.cssStyling) this.setStyle();
+      },
+      //internal api
       injectInParent: function() {
         var parentNode = undefined;
         //this tricks allows plugins to be added both at the <template> level 
@@ -18,7 +26,7 @@
         if (parentNode.injectPlugin && !this.objectParent) {
           this.objectParent = parentNode;
           this.async(function(){
-            parentNode.addToScene( this.helper, "helpers", {autoCenter:false,autoResize:false,select:false, persistent:true} );
+            parentNode.addToScene( this.helper, "helpers", {autoCenter:false,autoResize:false, select:false, persistent:true} );
           },null,1000);
           parentNode.injectPlugin( this );
           //console.log('[%s]: request adding to [%s]', this.localName + (this.id ? '#' + this.id : ''), parentName);
@@ -27,8 +35,9 @@
       unset:function(){
         this.helper.unset();
       },
-      domReady:function(){
-        if(this.cssStyling) this.setStyle();
+      //call this when measure is done, to fire events , etc
+      measureDone:function(params){
+        this.fire("measure-done", params);
       },
       //this allows setting the colors/styling etc of 3d elements via css
       setStyle:function(){
@@ -39,10 +48,7 @@
 	      var color = cs.getPropertyValue("color");
 	      this.helper.textColor = color;
       },
-      //attribute change callbacks
-      cssStylingChanged:function(){
-        if(this.cssStyling) this.setStyle();
-      }
+      
     });
     </script>
 </polymer>
