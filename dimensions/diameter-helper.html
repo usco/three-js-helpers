@@ -33,7 +33,8 @@
           this.helper.setRadius(dia);
           this.helper.center = undefined;
           
-          this.measureDone({type:"diameter", value:this.helper.diameter});
+          this.measureDone({type:"diameter", value:this.helper.diameter,
+            center:this.helper.center});
         }
       }
      });
