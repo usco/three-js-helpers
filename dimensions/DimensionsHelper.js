@@ -90,6 +90,8 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   this.arrows.add( heightArrow );
   
   this.add( this.arrows );
+  
+  this.objectOriginalPosition = this.mesh.position.clone();
 }
 
 ObjectDimensionsHelper.prototype.detach = function(mesh){
@@ -97,6 +99,14 @@ ObjectDimensionsHelper.prototype.detach = function(mesh){
   //this.remove( this.meshBoundingBox );
   this.remove( this.baseOutline );
   this.remove( this.arrows );
+  
+  this.objectOriginalPosition = new THREE.Vector3();
+}
+
+ObjectDimensionsHelper.prototype.update = function(){
+  var foo = this.mesh.position.clone().sub( this.objectOriginalPosition );
+  this.position.add( foo );
+  this.objectOriginalPosition = this.position.clone();
 }
 
 ObjectDimensionsHelper.prototype.computeMiddlePoint=function(mesh)
