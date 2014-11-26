@@ -19,6 +19,9 @@ ThicknessHelper = function(options)
   
   this.debug      = options.debug!== undefined ? options.debug : false;
   this.thickness  = options.thickness!== undefined ? options.thickness : undefined;
+  this.object     = undefined;
+  this.point      = undefined;
+  this.normal     = undefined;
 }
 
 ThicknessHelper.prototype = Object.create( BaseHelper.prototype );
@@ -67,6 +70,10 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
   }
   //compute actual thickness
   this.thickness = escapePoint.clone().sub( point).length();
+  //set various internal attributes
+  this.point  = point;
+  this.normal = normal;
+  this.object = entryInteresect.object;
   
   this._drawThickness( point, offsetPoint, escapePoint, normal, flippedNormal );
   //this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);

@@ -11,8 +11,6 @@ AngularDimHelper = function(options)
   var options = options || {};
   //Todo : auto adjust arrows : if not enough space, arrows shoud be outside
   this.up = new THREE.Vector3(0,0,1);
-  this.start = undefined;
-  this.end   = undefined;
 
   var position  = this.position  = options.position !== undefined ? options.position : new THREE.Vector3();
   this.direction = options.direction !== undefined ? options.direction : new THREE.Vector3(1,0,0);//should this be oposite angle ?
@@ -43,7 +41,15 @@ AngularDimHelper = function(options)
   
   this.radius = 20 ;
   
+  
+  this.start           = undefined;
+  this.startObject     = undefined;
+  this.mid             = undefined;
+  this.midObject       = undefined;
+  this.end             = undefined;
+  this.endObject       = undefined;
   this.angle = angle*Math.PI/180;
+  
   
   //this.set();
 }
@@ -58,15 +64,17 @@ AngularDimHelper.prototype.computeAngle = function(start, mid, end){
   return angle;
 }
 
-AngularDimHelper.prototype.setStart = function(start){
+AngularDimHelper.prototype.setStart = function( start, object ){
   this.start = start;
+  this.startObject = object;
   
   this.startCross = new CrossHelper({position:start, color:0xFF0000});
   this.add( this.startCross );
 }
 
-AngularDimHelper.prototype.setMid = function(mid){
+AngularDimHelper.prototype.setMid = function( mid, object ){
   this.mid = mid;
+  this.midObject = object;
   
   this.midCross = new CrossHelper({position:mid, color:0x0000FF});
   this.add( this.midCross );
@@ -82,8 +90,9 @@ AngularDimHelper.prototype.setMid = function(mid){
   this.add( this.startMidLine );
 }
 
-AngularDimHelper.prototype.setEnd = function(end){
+AngularDimHelper.prototype.setEnd = function( end, object ){
   this.end = end;
+  this.endObject = object;
   
   this.endCross = new CrossHelper({position:end, color:0x00FF00});
   this.add( this.endCross );

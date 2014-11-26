@@ -17,12 +17,13 @@
         if(pickingDatas.length == 0 || !this.selectedObject) return;
         
         var point = pickingDatas[0].point;//closest point
+        var object = pickingDatas[0].object; 
         
         if(! this.helper.start){
             this.helper.unset();
             //console.log("setting angle start point");
             //this.measureAngleStart = point;
-            this.helper.setStart(point);
+            this.helper.setStart( point, object );
             return;
           }
           else
@@ -31,7 +32,7 @@
             {
               //console.log("setting angle mid point");
               //this.measureAngleMid = point;
-              this.helper.setMid(point);
+              this.helper.setMid( point, object );
               return;
             }else
             {
@@ -39,10 +40,12 @@
               /*this.distanceHelper.set({start:this.measureDistanceStart, end:point.clone() });
               this.measurements.push( {type:"distance",start:this.measureDistanceStart.toArray(), 
               end:point.toArray() } );*/
-              this.helper.setEnd(point);
+              this.helper.setEnd( point, object );
               
               this.measureDone({type:"angle", value:this.helper.angle,
-                start:this.helper.start, mid:this.helper.mid,end:this.helper.end});
+                start:this.helper.start, mid:this.helper.mid,end:this.helper.end,
+                startObject: this.helper.startObject, midObject: this.helper.midObject,
+                endObject: this.helper.endObject});
               
               this.helper.start = undefined;
               this.helper.end   = undefined;

@@ -31,6 +31,7 @@ DiameterHelper = function(options)
   this.dimDisplayType = options.dimDisplayType!== undefined ? options.dimDisplayType : "offsetLine";
   
   this.center = undefined;
+  this.object = undefined;
 }
 
 DiameterHelper.prototype = Object.create( BaseHelper.prototype );
@@ -47,9 +48,11 @@ DiameterHelper.prototype.unset = function(){
   this.remove( this.dimensionHelper );
 }
 
-DiameterHelper.prototype.setCenter = function(center){
+DiameterHelper.prototype.setCenter = function( center, object ){
   if(center)  this.position.copy( center );
   if(center)  this.center = center;
+  this.object = object;
+  
   if(this.centerCross) this.remove( this.centerCross );
    //center cross
   this.centerCross = new CrossHelper({size:this.centerCrossSize});

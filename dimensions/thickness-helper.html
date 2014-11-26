@@ -20,7 +20,9 @@
         
         this.helper.unset();
         this.helper.set( entryInteresect, this.selectedObject );
-        this.measureDone({type:"thickness", value:this.helper.thickness});
+        
+        this.measureDone({type:"thickness", value:this.helper.thickness,
+        point:this.helper.point, object:this.helper.object, normal:this.helper.normal});
       }
      });
   </script>

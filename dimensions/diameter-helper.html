@@ -17,12 +17,14 @@
         if(pickingDatas.length == 0 || !this.selectedObject) return;
         
         var point = pickingDatas[0].point;//closest point
+        var object= pickingDatas[0].object;//closest point
+        
         if( !this.helper.center )
         {
-          console.log("measureDiaSetCenter")
+          //console.log("measureDiaSetCenter")
           this.helper.unset();
           var normal  = pickingDatas[0].face.normal.clone();
-          this.helper.setCenter(point);
+          this.helper.setCenter( point, object );
           this.helper.setOrientation( normal );
           //TODO : move this into helper
           //this.measureDiaCenter = point.clone();
@@ -33,7 +35,7 @@
           this.helper.setRadius(dia);
           
           this.measureDone({type:"diameter", value:this.helper.diameter,
-            center:this.helper.center});
+            center:this.helper.center, object:this.helper.object});
           
           this.helper.center = undefined;
         }
