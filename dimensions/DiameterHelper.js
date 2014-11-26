@@ -24,6 +24,8 @@ DiameterHelper = function(options)
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   
+  this.centerColor = options.centerColor!== undefined ? options.centerColor : "#F00";
+  
   this.text   = options.text !== undefined ? options.text : this.diameter.toFixed(2);
   
   this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false, depthWrite:false,renderDepth : 1e20});
@@ -57,16 +59,17 @@ DiameterHelper.prototype.unset = function(){
   if(this.pointCCross) this.remove( this.pointCCross );
   
   this.position.copy( new THREE.Vector3() );
+  this.setOrientation( new THREE.Vector3(0,0,1) );
 }
 
 DiameterHelper.prototype.setCenter = function( center, object ){
   if(center)  this.position.copy( center );
   if(center)  this.center = center;
-  this.object = object;
+  if(object)  this.object = object;
   
   if(this.centerCross) this.remove( this.centerCross );
    //center cross
-  this.centerCross = new CrossHelper({size:this.centerCrossSize});
+  this.centerCross = new CrossHelper({size:this.centerCrossSize,color:this.centerColor});
   this.add( this.centerCross );
 }
 

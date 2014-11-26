@@ -10,7 +10,7 @@
       selectedObject:null,
       mode:"3point", //can be 3point, ,2point: (center, radius)     
       ready:function(){
-        this.helper = new DiameterHelper({textBgColor:"#ffd200"});
+        this.helper = new DiameterHelper({textBgColor:"#ffd200", centerColor:"#ffd200"});
       },
       onPicked:function(e){
         console.log("picked", this.localName);
@@ -47,6 +47,7 @@
            {
               this.helper.unset();
               this.helper.setPointA( point, object );
+              this.helper.object = object;
               return;
            }
            if( !this.helper.pointB )
@@ -58,7 +59,7 @@
            {
               this.helper.setPointC( point, object );
               this.measureDone({type:"diameter", value:this.helper.diameter,
-              center:this.helper.center});
+              center:this.helper.center,object:this.helper.object});
               
               this.helper.center = undefined;
               this.helper.pointA = undefined;
