@@ -20,21 +20,24 @@
         if(pickingDatas.length == 0) return;
         
         var point = pickingDatas[0].point;//closest point
+        var object = pickingDatas[0].object;
       
         if(! this.helper.start){
           this.helper.unset();
-          this.helper.setStart(point);
+          this.helper.setStart(point, object);
           return;
         }else
         {
-          this.helper.setEnd( point );
+          this.helper.setEnd( point, object );
           this.distance = this.helper.distance;
-          this.helper.start = undefined;
           /*this.measurements.push( {type:"distance",start:this.measureDistanceStart.toArray(), 
           end:point.toArray() } );*/
           //this.measureDistanceStart = undefined;
           this.measureDone({type:"distance", value:this.helper.distance,
-            start:this.helper.start, end:this.helper.end});
+            start:this.helper.start, end:this.helper.end, 
+            startObject: this.helper.startObject, endObject: this.helper.endObject});
+          
+          this.helper.start = undefined;
         }
       }
      });

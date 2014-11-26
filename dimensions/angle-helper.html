@@ -41,6 +41,9 @@
               end:point.toArray() } );*/
               this.helper.setEnd(point);
               
+              this.measureDone({type:"angle", value:this.helper.angle,
+                start:this.helper.start, mid:this.helper.mid,end:this.helper.end});
+              
               this.helper.start = undefined;
               this.helper.end   = undefined;
               this.helper.mid   = undefined;

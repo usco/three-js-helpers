@@ -11,9 +11,12 @@ DistanceHelper = function(options)
   this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
   this.arrowHeadSize   = 4;
-  this.start = undefined;
-  this.end   = undefined;
-  this.distance = undefined;
+  this.start           = undefined;
+  this.startObject     = undefined;
+  this.end             = undefined;
+  this.endObject       = undefined;
+  
+  this.distance        = undefined;
 }
 
 DistanceHelper.prototype = Object.create( BaseHelper.prototype );
@@ -60,18 +63,24 @@ DistanceHelper.prototype.set = function( options )
   this.add( this.arrow ) ;
 }
 
-DistanceHelper.prototype.setStart = function( start )
+/*start: vector3D
+object: optional : on which object is the start point
+*/
+DistanceHelper.prototype.setStart = function( start, object )
 {
   if(!start) return;
   this.start = start;
+  this.startObject = object;
+  
   this.startCross = new CrossHelper({position:start});
   this.add( this.startCross ) ;
 }
 
-DistanceHelper.prototype.setEnd = function( end )
+DistanceHelper.prototype.setEnd = function( end, object )
 {
   if(!end) return;
   this.end = end;
+  this.endObject = object;
   
   this.distance = end.clone().sub(this.start).length();
   //FIXME: hack for now

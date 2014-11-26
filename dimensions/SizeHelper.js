@@ -143,6 +143,7 @@ depthTest:false, depthWrite:false});
   mainArrowRight.line.material = mainArrowLeft.line.material = this.arrowLineMaterial;
   mainArrowRight.cone.material = mainArrowLeft.cone.material = this.arrowConeMaterial;
   mainArrowRight.renderDepth = mainArrowLeft.renderDepth = 1e20;
+  
 }
 
 SizeHelper.prototype._drawLabel = function(){

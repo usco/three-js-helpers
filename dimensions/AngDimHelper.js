@@ -132,7 +132,7 @@ AngularDimHelper.prototype.setEnd = function(end){
   var arcOuterRadius = radius /1.5;
 	var arcInnerRadius = radius /2;
   
-  console.log("start", this.start, "offsetStart", offsetStart, "end", this.end);
+  //console.log("start", this.start, "offsetStart", offsetStart, "end", this.end);
 	
 	//first parallel is :
 	//endToOffsetStart
@@ -140,7 +140,7 @@ AngularDimHelper.prototype.setEnd = function(end){
 	var paral = endToOffsetStart.clone().normalize();//.add( this.mid );
 	paral = new THREE.Vector3(0,-1, 0 );
 	var midToStartAngle = paral.angleTo( midToStart );
-	console.log("midToStartAngle",midToStartAngle*180/Math.PI); 
+	//console.log("midToStartAngle",midToStartAngle*180/Math.PI); 
 	
 	var arcAngle = this.angle;
 	var arcAngleStart= - Math.PI/2 + midToStartAngle;

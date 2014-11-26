@@ -31,10 +31,11 @@
         {
           var dia = point.clone().sub( this.helper.center ).length();
           this.helper.setRadius(dia);
-          this.helper.center = undefined;
           
           this.measureDone({type:"diameter", value:this.helper.diameter,
             center:this.helper.center});
+          
+          this.helper.center = undefined;
         }
       }
      });
