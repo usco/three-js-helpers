@@ -15,6 +15,7 @@ ObjectDimensionsHelper.prototype.constructor = ObjectDimensionsHelper;
 
 
 ObjectDimensionsHelper.prototype.attach = function(mesh){
+  console.log("attaching");
   var color = this.color;
   var mesh = this.mesh = mesh;
   var lineMat = new THREE.MeshBasicMaterial({color: color, wireframe: true, shading:THREE.FlatShading});
@@ -92,21 +93,24 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   this.add( this.arrows );
   
   this.objectOriginalPosition = this.mesh.position.clone();
+  this.position.copy( this.objectOriginalPosition );
 }
 
 ObjectDimensionsHelper.prototype.detach = function(mesh){
+  console.log("detaching");
   this.mesh = null;
   //this.remove( this.meshBoundingBox );
   this.remove( this.baseOutline );
   this.remove( this.arrows );
   
   this.objectOriginalPosition = new THREE.Vector3();
+  this.position.copy( new THREE.Vector3() );
 }
 
 ObjectDimensionsHelper.prototype.update = function(){
   var foo = this.mesh.position.clone().sub( this.objectOriginalPosition );
   this.position.add( foo );
-  this.objectOriginalPosition = this.position.clone();
+  this.objectOriginalPosition = this.mesh.position.clone();
 }
 
 ObjectDimensionsHelper.prototype.computeMiddlePoint=function(mesh)
