@@ -8,6 +8,7 @@
       pointerPosition:null,
       helper:null,
       selectedObject:null,
+      mode:"3point", //can be 3point, ,2point: (center, radius)     
       ready:function(){
         this.helper = new DiameterHelper({textBgColor:"#ffd200"});
       },
@@ -19,26 +20,52 @@
         var point = pickingDatas[0].point;//closest point
         var object= pickingDatas[0].object;//closest point
         
-        if( !this.helper.center )
+        if(this.mode == "2point")
         {
-          //console.log("measureDiaSetCenter")
-          this.helper.unset();
-          var normal  = pickingDatas[0].face.normal.clone();
-          this.helper.setCenter( point, object );
-          this.helper.setOrientation( normal );
-          //TODO : move this into helper
-          //this.measureDiaCenter = point.clone();
-          return;
-        }else
-        {
-          var dia = point.clone().sub( this.helper.center ).length();
-          this.helper.setRadius(dia);
-          
-          this.measureDone({type:"diameter", value:this.helper.diameter,
-            center:this.helper.center, object:this.helper.object});
-          
-          this.helper.center = undefined;
-        }
+          if( !this.helper.center )
+          {
+            //console.log("measureDiaSetCenter")
+            this.helper.unset();
+            var normal  = pickingDatas[0].face.normal.clone();
+            this.helper.setCenter( point, object );
+            this.helper.setOrientation( normal );
+            //TODO : move this into helper
+            //this.measureDiaCenter = point.clone();
+            return;
+          }else
+          {
+            var dia = point.clone().sub( this.helper.center ).length();
+            this.helper.setRadius(dia);
+            
+            this.measureDone({type:"diameter", value:this.helper.diameter,
+              center:this.helper.center, object:this.helper.object});
+            
+            this.helper.center = undefined;
+          }
+         }else{
+           if( !this.helper.pointA )
+           {
+              this.helper.unset();
+              this.helper.setPointA( point, object );
+              return;
+           }
+           if( !this.helper.pointB )
+           {
+              this.helper.setPointB( point, object );
+              return;
+           }
+           if( !this.helper.pointC )
+           {
+              this.helper.setPointC( point, object );
+              this.measureDone({type:"diameter", value:this.helper.diameter,
+              center:this.helper.center});
+              
+              this.helper.center = undefined;
+              this.helper.pointA = undefined;
+              this.helper.pointB = undefined;
+              this.helper.pointC = undefined;
+           }
+         }
       }
      });
   </script>
