@@ -93,7 +93,9 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   this.add( this.arrows );
   
   this.objectOriginalPosition = this.mesh.position.clone();
-  this.position.copy( this.objectOriginalPosition );
+  var offsetPosition = this.objectOriginalPosition.clone().sub(
+    new THREE.Vector3(0,0,this.height/2 ) );
+  this.position.copy( offsetPosition );
 }
 
 ObjectDimensionsHelper.prototype.detach = function(mesh){
