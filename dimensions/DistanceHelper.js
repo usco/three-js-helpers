@@ -17,6 +17,9 @@ DistanceHelper = function(options)
   this.endObject       = undefined;
   
   this.distance        = undefined;
+  
+  if( options.start ) this.setStart( options.start );
+  if( options.end )   this.setEnd( options.end );
 }
 
 DistanceHelper.prototype = Object.create( BaseHelper.prototype );
@@ -57,7 +60,8 @@ DistanceHelper.prototype.set = function( options )
   //main arrow
   var dirNorm = direction.clone().normalize();
   this.arrow = new SizeHelper( {start:start,length:length,direction:dirNorm,
-  drawRightArrow:false,textBgColor:this.textBgColor,textColor:this.textColor, labelType:
+  drawRightArrow:false, arrowColor:this.arrowColor, linesColor:this.arrowColor,
+  textBgColor:this.textBgColor,textColor:this.textColor, labelType:
   this.labelType} );
   this.arrow.set();
   this.add( this.arrow ) ;
