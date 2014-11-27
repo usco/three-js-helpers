@@ -1,0 +1,30 @@
+<link rel="import" href="dimension-helper-base.html">
+
+<script src="NoteHelper.js"></script>
+
+<polymer-element name="note-helper" attributes="selectedObject" extends="dimension-helper-base">
+  <script>
+    Polymer('note-helper', {
+      active:null,
+      pointerPosition:null,
+      helper:null,
+      selectedObject:null,
+      ready:function(){
+        this.helper = new NoteHelper();
+      },
+      onPicked:function(e){
+        //console.log("picked", this.localName);
+        pickingDatas = e.detail.pickingInfos;
+        if(pickingDatas.length == 0 || !this.selectedObject) return;
+        
+        var point = pickingDatas[0].point;//closest point
+        var object= pickingDatas[0].object;//closest point
+        
+        this.helper.setPoint( point, object );
+        
+        this.measureDone({type:"note", value:"",
+        point:this.helper.point, object:this.helper.object});
+      }
+     });
+  </script>
+</polymer-element>

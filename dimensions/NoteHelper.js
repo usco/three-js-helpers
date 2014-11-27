@@ -1,28 +1,28 @@
 /*
   Made of one main arrow, and two lines perpendicular to the main arrow, at both its ends
 */
-AnnotationHelper = function(diameter, distance, endLength, color)
+NoteHelper = function(options)
 {
   BaseHelper.call( this );
 
-  this.distance = distance || 30;
+  var options = options || {};
+  /*this.distance = distance || 30;
   this.diameter = diameter || 20;
   this.endLength = endLength || 20;
   this.color = color || "#000000" ;
-  this.text = this.diameter;
-
+  this.text = this.diameter;*/
+  
+  
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
+  this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
+  this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  
+  this.crossColor = options.crossColor!== undefined ? options.crossColor : "#F00";
+  
+  /*
   var material = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false,depthWrite:false,renderDepth : 1e20});
- 
-  //center cross
-  var centerCrossSize = 10;
-  var centerCrossGeometry1 = new THREE.Geometry();
-  centerCrossGeometry1.vertices.push( new THREE.Vector3( -centerCrossSize, 0, 0 ) );
-  centerCrossGeometry1.vertices.push( new THREE.Vector3( centerCrossSize, 0, 0 ) );
-  var centerCrossGeometry2 = new THREE.Geometry();
-  centerCrossGeometry2.vertices.push( new THREE.Vector3( 0, -centerCrossSize, 0 ) );
-  centerCrossGeometry2.vertices.push( new THREE.Vector3( 0, centerCrossSize, 0 ) );
-  var centerCross1 = new THREE.Line( centerCrossGeometry1, material );
-  var centerCross2 = new THREE.Line( centerCrossGeometry2, material );
 
   //draw arrow
   var arrowOffset = new THREE.Vector3(Math.sqrt(this.distance)*2+this.diameter/2,Math.sqrt(this.distance)*2+this.diameter/2,0);
@@ -36,7 +36,7 @@ AnnotationHelper = function(diameter, distance, endLength, color)
    var endLine = new THREE.Line( endLineGeometry, material );
 
   //draw dimention / text
-  this.label = new THREE.TextDrawHelper().drawTextOnPlane(this.text,45);
+  this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize, color:this.textColor, bgColor:this.textBgColor});
   this.label.position.add( endLineEndPoint );
   //TODO: account for size of text instead of these hacks
   this.label.position.x += 5
@@ -56,10 +56,28 @@ AnnotationHelper = function(diameter, distance, endLength, color)
   this.add( mainArrow );
   this.add( endLine );
   this.add( this.label );
-  this.add( centerCross1 );
-  this.add( centerCross2 );
+  this.add( centerCross1 );*/
+  
+  this.point = undefined;
+  this.object= undefined;
 }
 
-AnnotationHelper.prototype = Object.create( BaseHelper.prototype );
-AnnotationHelper.prototype.constructor = AnnotationHelper;
+NoteHelper.prototype = Object.create( BaseHelper.prototype );
+NoteHelper.prototype.constructor = NoteHelper;
+
+
+NoteHelper.prototype.unset = function( ){
+  this.remove( this.pointCross );
+}
+
+NoteHelper.prototype.setPoint = function( point, object ){
+  if(point) this.point = point;
+  if(object) this.object = object;
+
+  if(this.pointCross) this.remove( this.pointCross );
+  //point location cross
+  this.pointCross = new CrossHelper({size:this.centerCrossSize,color:this.crossColor});
+  this.pointCross.position.copy( this.point );
+  this.add( this.pointCross );
+}
 
