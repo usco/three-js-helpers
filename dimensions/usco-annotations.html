@@ -1,0 +1,75 @@
+<link rel="import" href="distance-helper.html">
+<link rel="import" href="thickness-helper.html">
+<link rel="import" href="diameter-helper.html">
+<link rel="import" href="angle-helper.html">
+<link rel="import" href="note-helper.html">
+<link rel="import" href="dimensions-helper-group.html">
+
+<!--FIXME: temporary name-->
+<polymer-element name="usco-annotations" extends="dimensions-helper-group" attributes="activeType" 
+on-measure-done="{{measureDone}}">
+  <template>
+    <!-- measurements system test -->
+    <!--<dimensions-helper-group id="dimensions" selectedObject="{{selectedObject}}" 
+    selectedMeasurement="{{measureType}}" on-measure-done="{{measureDone}}"> -->
+      <distance-helper  id="distHelper" selectedObject="{{selectedObject}}"> </distance-helper>
+      <thickness-helper id="thickHelper" selectedObject="{{selectedObject}}"> </thickness-helper>
+      <diameter-helper  id="diamHelper" selectedObject="{{selectedObject}}"> </diameter-helper>
+      <angle-helper     id="angleHelper" selectedObject="{{selectedObject}}"> </angle-helper>
+      <note-helper     id="noteHelper" selectedObject="{{selectedObject}}"> </note-helper>
+    <!--</dimensions-helper-group>-->
+    
+  </template>
+  <script>
+    Polymer("usco-annotations",{
+      activeType: null,
+      annotations: [],
+      annotationTypes:[],
+      created:function(){
+        this.annotations  = [];
+      },
+      domReady:function(){
+        this.annotationTypes = Object.keys(this._helpers)
+        //console.log("annotations", this.annotationTypes );
+      },
+      //attriubte change handlers
+      activeTypeChanged:function(){
+        //console.log("activeType changed", this.activeType);
+        //if(this.activeType != this.selectedMeasurement ){
+        this.selectedMeasurement = this.activeType;
+      },
+      //event handlers
+      measureDone:function(e,detail,sender){
+        var measurement = detail;
+        return;
+        //FIXME , do this better
+        for(key in measurement)
+        {
+          if(measurement[key] instanceof THREE.Vector3)
+          {
+            measurement[key] = measurement[key].toArray();
+          }
+          if(measurement[key] instanceof THREE.Object3D)
+          {
+            measurement.partId = measurement[key].userData.part.id;
+            delete measurement[key];
+          }
+          if(key === "point")
+          {
+            measurement["position"] = measurement[key];
+            delete measurement[key];
+          }
+        }
+        console.log("within annotations element : measure done", measurement);
+        //this.measurements.push( measurement );
+        this.annotations.push( measurement );
+        //console.log(  this.measurements ); 
+      },
+      
+      /*onPicked:function( e ){
+        this.$.dimensions.onPicked( e );
+      }*/
+    
+    });
+   </script>
+ </polymer-element>  
