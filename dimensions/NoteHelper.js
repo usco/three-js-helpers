@@ -20,6 +20,8 @@ NoteHelper = function(options)
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   
   this.crossColor = options.crossColor!== undefined ? options.crossColor : "#F00";
+  this.text       = options.text      !== undefined ? options.text : "";
+  this.title      = options.title     !== undefined ? options.title : "";
   
   /*
   var material = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false,depthWrite:false,renderDepth : 1e20});

@@ -11,6 +11,7 @@
       selectedObject:null,
       ready:function(){
         this.helper = new NoteHelper();
+        //TODO: add variants for spherical & cubical "volume notes"
       },
       onPicked:function(e){
         //console.log("picked", this.localName);
@@ -22,8 +23,9 @@
         
         this.helper.setPoint( point, object );
         
-        this.measureDone({type:"note", value:"",
-        point:this.helper.point, object:this.helper.object});
+        this.measureDone({type:"note", value:this.helper.text,
+          title:this.helper.title, point:this.helper.point, 
+          object:this.helper.object});
       }
      });
   </script>
