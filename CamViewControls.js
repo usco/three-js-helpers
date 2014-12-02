@@ -108,18 +108,11 @@ ViewCubeGizmo = function( size, cornerWidth, position ){
   var cornerWidth = cornerWidth || 4;
   var position = position || new THREE.Vector3();
 
-  var viewCube = new THREE.Mesh(new THREE.BoxGeometry( size, size, size ), 
-    new GizmoMaterial( {color:0xFFFF00, transparent:true, opacity:0.5} ) );
-  viewCube.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0 ,size /2 ) );
-  viewCube.name = "viewCube";
-  
-  this.corners = new THREE.Object3D();
+  this.edges = new THREE.Object3D();
   this.planes  = new THREE.Object3D();
-  
   
   //planes
   var plSize = size - cornerWidth;
-  
   var planes = {
 		"F":   new CubePlane(plSize),
 		"B":   new CubePlane(plSize),
@@ -136,12 +129,11 @@ ViewCubeGizmo = function( size, cornerWidth, position ){
 	
 	planes["L"].rotation.set( -Math.PI/2, 0, -Math.PI );
 	planes["L"].position.set( 0, size/2, size/2 );
-	/*planes["R"].rotation.set( 0, -Math.PI/2, 0 );
-	planes["R"].position.set( -size/2, 0,size/2 );*/
+	planes["R"].rotation.set( -Math.PI/2, 0, -Math.PI );
+	planes["R"].position.set( 0,-size/2, size/2 );
 	
 	planes["A"].position.set( 0, 0, size );
 	planes["U"].position.set( 0, 0, 0 );
-	
 
 	for (var i in planes) {
 		planes[i].name = i;
@@ -150,22 +142,66 @@ ViewCubeGizmo = function( size, cornerWidth, position ){
 		//planes[i].visible = false;
 	}
   
-  //corners
-  var frontLeftCorner = new CubeCorner( size, cornerWidth, 
-    new THREE.Vector3( size/2,-size/2,0) );
-  frontLeftCorner.rotation.z -= Math.PI/2;
-  frontLeftCorner.name="frontLeftCorner";
+  //edges
+  var edges = {
+		"FL":   new CubeCorner( size, cornerWidth ),
+		"FR":   new CubeCorner( size, cornerWidth ),
+		"FT":   new CubeCorner( size, cornerWidth ),
+		"FB":   new CubeCorner( size, cornerWidth ),
+		
+		"BL":   new CubeCorner( size, cornerWidth ),
+		"BR":   new CubeCorner( size, cornerWidth ),
+		"BT":   new CubeCorner( size, cornerWidth ),
+		"BB":   new CubeCorner( size, cornerWidth ),
+		
+		"LT":   new CubeCorner( size, cornerWidth ),
+		"LB":   new CubeCorner( size, cornerWidth ),
+		"RT":   new CubeCorner( size, cornerWidth ),
+		"RB":   new CubeCorner( size, cornerWidth ),
+	};
+	//front
+	edges["FL"].rotation.set( 0, 0, -Math.PI/2 );
+	edges["FL"].position.set( size/2,-size/2, 0 );
+	edges["FR"].position.set( size/2, size/2, 0 );
+	
+	edges["FT"].rotation.set( Math.PI/2, 0, 0 );
+	edges["FT"].position.set( size/2, size/2, size );
+	edges["FB"].rotation.set( -Math.PI/2, 0, 0 );
+	edges["FB"].position.set( size/2, -size/2, 0 );
+	
+	//back	
+	edges["BL"].rotation.set( 0, 0, Math.PI/2 );
+	edges["BL"].position.set( -size/2,size/2, 0 );
+	edges["BR"].rotation.set( 0, 0, -Math.PI );
+	edges["BR"].position.set( -size/2, -size/2, 0 );
 
-  var frontRightCorner = new CubeCorner( size, cornerWidth, 
-    new THREE.Vector3( size/2,size/2,0) );
-  frontRightCorner.name="frontRightCorner";
+	edges["BT"].rotation.set( Math.PI/2, Math.PI , 0);
+	edges["BT"].position.set( -size/2, -size/2, size );
+	edges["BB"].rotation.set( -Math.PI/2, Math.PI, 0 );
+	edges["BB"].position.set( -size/2, size/2, 0 );
+	
+	//sides (left/right)
+	edges["LT"].rotation.set( Math.PI/2, -Math.PI/2 , 0);
+	edges["LT"].position.set( size/2, -size/2, size );
+	edges["LB"].rotation.set( Math.PI, -Math.PI/2 , 0);
+	edges["LB"].position.set( size/2, -size/2, 0 );
+	
+	edges["RT"].rotation.set( Math.PI/2, Math.PI/2 , 0);
+	edges["RT"].position.set( -size/2, size/2, size );
+	
+	edges["RB"].rotation.set( 0, Math.PI/2 , 0);
+	edges["RB"].position.set( -size/2, size/2, 0 );
   
-  this.corners.add( frontLeftCorner );
-  this.corners.add( frontRightCorner );
   
-  this.add( this.corners );
+	for (var i in edges) {
+		edges[i].name = i;
+		this.edges.add(edges[i]);
+		this.edges[i] = edges[i];
+		//planes[i].visible = false;
+	}
+  
+  this.add( this.edges );
   this.add( this.planes );
-  //this.add( viewCube );
   
   this.position.copy( position );
 }
@@ -202,8 +238,8 @@ ViewCubeGizmo.prototype.highlight = function ( item ) {
 CamViewControls = function (size, xColor, yColor, zColor, textColor, addLabels, addArrows) { 
 	 THREE.Object3D.call( this );
 	
-	 var size = 12;
-	 var cornerWidth = 2;
+	 var size = 20;
+	 var cornerWidth = 3;
 	 
 	 this.viewCubeGizmo = new ViewCubeGizmo(size, cornerWidth);
 	 this.add( this.viewCubeGizmo );
