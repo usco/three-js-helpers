@@ -39,19 +39,20 @@ GizmoMaterial = function ( parameters ) {
 			}
 
 		};
-
 };
 
 GizmoMaterial.prototype = Object.create( THREE.MeshBasicMaterial.prototype );
 
 
-CubeEdge = function( size, width, color, position ){
+CubeEdge = function( size, width, color, position, selectionCallback ){
   var size = size || 10;
   var width = width || 4;
   var position = position || new THREE.Vector3();
   var color = color || 0xFF0000;
+  this.selectionCallback = selectionCallback;
 
-  var planeGeometry = new THREE.PlaneGeometry( size, width, 2, 2 );
+  var midSize = size - width*2;
+  var planeGeometry = new THREE.PlaneGeometry( midSize, width, 2, 2 );
   planeGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI/2 ) ); 
   planeGeometry.applyMatrix( new THREE.Matrix4().makeRotationY( Math.PI/2 ) ); 
   planeGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, 0 ,size /2 ) );
@@ -63,9 +64,12 @@ CubeEdge = function( size, width, color, position ){
   var geometry = new THREE.Geometry();
   geometry.merge(planeGeometry);
   geometry.merge(planeGeometry2);
+  //geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, width/2 , 0 ) );
+  geometry = new THREE.BoxGeometry( width, width, midSize );
+  geometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, -width /2 ,size /2 ) );
   
   var material = new GizmoMaterial( { color:color, 
-	   side : THREE.DoubleSide,
+	   side : THREE.DoubleSide,opacity:1,transparent:true
 	  } );
   //depthTest:false, depthWrite:false 
   THREE.Mesh.call(this, geometry, material);
@@ -77,16 +81,21 @@ CubeEdge.prototype.constructor = CubeEdge;
 
 CubeEdge.prototype.onSelect = function(){
   console.log(this.name+ " selected");
+  if(this.selectionCallback){
+    this.selectionCallback( this.name );
+  }
 }
 
 
-CubePlane = function( size, color, position ){
+CubePlane = function( size, color, position, selectionCallback ){
   var size = size || 10;
   var position = position || new THREE.Vector3();
   var color = color || 0xFF0000;
+  this.selectionCallback = selectionCallback;
 
   var geometry = new THREE.PlaneBufferGeometry( size, size, 2, 2 );
-  var material = new GizmoMaterial( { color:color });
+  var material = new GizmoMaterial( { color:color, side : THREE.DoubleSide,
+  opacity:1,transparent:true });
   //, depthTest:false , side:THREE.FrontSide
   
   THREE.Mesh.call(this, geometry, material);
@@ -98,31 +107,102 @@ CubePlane.prototype.constructor = CubePlane;
 
 CubePlane.prototype.onSelect = function(){
   console.log(this.name+ " selected");
+  if(this.selectionCallback){
+    this.selectionCallback( this.name );
+  }
+}
+
+
+CubeCorner = function( size, color, position, selectionCallback ){
+  var size = size || 10;
+  var position = position || new THREE.Vector3();
+  var color = color || 0xFF0000;
+  this.selectionCallback = selectionCallback;
+
+  var geometry = new THREE.BoxGeometry( size, size, size);
+  var material = new GizmoMaterial( { color:color, side : THREE.DoubleSide,
+  opacity:1,transparent:true });
+  //, depthTest:false , side:THREE.FrontSide
+  
+  THREE.Mesh.call(this, geometry, material);
+  this.position.copy( position );
+}
+
+CubeCorner.prototype = Object.create( THREE.Mesh.prototype );
+CubeCorner.prototype.constructor = CubeCorner;  
+
+CubeCorner.prototype.onSelect = function(){
+  console.log(this.name+ " selected");
+  if(this.selectionCallback){
+    this.selectionCallback( this.name );
+  }
 }
 
 
 
-ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor ){
+ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, cornersColor, controlledCamera ){
   THREE.Object3D.call( this );
   
-  var size = size || 10;
+  var size        = size || 10;
   var cornerWidth = cornerWidth || 4;
-  var position = position || new THREE.Vector3();
-  var planesColor = planesColor;
-  var edgesColor  = edgesColor;
+  var position    = position || new THREE.Vector3();
+  var planesColor = planesColor || 0x00FF00;
+  var edgesColor  = edgesColor  || 0x0000FF;
+  var cornersColor= cornersColor|| 0xFF0000;
+  var controlledCamera = controlledCamera;
 
-  this.edges = new THREE.Object3D();
+  this.edges   = new THREE.Object3D();
   this.planes  = new THREE.Object3D();
+  this.corners = new THREE.Object3D();
+  
+  var orientationMap = {
+    "F":    "Front",
+    "B":    "Back",
+    "L":    "Left",
+    "R":    "Right",
+    "A":    "Top",
+    "U":    "Bottom",
+    
+    "FL":   "FrontLeft",
+		"FR":   "FrontRight",
+		"FT":   "FrontTop",
+		"FB":   "FrontBottom", 
+		
+    "BL":   "BackLeft",
+		"BR":   "BackRight",
+		"BT":   "BackTop",
+		"BB":   "BackBottom", 
+		
+		"LT":   "LeftTop",
+		"LB":   "LeftBottom",
+		"RT":   "RightTop",
+		"RB":   "RightBottom",
+		
+		"FTL":   "FrontTopLeft",
+		"FTR":   "FrontTopRight",
+		"FBL":   "FrontBottomLeft",
+		"FBR":   "FrontBottomRight",
+		
+	  "BTL":   "BackTopLeft",
+		"BTR":   "BackTopRight",
+		"BBL":   "BackBottomLeft",
+		"BBR":   "BackBottomRight",
+  };
+  
+  var orientationCallback = function( orientationShortName ){
+    console.log("yeahn orientation selected : "+orientationShortName);
+    controlledCamera.orientation = orientationMap[orientationShortName];
+  }
   
   //planes
-  var plSize = size - cornerWidth;
+  var plSize = size - cornerWidth*2;
   var planes = {
-		"F":   new CubePlane( plSize, planesColor ),
-		"B":   new CubePlane( plSize, planesColor ),
-		"L":   new CubePlane( plSize, planesColor ),
-		"R":   new CubePlane( plSize, planesColor ),
-		"A":   new CubePlane( plSize, planesColor ),
-		"U":   new CubePlane( plSize, planesColor ),
+		"F":   new CubePlane( plSize, planesColor, null, orientationCallback ),
+		"B":   new CubePlane( plSize, planesColor, null, orientationCallback ),
+		"L":   new CubePlane( plSize, planesColor, null, orientationCallback ),
+		"R":   new CubePlane( plSize, planesColor, null, orientationCallback ),
+		"A":   new CubePlane( plSize, planesColor, null, orientationCallback ),
+		"U":   new CubePlane( plSize, planesColor, null, orientationCallback ),
 	};
 	
 	planes["F"].rotation.set( 0, Math.PI/2, 0 );
@@ -137,31 +217,36 @@ ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor )
 	
 	planes["A"].position.set( 0, 0, size );
 	planes["U"].position.set( 0, 0, 0 );
+	
+	//test
+	planes["A"].controlledCamera = controlledCamera;
 
 	for (var i in planes) {
 		planes[i].name = i;
 		this.planes.add(planes[i]);
 		this.planes[i] = planes[i];
-		//planes[i].visible = false;
+		planes[i].visible = false;
 	}
   
   //edges
   var edges = {
-		"FL":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"FR":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"FT":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"FB":   new CubeEdge( size, cornerWidth, edgesColor ), 
+		"FL":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"FR":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"FT":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"FB":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
 		
-		"BL":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"BR":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"BT":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"BB":   new CubeEdge( size, cornerWidth, edgesColor ), 
+		"BL":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"BR":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"BT":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"BB":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
 		
-		"LT":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"LB":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"RT":   new CubeEdge( size, cornerWidth, edgesColor ), 
-		"RB":   new CubeEdge( size, cornerWidth, edgesColor ), 
+		"LT":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"LB":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"RT":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
+		"RB":   new CubeEdge( size, cornerWidth, edgesColor, null, orientationCallback ), 
 	};
+	
+	size += 0.1;
 	//front
 	edges["FL"].rotation.set( 0, 0, -Math.PI/2 );
 	edges["FL"].position.set( size/2,-size/2, 0 );
@@ -200,13 +285,49 @@ ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor )
 		edges[i].name = i;
 		this.edges.add(edges[i]);
 		this.edges[i] = edges[i];
-		//planes[i].visible = false;
+    edges[i].visible = false;
+	}
+	
+	//corners
+	size -= 0.1;
+	var cSize = cornerWidth;
+  var corners = {
+		"FTL":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		"FTR":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		"FBL":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		"FBR":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		
+	  "BTL":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		"BTR":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		"BBL":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+		"BBR":   new CubeCorner( cSize, cornersColor, null, orientationCallback ),
+	};
+	
+	corners["FTL"].position.set( (size-cSize)/2, -(size-cSize)/2, size-cSize/2 );
+	corners["FTR"].position.set( (size-cSize)/2, (size-cSize)/2, size-cSize/2 );
+	corners["FBL"].position.set( (size-cSize)/2, -(size-cSize)/2, cSize/2 );
+	corners["FBR"].position.set( (size-cSize)/2, (size-cSize)/2, cSize/2 );
+	
+	corners["BTL"].position.set( -(size-cSize)/2, -(size-cSize)/2, size-cSize/2 );
+	corners["BTR"].position.set( -(size-cSize)/2, (size-cSize)/2, size-cSize/2 );
+	corners["BBL"].position.set( -(size-cSize)/2, -(size-cSize)/2, cSize/2 );
+	corners["BBR"].position.set( -(size-cSize)/2, (size-cSize)/2, cSize/2 );
+	
+	for (var i in corners) {
+		corners[i].name = i;
+		this.corners.add(corners[i]);
+		this.corners[i] = corners[i];
+		corners[i].visible = false;
 	}
   
   this.add( this.edges );
   this.add( this.planes );
+  this.add( this.corners );
   
   this.position.copy( position );
+  
+  //event handling
+  //orientation
 }
 
 ViewCubeGizmo.prototype = Object.create( THREE.Object3D.prototype );
@@ -238,18 +359,26 @@ ViewCubeGizmo.prototype.highlight = function ( item ) {
 };
 
  
-CamViewControls = function (size, xColor, yColor, zColor, textColor, addLabels, addArrows) { 
+CamViewControls = function (size, cornerWidth, controlledCam) { 
 	 THREE.Object3D.call( this );
 	
 	 var size = 20;
 	 var cornerWidth = 3;
-	 var edgesColor = 0x889999;
+	 var controlledCam = controlledCam;
+	 
+	 /*var edgesColor = 0x889999;
 	 var planesColor = 0x778888;
+	 var cornersColor = 0x778888;*/
+	 var edgesColor = null;
+	 var planesColor = null;
+	 var cornersColor = null;
 	 
-	 this.viewCubeGizmo = new ViewCubeGizmo(size, cornerWidth, null, edgesColor, planesColor);
+	 
+	 this.viewCubeGizmo = new ViewCubeGizmo(size, cornerWidth, new THREE.Vector3(size/2,size/2,0)
+	  , edgesColor, planesColor, cornersColor,controlledCam);
+	  
 	 this.add( this.viewCubeGizmo );
-	 
-	 this.add( new THREE.LabeledAxes(size, null, null, null, null,true,true) );
+	 this.add( new THREE.LabeledAxes(size-4, null, null, null, null,true,true) );
 }
 
 CamViewControls.prototype = Object.create( THREE.Object3D.prototype );
@@ -295,12 +424,16 @@ CamViewControls.prototype.init = function( camera, domElement ){
 		var x = pointer.offsetX;//;( pointer.offsetX - rect.left ) / rect.width;
 		var y = pointer.offsetY;//;( pointer.offsetX - rect.top ) / rect.height;
 
-    pointerVector.set( (x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1, 1  );
+    //pointerVector.set( (x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1, 1  );
+    
+    var x = ( pointer.clientX - rect.left ) / rect.width;
+	  var y = ( pointer.clientY - rect.top ) / rect.height;
+
+	  pointerVector.set( ( x * 2 ) - 1, - ( y * 2 ) + 1, 0.5 );
+    
     
     if( !isOrtho)
 		{
-		  //pointerVector.set( ( x * 2 ) - 1, - ( y * 2 ) + 1, 0.5 );
-		  
 		  pointerVector.unproject( camera );
 
 		  ray.set( camPosition, pointerVector.sub( camPosition ).normalize() );
@@ -327,11 +460,11 @@ CamViewControls.prototype.init = function( camera, domElement ){
 			
       if(intersect && intersect.object.name){
         scope.activeItem = intersect.object.name;
-        //scope.viewCubeGizmo.show();
+        scope.viewCubeGizmo.show();
       }
       else{
         scope.activeItem = null;
-        //scope.viewCubeGizmo.hide();
+        scope.viewCubeGizmo.hide();
       }
       //intersect
 			//point.copy( planeIntersect.point );
