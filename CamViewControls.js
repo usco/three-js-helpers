@@ -80,7 +80,6 @@ CubeEdge.prototype = Object.create( THREE.Mesh.prototype );
 CubeEdge.prototype.constructor = CubeEdge;  
 
 CubeEdge.prototype.onSelect = function(){
-  console.log(this.name+ " selected");
   if(this.selectionCallback){
     this.selectionCallback( this.name );
   }
@@ -106,7 +105,6 @@ CubePlane.prototype = Object.create( THREE.Mesh.prototype );
 CubePlane.prototype.constructor = CubePlane;  
 
 CubePlane.prototype.onSelect = function(){
-  console.log(this.name+ " selected");
   if(this.selectionCallback){
     this.selectionCallback( this.name );
   }
@@ -132,7 +130,6 @@ CubeCorner.prototype = Object.create( THREE.Mesh.prototype );
 CubeCorner.prototype.constructor = CubeCorner;  
 
 CubeCorner.prototype.onSelect = function(){
-  console.log(this.name+ " selected");
   if(this.selectionCallback){
     this.selectionCallback( this.name );
   }
@@ -140,7 +137,7 @@ CubeCorner.prototype.onSelect = function(){
 
 
 
-ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, cornersColor, controlledCamera ){
+ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, cornersColor, controlledCameras ){
   THREE.Object3D.call( this );
   
   var size        = size || 10;
@@ -149,7 +146,7 @@ ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, 
   var planesColor = planesColor || 0x00FF00;
   var edgesColor  = edgesColor  || 0x0000FF;
   var cornersColor= cornersColor|| 0xFF0000;
-  var controlledCamera = controlledCamera;
+  var controlledCameras = controlledCameras;
 
   this.edges   = new THREE.Object3D();
   this.planes  = new THREE.Object3D();
@@ -190,8 +187,12 @@ ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, 
   };
   
   var orientationCallback = function( orientationShortName ){
-    console.log("yeahn orientation selected : "+orientationShortName);
-    controlledCamera.orientation = orientationMap[orientationShortName];
+    for(var i=0;i<controlledCameras.length;i++)
+    {
+      var controlledCamera = controlledCameras[i];
+      //console.log("yeahn orientation selected : "+orientationShortName+" in ",controlledCamera);
+      controlledCamera.orientation = orientationMap[orientationShortName];
+    }
   }
   
   //planes
@@ -217,9 +218,6 @@ ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, 
 	
 	planes["A"].position.set( 0, 0, size );
 	planes["U"].position.set( 0, 0, 0 );
-	
-	//test
-	planes["A"].controlledCamera = controlledCamera;
 
 	for (var i in planes) {
 		planes[i].name = i;
@@ -359,12 +357,12 @@ ViewCubeGizmo.prototype.highlight = function ( item ) {
 };
 
  
-CamViewControls = function (size, cornerWidth, controlledCam) { 
+CamViewControls = function (size, cornerWidth, controlledCameras) { 
 	 THREE.Object3D.call( this );
 	
-	 var size = 20;
+	 var size = 15;
 	 var cornerWidth = 3;
-	 var controlledCam = controlledCam;
+	 var controlledCameras = controlledCameras;
 	 
 	 /*var edgesColor = 0x889999;
 	 var planesColor = 0x778888;
@@ -375,7 +373,7 @@ CamViewControls = function (size, cornerWidth, controlledCam) {
 	 
 	 
 	 this.viewCubeGizmo = new ViewCubeGizmo(size, cornerWidth, new THREE.Vector3(size/2,size/2,0)
-	  , edgesColor, planesColor, cornersColor,controlledCam);
+	  , edgesColor, planesColor, cornersColor, controlledCameras);
 	  
 	 this.add( this.viewCubeGizmo );
 	 this.add( new THREE.LabeledAxes(size-4, null, null, null, null,true,true) );
@@ -403,20 +401,19 @@ CamViewControls.prototype.init = function( camera, domElement ){
 	this.camPosition = camPosition;
 	this.camRotation = camRotation;
   
-  domElement.addEventListener( "mousedown", onPointerDown, false );
-	domElement.addEventListener( "touchstart", onPointerDown, false );
+  domElement.addEventListener( "mousedown", onPointerDown, true );
+	domElement.addEventListener( "touchstart", onPointerDown, true );
 
-	/*domElement.addEventListener( "mousemove", onPointerHover, false );
-	domElement.addEventListener( "touchmove", onPointerHover, false );*/
+  var useCapture = false;
+  
+	domElement.addEventListener( "mousemove", onPointerMove, useCapture );
+	domElement.addEventListener( "touchmove", onPointerMove, useCapture );
 
-	domElement.addEventListener( "mousemove", onPointerMove, false );
-	domElement.addEventListener( "touchmove", onPointerMove, false );
-
-	/*domElement.addEventListener( "mouseup", onPointerUp, false );
-	domElement.addEventListener( "mouseout", onPointerUp, false );
-	domElement.addEventListener( "touchend", onPointerUp, false );
-	domElement.addEventListener( "touchcancel", onPointerUp, false );
-	domElement.addEventListener( "touchleave", onPointerUp, false );*/
+	domElement.addEventListener( "mouseup", onPointerUp, useCapture );
+	domElement.addEventListener( "mouseout", onPointerUp, useCapture );
+	domElement.addEventListener( "touchend", onPointerUp, useCapture );
+	domElement.addEventListener( "touchcancel", onPointerUp, useCapture );
+	domElement.addEventListener( "touchleave", onPointerUp, useCapture );
 	
 	function intersectObjects( pointer, objects, isOrtho ) {
 
@@ -470,17 +467,23 @@ CamViewControls.prototype.init = function( camera, domElement ){
 			//point.copy( planeIntersect.point );
   }
   function onPointerDown( event ) {
-      console.log("pointer down in camView controls");
-			event.preventDefault();
-			event.stopPropagation();
-			event.stopImmediatePropagation();
+      //console.log("pointer up in camView controls");
 
 			var pointer = event.changedTouches ? event.changedTouches[ 0 ] : event;
 			var intersect = intersectObjects( pointer, scope.viewCubeGizmo.children, true );
 			if(intersect && intersect.object.onSelect)
 			{
+		  	event.preventDefault();
+			  event.stopPropagation();
+			  event.stopImmediatePropagation();
+			  
 			  intersect.object.onSelect();
 			}
+  }
+  
+  function onPointerUp( event ) {
+    scope.activeItem = null;
+  
   }
   
   
