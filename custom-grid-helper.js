@@ -204,8 +204,9 @@ GridHelper.prototype._drawNumbering = function() {
         this.mainGrid.remove(this.labels);
       }
       this.labels = new THREE.Object3D();
-      xLabelsLeft = new THREE.Object3D();
-      yLabelsFront = new THREE.Object3D();
+      
+      xLabelsFront = new THREE.Object3D();
+      yLabelsRight = new THREE.Object3D();
       
       for (var i = -size/2; i <= size/2; i += step)
   	  {
@@ -213,32 +214,34 @@ GridHelper.prototype._drawNumbering = function() {
         sizeLabel2 = sizeLabel.clone();
         sizeLabel.rotation.z = Math.PI / 2;
         sizeLabel.position.set(i, this.size / 2, 0.1);
-        xLabelsLeft.add(sizeLabel);
+        yLabelsRight.add(sizeLabel);
         if (this.textLocation === "center") {
           if (i !== 0) {
             sizeLabel2.position.set(this.size / 2, i, 0.1);
             sizeLabel2.rotation.z = Math.PI / 2;
-            yLabelsFront.add(sizeLabel2);
+            xLabelsFront.add(sizeLabel2);
           }
         } else {
           if (i !== this.size / 2 && i !== -this.size / 2) {
-            sizeLabel2.position.set(this.size / 2, i, 0.1);
+            sizeLabel2.position.set(this.size / 2, -i, 0.1);
             sizeLabel2.rotation.z = Math.PI / 2;
-            yLabelsFront.add(sizeLabel2);
+            xLabelsFront.add(sizeLabel2);
           }
         }
       }
+      
       if (this.textLocation === "center") {
-        xLabelsLeft.translateY(-this.size / 2);
-        yLabelsFront.translateX(-this.size / 2);
+        yLabelsRight.translateY(-this.size / 2);
+        xLabelsFront.translateX(-this.size / 2);
       } else {
-        xLabelsRight = xLabelsLeft.clone().translateY(-this.size);
-        yLabelsBack = yLabelsFront.clone().translateX(-this.size);
-        this.labels.add(xLabelsRight);
-        this.labels.add(yLabelsBack);
+        yLabelsLeft = yLabelsRight.clone().translateY(-this.size);
+        xLabelsBack = xLabelsFront.clone().translateX(-this.size);
+        
+        this.labels.add( yLabelsLeft );
+        this.labels.add( xLabelsBack) ;
       }
-      this.labels.add(xLabelsLeft);
-      this.labels.add(yLabelsFront);
+      this.labels.add( yLabelsRight );
+      this.labels.add( xLabelsFront );
       
       //apply visibility settings to all labels
       var textVisible = this.text;
