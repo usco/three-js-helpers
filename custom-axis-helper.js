@@ -6,7 +6,7 @@ THREE.ArrowHelper2 = function (direction, origin, length, color, headLength, hea
 	this.length = length || 50;
 	this.color = color || "#FF0000";
   this.headLength = headLength || 6;
-  this.headRadius = headRadius || 1;
+  this.headRadius = headRadius || headLength/7;
   this.headColor = headColor || this.color;
 	
 	//dir, origin, length, hex
@@ -30,16 +30,21 @@ THREE.ArrowHelper2.prototype = Object.create( THREE.Object3D.prototype );
 
 
       
-THREE.LabeledAxes = function (size, xColor, yColor, zColor, textColor, addLabels, addArrows) { 
+THREE.LabeledAxes = function (options) { 
 	 THREE.Object3D.call( this );
 	
-      this.size = size || 50 ;
-      this.xColor = xColor || "0xFF7700" ;
-      this.yColor = yColor || "0x77FF00" ;
-      this.zColor = zColor || "0x0077FF" ;
-      this.textColor = textColor || "#FFFFFF" ;
-      addLabels = addLabels || true ;
-      addArrows = addArrows || true ;
+      this.size   = options.size !== undefined ? options.size : 50 ;
+      this.xColor = options.xColor!== undefined ? options.xColor : "0xFF7700" ;
+      this.yColor = options.yColor!== undefined ? options.yColor : "0x77FF00" ;
+      this.zColor = options.zColor!== undefined ? options.zColor : "0x0077FF" ;
+      
+      this.fontSize   = options.fontSize!== undefined ? options.fontSize : 6;
+      this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
+      
+      this.arrowSize = options.arrowSize !== undefined ? options.arrowSize : 3;
+      
+      var addLabels  = options.addLabels !== undefined ? options.addLabels : true;
+      var addArrows  = options.addArrows !== undefined ? options.addArrows : true;
       
       this.xColor = new THREE.Color().setHex( this.xColor );
       this.yColor = new THREE.Color().setHex( this.yColor );
@@ -48,7 +53,7 @@ THREE.LabeledAxes = function (size, xColor, yColor, zColor, textColor, addLabels
 	    if ( addLabels == true )
       {
         var s = this.size ;
-        var fontSize = 10 ;
+        var fontSize = this.fontSize ;
         
         this.xLabel=this._drawText("X",fontSize);
         this.xLabel.position.set(s,0,0);
@@ -62,9 +67,9 @@ THREE.LabeledAxes = function (size, xColor, yColor, zColor, textColor, addLabels
       if ( addArrows == true )
       {
         s = this.size / 1.25; // THREE.ArrowHelper arrow length
-        this.xArrow = new THREE.ArrowHelper2(new THREE.Vector3(1,0,0),new THREE.Vector3(0,0,0),s, this.xColor);
-        this.yArrow = new THREE.ArrowHelper2(new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,0),s, this.yColor);
-        this.zArrow = new THREE.ArrowHelper2(new THREE.Vector3(0,0,1),new THREE.Vector3(0,0,0),s, this.zColor);
+        this.xArrow = new THREE.ArrowHelper2(new THREE.Vector3(1,0,0),new THREE.Vector3(0,0,0),s, this.xColor,this.arrowSize);
+        this.yArrow = new THREE.ArrowHelper2(new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,0),s, this.yColor,this.arrowSize);
+        this.zArrow = new THREE.ArrowHelper2(new THREE.Vector3(0,0,1),new THREE.Vector3(0,0,0),s, this.zColor,this.arrowSize);
         this.add( this.xArrow );
         this.add( this.yArrow );
         this.add( this.zArrow );

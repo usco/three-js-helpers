@@ -16,10 +16,12 @@ GizmoMaterial = function ( parameters ) {
 
 		//this.depthTest = false;
 		//this.depthWrite = false;
-		this.side = THREE.FrontSide;
+		this.side = THREE.DoubleSide;
 		//this.transparent = true;
-
+		this.opacity = 0.8;
 		this.setValues( parameters );
+		
+		this.highlightColor = parameters.highlightColor !== undefined ? options.parameters : 0xFFFF00;
 
 		this.oldColor = this.color.clone();
 		this.oldOpacity = this.opacity;
@@ -28,7 +30,7 @@ GizmoMaterial = function ( parameters ) {
 
 			if ( highlighted ) {
 
-				this.color.setRGB( 1, 1, 0 );
+				this.color.set( this.highlightColor );//.setRGB( 1, 1, 0 );
 				this.opacity = 1;
 
 			} else {
@@ -69,7 +71,6 @@ CubeEdge = function( size, width, color, position, selectionCallback ){
   geometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, -width /2 ,size /2 ) );
   
   var material = new GizmoMaterial( { color:color, 
-	   side : THREE.DoubleSide,opacity:1,transparent:true
 	  } );
   //depthTest:false, depthWrite:false 
   THREE.Mesh.call(this, geometry, material);
@@ -93,8 +94,8 @@ CubePlane = function( size, color, position, selectionCallback ){
   this.selectionCallback = selectionCallback;
 
   var geometry = new THREE.PlaneBufferGeometry( size, size, 2, 2 );
-  var material = new GizmoMaterial( { color:color, side : THREE.DoubleSide,
-  opacity:1,transparent:true });
+  var material = new GizmoMaterial( { color:color,
+   });
   //, depthTest:false , side:THREE.FrontSide
   
   THREE.Mesh.call(this, geometry, material);
@@ -118,9 +119,8 @@ CubeCorner = function( size, color, position, selectionCallback ){
   this.selectionCallback = selectionCallback;
 
   var geometry = new THREE.BoxGeometry( size, size, size);
-  var material = new GizmoMaterial( { color:color, side : THREE.DoubleSide,
-  opacity:1,transparent:true });
-  //, depthTest:false , side:THREE.FrontSide
+  var material = new GizmoMaterial( { color:color,
+   });
   
   THREE.Mesh.call(this, geometry, material);
   this.position.copy( position );
@@ -137,15 +137,33 @@ CubeCorner.prototype.onSelect = function(){
 
 
 
-ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, cornersColor, controlledCameras ){
+ViewCubeGizmo = function( controlledCameras, position, options ){
   THREE.Object3D.call( this );
   
-  var size        = size || 10;
-  var cornerWidth = cornerWidth || 4;
+  var options = options || {};
+  
+  this.size        = options.size !== undefined ? options.size : 15;
+  this.cornerWidth = options.cornerWidth !== undefined ? options.cornerWidth : 3;
+  
+  this.planesColor  = options.planesColor !== undefined ? options.planesColor : 0x77FF00;
+  this.edgesColor   = options.edgesColor !== undefined ? options.edgesColor : 0xFF7700;
+  this.cornersColor = options.cornersColor !== undefined ? options.cornersColor : 0x0077FF;
+  this.highlightColor = options.highlightColor !== undefined ? options.highlightColor : 0xFFFF00;
+  this.opacity      = options.opacity !== undefined ? options.opacity : 1;
+  
   var position    = position || new THREE.Vector3();
+  var cornerWidth = this.cornerWidth;
+  var size        = this.size;
+  var planesColor = this.planesColor;
+  var edgesColor  = this.edgesColor;
+  var cornersColor= this.cornersColor;
+  
+  /*var size        = size || 10;
+  var cornerWidth = cornerWidth || 4;
+  
   var planesColor = planesColor || 0x00FF00;
   var edgesColor  = edgesColor  || 0x0000FF;
-  var cornersColor= cornersColor|| 0xFF0000;
+  var cornersColor= cornersColor|| 0xFF0000;*/
   var controlledCameras = controlledCameras;
 
   this.edges   = new THREE.Object3D();
@@ -324,8 +342,17 @@ ViewCubeGizmo = function( size, cornerWidth, position, edgesColor, planesColor, 
   
   this.position.copy( position );
   
-  //event handling
-  //orientation
+  var self = this;
+  this.traverse(function( child ) {
+    if( child.material){
+      child.material.opacity = self.opacity;
+      child.material.transparent = true;
+      if(child.material.highlightColor)
+      {
+        child.material.highlightColor = self.highlightColor;
+      }
+    }
+	});
 }
 
 ViewCubeGizmo.prototype = Object.create( THREE.Object3D.prototype );
@@ -357,26 +384,29 @@ ViewCubeGizmo.prototype.highlight = function ( item ) {
 };
 
  
-CamViewControls = function (size, cornerWidth, controlledCameras) { 
+CamViewControls = function ( options, controlledCameras) { 
 	 THREE.Object3D.call( this );
 	
-	 var size = 15;
-	 var cornerWidth = 3;
-	 var controlledCameras = controlledCameras;
+	 var options = options || {};
+  
+   this.planesColor  = options.planesColor !== undefined ? options.planesColor : 0x00FF00;
+   this.edgesColor   = options.edgesColor !== undefined ? options.edgesColor : 0xFF0000;
+   this.cornersColor = options.cornersColor !== undefined ? options.cornersColor : 0x0000FF;
+   this.highlightColor = options.highlightColor !== undefined ? options.highlightColor : 0xFFFF00;
+   this.opacity      = options.opacity !== undefined ? options.opacity : 1;
+	
+	 this.size        = options.size !== undefined ? options.size : 15;
+	 this.cornerWidth = options.cornerWidth !== undefined ? options.cornerWidth : 3;
 	 
-	 /*var edgesColor = 0x889999;
-	 var planesColor = 0x778888;
-	 var cornersColor = 0x778888;*/
-	 var edgesColor = null;
-	 var planesColor = null;
-	 var cornersColor = null;
-	 
-	 
-	 this.viewCubeGizmo = new ViewCubeGizmo(size, cornerWidth, new THREE.Vector3(size/2,size/2,0)
-	  , edgesColor, planesColor, cornersColor, controlledCameras);
+	 var gizmoPos = new THREE.Vector3(this.size/2, this.size/2,0);
+	 this.viewCubeGizmo = new ViewCubeGizmo( controlledCameras, gizmoPos, options);
+	 /*new ViewCubeGizmo(this.size, this.cornerWidth, 
+	  
+	  , this.edgesColor, this.planesColor, this.cornersColor, controlledCameras);*/
+	  
 	  
 	 this.add( this.viewCubeGizmo );
-	 this.add( new THREE.LabeledAxes(size-4, null, null, null, null,true,true) );
+	 this.add( new THREE.LabeledAxes( options ) );
 }
 
 CamViewControls.prototype = Object.create( THREE.Object3D.prototype );
@@ -483,7 +513,7 @@ CamViewControls.prototype.init = function( camera, domElement ){
   
   function onPointerUp( event ) {
     scope.activeItem = null;
-  
+    scope.viewCubeGizmo.hide();
   }
   
   
