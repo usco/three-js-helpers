@@ -89,9 +89,14 @@ ThicknessHelper.prototype.setThickness = function( thickness ){
     this.thickness  = thickness;
 }
 
-ThicknessHelper.prototype.setPoint = function( point ){
+ThicknessHelper.prototype.setPoint = function( point, object ){
     this.point  = point;
+    this.object = object;
+    
+    //FIXME: not needed if this helper becomes a child of the measured object
+    if(object) this._curObjectPos = object.position.clone();
 }
+
 
 ThicknessHelper.prototype.setNormal = function( normal ){
     this.normal  = normal;
@@ -135,3 +140,40 @@ ThicknessHelper.prototype._drawDebugHelpers = function(point, offsetPoint, escap
   this.add( remotePointHelper );
   this.add( escapePointHelper );
 }
+
+ThicknessHelper.prototype.update = function(){
+  //TODO: find a way to only call this when needed
+  if(!this.visible) return;
+  var changed = false;
+  this.object.updateMatrix();
+  this.object.updateMatrixWorld();
+  
+  if( ! this.object.position.equals( this.curObjectPos ) )
+  {
+    var offset = this.startObject.position.clone().sub( this.curStartObjectPos );
+    //console.log("STARTchange",offset);
+    //this.curStartObjectPos.copy( this.startObject.position );
+    //this.startCross.position.add( offset );
+    //this.start.add( offset );
+    if(!this.start) return;
+    this.setStart(this.start.clone().add( offset ), this.startObject );
+    
+    //this.set({start:this.start, end:this.end});
+    if(this.startObject === this.endObject)
+    {
+      this.setEnd(this.end.clone().add( offset ), this.endObject );
+      //this.end.add(offset);
+    }
+    
+    changed = true;
+  }
+
+  if(changed){
+     //console.log("change");
+     this.distance = this.end.clone().sub(this.start).length();
+     this.unset();
+     this.set({start:this.start, end:this.end});
+  }
+  
+}
+

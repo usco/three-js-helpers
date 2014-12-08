@@ -20,8 +20,15 @@ DistanceHelper = function(options)
   
   //initialise internal sub objects
   this.startCross = new CrossHelper();
-  //this.startCross.hide();
+  this.startCross.hide();
   this.add( this.startCross ) ;
+  
+  this.sizeArrow = new SizeHelper( { drawRightArrow:false, arrowColor:this.arrowColor, 
+    linesColor:this.arrowColor,
+    textBgColor:this.textBgColor,textColor:this.textColor, labelType:
+    this.labelType} ); 
+  this.sizeArrow.hide();
+  this.add( this.sizeArrow );
   
   if( options.start ) this.setStart( options.start, this.startObject );
   if( options.end )   this.setEnd( options.end, this.endObject );
@@ -38,8 +45,11 @@ DistanceHelper.prototype.toggleText = function(toggle)
   this.label.textSprite.visible = toggle;
 }
 
-DistanceHelper.prototype.set = function( options )
+/*
+DistanceHelper.prototype.set = function( )
 {
+  return;
+
   var options = options || {};
   var start   = options.start !== undefined ? options.start.clone() : new THREE.Vector3();
   var end     = options.end !== undefined ? options.end.clone()   : new THREE.Vector3(10,0,0);
@@ -72,7 +82,7 @@ DistanceHelper.prototype.set = function( options )
   this.arrow.set();
   this.add( this.arrow ) ;
   
-}
+}*/
 
 /*start: vector3D
 object: optional : on which object is the start point
@@ -101,6 +111,9 @@ DistanceHelper.prototype.setStart = function( start, object )
   }
   this.startCross.show();
   this.startCross.position.copy( this.start );
+  
+  this.sizeArrow.setStart( this.start );
+  this.sizeArrow.show();
 }
 
 DistanceHelper.prototype.setEnd = function( end, object )
@@ -114,20 +127,21 @@ DistanceHelper.prototype.setEnd = function( end, object )
   //}
   //FIXME: experimental
   this.curEndObjectPos = object.position.clone();
-  
   this.distance = end.clone().sub(this.start).length();
   
-  //FIXME: hack for now
-  //this.set({start:this.start, end:this.end});
+  this.sizeArrow.setEnd( this.end);
 }
 
 DistanceHelper.prototype.unset = function( )
 {
   //this.remove( this.startCross );
-  this.remove( this.arrow );
+  //this.remove( this.arrow );
+  this.startCross.hide();
+  this.sizeArrow.hide();
 }
 
 DistanceHelper.prototype.update = function(){
+  return;
   //TODO: find a way to only call this when needed
   if(!this.visible) return;
   var changed = false;
@@ -137,11 +151,10 @@ DistanceHelper.prototype.update = function(){
   this.startObject.updateMatrixWorld();
   this.endObject.updateMatrixWorld();
   
-  
   if( ! this.startObject.position.equals( this.curStartObjectPos ) )
   {
     var offset = this.startObject.position.clone().sub( this.curStartObjectPos );
-    console.log("STARTchange",offset);
+    //console.log("STARTchange",offset);
     //this.curStartObjectPos.copy( this.startObject.position );
     //this.startCross.position.add( offset );
     //this.start.add( offset );
@@ -159,22 +172,20 @@ DistanceHelper.prototype.update = function(){
   }
   if( ! this.endObject.position.equals( this.curEndObjectPos ) &&  this.startObject !== this.endObject)
   {
-        console.log("ENDchange");
+       // console.log("ENDchange");
     var offset = this.endObject.position.clone().sub( this.curEndObjectPos );
     this.curEndObjectPos.copy( this.endObject.position );
     this.end.add( offset );
     //this.setEnd(this.end.clone().add( offset ) , this.endObject );
-    
     changed = true;
   }
   if(changed){
-     console.log("change");
+     //console.log("change");
      this.distance = this.end.clone().sub(this.start).length();
-     this.unset();
-     this.set({start:this.start, end:this.end});
+     //this.unset();
+     //this.set({start:this.start, end:this.end});
+     this.sizeArrow.setStart( this.start );
+     this.sizeArrow.setEnd( this.end);
   }
   
-  ///console.log("s",this.start, "e",this.end);
-  //this.unset();
-  //this.set({start:this.start, end:this.end});
 }

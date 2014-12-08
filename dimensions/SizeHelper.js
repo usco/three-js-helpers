@@ -24,6 +24,7 @@ SizeHelper = function(options)
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";//frontFacing or flat
   this.drawLabel  = options.drawLabel!== undefined ? options.drawLabel : true;
+  this.lengthAsLabel  = options.lengthAsLabel!== undefined ? options.lengthAsLabel : true;
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
@@ -53,9 +54,7 @@ SizeHelper = function(options)
   {
     var tmpV = end.clone().sub( start ) ;
     this.length = tmpV.length();
-    //console.log("start",start,"end", end);
     this.direction = tmpV.normalize();
-    //console.log("computed length", this.length, "dir", this.direction);
     //this._position = start.clone().add( end.clone().sub( start ).divideScalar(2) ) ;
   }else if(start && !end){
     end = this.direction.clone().multiplyScalar( this.length ).add( start );
@@ -72,7 +71,9 @@ SizeHelper = function(options)
   this.end   = end;
   this.mid   = this.direction.clone().multiplyScalar( this.length/2 ).add( this.start );
   
-  this.text   = options.text !== undefined ? options.text : this.length.toFixed(2);
+  var textDefault = "";
+  if(this.lengthAsLabel) textDefault = this.length.toFixed(2);
+  this.text   = options.text !== undefined ? options.text : textDefault;
   
   this.arrowSize = this.length/2;//size of arrows  
   //HACK, for testing
@@ -92,6 +93,8 @@ SizeHelper = function(options)
   this.flatNormal = cross.clone();
   
   this.debug = options.debug !== undefined ? options.debug : false;
+  
+  this.set();
 }
 
 SizeHelper.prototype = Object.create( BaseHelper.prototype );
@@ -109,10 +112,113 @@ SizeHelper.prototype.set = function(){
   
 }
 
+//setters
+
+SizeHelper.prototype.setUp = function( up ){
+
+  this.up = up !== undefined ? up : new THREE.Vector3(0,0,1);
+  this._recomputeMidDir();
+}
+
+SizeHelper.prototype.setDirection = function( direction ){
+   this.direction = direction || new THREE.Vector3(1,0,0);
+   
+   this._recomputeMidDir();
+}
+
+
+SizeHelper.prototype.setLength = function( length ){
+   this.length = length !== undefined ? length : 10;
+ 
+    this._recomputeMidDir();  
+}
+
+
+SizeHelper.prototype.setStart = function( start ){
+
+  this.start = start || new THREE.Vector3();
+  
+  var tmpV = this.end.clone().sub( this.start ) ;
+  this.length = tmpV.length();
+  this.direction = tmpV.normalize();
+  
+  this._recomputeMidDir();
+}
+  
+SizeHelper.prototype.setEnd = function( end ){
+
+  this.end = end || new THREE.Vector3();
+  
+  var tmpV = this.end.clone().sub( this.start ) ;
+  this.length = tmpV.length();
+  this.direction = tmpV.normalize();
+  
+  this._recomputeMidDir();
+} 
+
+//helpers
+SizeHelper.prototype._recomputeMidDir = function(){
+
+    this.mid   = this.direction.clone().multiplyScalar( this.length/2 ).add( this.start );
+    
+    if(this.lengthAsLabel) {
+      this.text = this.length.toFixed(2);
+    }
+    
+    this.arrowSize = this.length/2;//size of arrows 
+    
+    this.leftArrowDir = this.direction.clone();
+    this.rightArrowDir = this.leftArrowDir.clone().negate();
+
+    //HACK, for up vector issues prevention
+    if( ( (Math.abs( this.direction.z) - 1) <= 0.0001) && this.direction.x == 0 && this.direction.y ==0 )
+    {
+      this.up = new THREE.Vector3( 1,0, 0 );
+    }
+
+    var cross = this.direction.clone().cross( this.up );
+    cross.normalize().multiplyScalar(this.sideLength);
+    //console.log("mid", this.mid,"cross", cross);
+
+    this.leftArrowPos = this.mid.clone().add( cross );
+    this.rightArrowPos = this.mid.clone().add( cross );
+    
+    this.flatNormal = cross.clone(); 
+    
+    //update label
+    this.remove( this.label );
+    this._drawLabel();
+    
+    
+    //update arrows
+    var arrowHeadSize = this.arrowHeadSize;
+    var arrowSize     = this.arrowSize; 
+    
+    var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
+    var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
+    if(this.drawLeftArrow){ leftArrowHeadSize = arrowHeadSize; leftArrowHeadWidth=this.arrowHeadWidth}
+    if(this.drawRightArrow){ rightArrowHeadSize = arrowHeadSize; rightArrowHeadWidth= this.arrowHeadWidth}
+    
+    this.mainArrowRight.position.copy( this.rightArrowPos );
+    this.mainArrowRight.setDirection( this.rightArrowDir );
+    this.mainArrowRight.setLength( arrowSize, rightArrowHeadSize, rightArrowHeadWidth );
+    
+    this.mainArrowLeft.position.copy( this.leftArrowPos );
+    this.mainArrowLeft.setDirection( this.leftArrowDir );
+    this.mainArrowLeft.setLength( arrowSize, leftArrowHeadSize, leftArrowHeadWidth );
+    
+    //update side lines
+    //TODO: make truely dynamic
+    this.remove( this.rightSideLine );
+    this.remove( this.leftSideLine );
+    this._drawSideLines();
+    
+}
+
+
+//drawers
 SizeHelper.prototype._drawArrows = function(){
   var sideLength = this.sideLength;
-  var length     = this.length;
-  var direction  = this.direction;
   
   var leftArrowDir = this.leftArrowDir;
   var rightArrowDir= this.rightArrowDir 
@@ -144,6 +250,9 @@ depthTest:false, depthWrite:false});
   mainArrowRight.line.material = mainArrowLeft.line.material = this.arrowLineMaterial;
   mainArrowRight.cone.material = mainArrowLeft.cone.material = this.arrowConeMaterial;
   mainArrowRight.renderDepth = mainArrowLeft.renderDepth = 1e20;
+  
+  this.mainArrowRight = mainArrowRight;
+  this.mainArrowLeft  = mainArrowLeft;
   
 }
 

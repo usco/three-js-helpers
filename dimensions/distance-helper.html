@@ -23,8 +23,8 @@
         var object = pickingDatas[0].object;
       
         if(! this.helper.start){
-          this.helper.show();
           this.helper.unset();
+          this.helper.show();
           this.helper.setStart( point, object );
           return;
         }else
@@ -32,14 +32,12 @@
           this.helper.setEnd( point, object );
           this.distance = this.helper.distance;
           
-          this.helper.set( {start:this.helper.start, end:this.helper.end} );
-          
           this.annotationDone({type:"distance", value:this.helper.distance,
             start:this.helper.start, end:this.helper.end, 
             startObject: this.helper.startObject, endObject: this.helper.endObject});
             
           this.helper.start = undefined;
-          this.helper.hide();
+          //this.helper.hide();
         }
       }
      });
