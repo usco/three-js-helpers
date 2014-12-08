@@ -22,12 +22,14 @@ SizeHelper = function(options)
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
-  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";//frontFacing
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";//frontFacing or flat
+  this.drawLabel  = options.drawLabel!== undefined ? options.drawLabel : true;
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
   this.sideLengthExtra = options.sideLengthExtra!== undefined ? options.sideLengthExtra : 2; 
   
+  this.drawArrows      = options.drawArrows !== undefined ? options.drawArrows: true  ;
   this.drawLeftArrow   = options.drawLeftArrow !== undefined ? options.drawLeftArrow: true  ;
   this.drawRightArrow  = options.drawRightArrow !== undefined ? options.drawRightArrow : true;
   //can be either, dynamic, inside, outside
@@ -53,7 +55,7 @@ SizeHelper = function(options)
     this.length = tmpV.length();
     //console.log("start",start,"end", end);
     this.direction = tmpV.normalize();
-    console.log("computed length", this.length, "dir", this.direction);
+    //console.log("computed length", this.length, "dir", this.direction);
     //this._position = start.clone().add( end.clone().sub( start ).divideScalar(2) ) ;
   }else if(start && !end){
     end = this.direction.clone().multiplyScalar( this.length ).add( start );
@@ -95,15 +97,14 @@ SizeHelper = function(options)
 SizeHelper.prototype = Object.create( BaseHelper.prototype );
 SizeHelper.prototype.constructor = SizeHelper;
 
-SizeHelper.prototype.set = function(options){
-  var options = options || {};
+SizeHelper.prototype.set = function(){
   //this._position= options.position !== undefined ? options.position : new THREE.Vector3();
 
   //for debugging only
   if(this.debug) this._drawDebugHelpers();
 
   this._drawLabel();
-  this._drawArrows();
+  if(this.drawArrows) this._drawArrows();
   this._drawSideLines();
   
 }
@@ -180,7 +181,7 @@ SizeHelper.prototype._drawLabel = function(){
   this.label.position.copy( this.leftArrowPos );
   //this.label.rotation.z = Math.PI;
   
-  this.add( this.label );
+  if(this.drawLabel) this.add( this.label );
   
   if( this.arrowsPlacement == "dynamic" )
   {
@@ -212,6 +213,7 @@ SizeHelper.prototype._drawLabel = function(){
     this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
     this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
   }
+  
   
 }
 
@@ -259,3 +261,4 @@ SizeHelper.prototype._drawDebugHelpers = function(){
   
   this.add( this.debugHelpers );
 }
+

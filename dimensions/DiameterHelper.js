@@ -39,6 +39,10 @@ DiameterHelper = function(options)
   this.pointB = undefined;
   this.pointC = undefined;
   
+  
+  if( options.center )   this.setCenter( options.center );
+  if( options.diameter ) this.setDiameter( options.diameter );
+  if( options.orientation ) this.setOrientation( options.orientation );
 }
 
 DiameterHelper.prototype = Object.create( BaseHelper.prototype );

@@ -58,8 +58,9 @@
            if( !this.helper.pointC )
            {
               this.helper.setPointC( point, object );
-              this.measureDone({type:"diameter", value:this.helper.diameter,
-              center:this.helper.center,object:this.helper.object});
+              this.annotationDone({type:"diameter", value:this.helper.diameter,
+              center:this.helper.center, orientation:this.helper.orientation,
+              object:this.helper.object});
               
               this.helper.center = undefined;
               this.helper.pointA = undefined;

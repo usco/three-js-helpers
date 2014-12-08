@@ -7,7 +7,7 @@
 
 <!--FIXME: temporary name-->
 <polymer-element name="usco-annotations" extends="dimensions-helper-group" attributes="activeType" 
-on-measure-done="{{measureDone}}">
+on-annotation-done="{{measureDone}}">
   <template>
     <!-- measurements system test -->
     <!--<dimensions-helper-group id="dimensions" selectedObject="{{selectedObject}}" 
@@ -39,7 +39,7 @@ on-measure-done="{{measureDone}}">
         this.selectedMeasurement = this.activeType;
       },
       //event handlers
-      measureDone:function(e,detail,sender){
+      annotationDone:function(e,detail,sender){
         var measurement = detail;
         return;
         //FIXME , do this better

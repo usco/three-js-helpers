@@ -15,7 +15,7 @@
         this.helper = new DistanceHelper({arrowColor:0x000000,textBgColor:"#ffd200"});
       },
       onPicked:function(e){
-        console.log("picked", this.localName);
+        //console.log("picked", this.localName);
         pickingDatas = e.detail.pickingInfos;
         if(pickingDatas.length == 0) return;
         
@@ -23,6 +23,7 @@
         var object = pickingDatas[0].object;
       
         if(! this.helper.start){
+          this.helper.show();
           this.helper.unset();
           this.helper.setStart( point, object );
           return;
@@ -30,14 +31,15 @@
         {
           this.helper.setEnd( point, object );
           this.distance = this.helper.distance;
-          /*this.measurements.push( {type:"distance",start:this.measureDistanceStart.toArray(), 
-          end:point.toArray() } );*/
-          //this.measureDistanceStart = undefined;
-          this.measureDone({type:"distance", value:this.helper.distance,
+          
+          this.helper.set( {start:this.helper.start, end:this.helper.end} );
+          
+          this.annotationDone({type:"distance", value:this.helper.distance,
             start:this.helper.start, end:this.helper.end, 
             startObject: this.helper.startObject, endObject: this.helper.endObject});
-          
+            
           this.helper.start = undefined;
+          this.helper.hide();
         }
       }
      });

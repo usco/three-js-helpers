@@ -35,9 +35,9 @@
       unset:function(){
         this.helper.unset();
       },
-      //call this when measure is done, to fire events , etc
-      measureDone:function(params){
-        this.fire("measure-done", params);
+      //call this when annotation/measure is done, to fire events , etc
+      annotationDone:function(params){
+        this.fire("annotation-done", params);
       },
       //this allows setting the colors/styling etc of 3d elements via css
       setStyle:function(){

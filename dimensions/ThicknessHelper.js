@@ -22,6 +22,11 @@ ThicknessHelper = function(options)
   this.object     = undefined;
   this.point      = undefined;
   this.normal     = undefined;
+  
+  if( options.thickness )this.setThickness( options.thickness );
+  if( options.point ) this.setPoint( options.point );
+  if( options.normal )this.setNormal( options.normal );
+  
 }
 
 ThicknessHelper.prototype = Object.create( BaseHelper.prototype );
@@ -75,22 +80,48 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
   this.normal = normal;
   this.object = entryInteresect.object;
   
-  this._drawThickness( point, offsetPoint, escapePoint, normal, flippedNormal );
+  this._drawThickness( point, escapePoint, normal );
   //this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
   //this._drawLabel( point, escapePoint);
 }
 
-ThicknessHelper.prototype.unset = function(){
-  this.remove( this.thicknessHelper );
+ThicknessHelper.prototype.setThickness = function( thickness ){
+    this.thickness  = thickness;
 }
 
-ThicknessHelper.prototype._drawThickness = function(point, offsetPoint, escapePoint, normal, flippedNormal){
-  this.thicknessHelper = new SizeHelper({length:this.thickness, 
+ThicknessHelper.prototype.setPoint = function( point ){
+    this.point  = point;
+}
+
+ThicknessHelper.prototype.setNormal = function( normal ){
+    this.normal  = normal;
+    var escapePoint = this.point.clone().sub( normal.clone().normalize().multiplyScalar( this.thickness ));
+    
+    this._drawThickness( this.point, escapePoint, normal );
+}
+
+
+ThicknessHelper.prototype.unset = function(){
+  this.remove( this.thicknessHelperArrows );
+  this.remove( this.thicknessHelperLabel );
+}
+
+ThicknessHelper.prototype._drawThickness = function(point, escapePoint, normal){
+  this.thicknessHelperArrows = new SizeHelper({length:this.thickness, 
   textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
-  labelType:"frontFacing",sideLength:this.sideLength
+  labelType:"frontFacing",sideLength:0, drawLabel:false
   });
-  this.thicknessHelper.set();
-  this.add( this.thicknessHelper );
+  this.thicknessHelperArrows.set();
+  
+  this.thicknessHelperLabel = new SizeHelper({length:this.thickness, 
+  textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",start: point, end:escapePoint,
+  labelType:"frontFacing",sideLength:this.sideLength, drawArrows:false
+  });
+  this.thicknessHelperLabel.set();
+  
+  
+  this.add( this.thicknessHelperLabel );
+  this.add( this.thicknessHelperArrows );
 }
 
 ThicknessHelper.prototype._drawDebugHelpers = function(point, offsetPoint, escapePoint, normal, flippedNormal){
