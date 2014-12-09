@@ -21,7 +21,7 @@ DistanceHelper = function(options)
   //initialise internal sub objects
   this.startCross = new CrossHelper();
   this.startCross.hide();
-  this.add( this.startCross ) ;
+  this.add( this.startCross );
   
   this.sizeArrow = new SizeHelper( { drawRightArrow:false, arrowColor:this.arrowColor, 
     linesColor:this.arrowColor,

@@ -40,6 +40,42 @@ DiameterHelper = function(options)
   this.pointC = undefined;
   
   
+  //initialise internal sub objects
+  this.centerCross = new CrossHelper({size:this.centerCrossSize,color:this.centerColor});
+  this.centerCross.hide();
+  this.add( this.centerCross );
+  
+   //pointA cross
+  this.pointACross = new CrossHelper({size:this.centerCrossSize});
+  this.pointACross.hide();
+  this.add( this.pointACross );
+    
+   //pointB cross
+  this.pointBCross = new CrossHelper({size:this.centerCrossSize});
+  this.pointBCross.hide();
+  this.add( this.pointBCross );
+  
+   //pointC cross
+  this.pointCCross = new CrossHelper({size:this.centerCrossSize});
+  this.pointCCross.hide();
+  this.add( this.pointCCross );
+  
+  this.diaCircle = new CircleHelper({material : this.lineMaterial});
+  this.diaCircle.hide();
+  this.add( this.diaCircle );
+  
+  this.sizeArrow = new SizeHelper({
+  textColor: this.textColor, textBgColor:this.textBgColor, labelType:"frontFacing",
+  });
+  this.sizeArrow.hide();
+  this.add( this.sizeArrow );
+  
+  //TODO: add settable swtich between size helper & leader line
+  //leader line
+  //this.dimensionHelper = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
+  //fontSize:this.fontSize, textColor: this.textColor, textBgColor:this.textBgColor});
+  
+  
   if( options.center )   this.setCenter( options.center );
   if( options.diameter ) this.setDiameter( options.diameter );
   if( options.orientation ) this.setOrientation( options.orientation );
@@ -54,13 +90,14 @@ DiameterHelper.prototype.set = function(){
 }
 
 DiameterHelper.prototype.unset = function(){
-  this.remove( this.centerCross );
-  this.remove( this.diaCircle );
-  this.remove( this.dimensionHelper );
+
+  this.centerCross.hide();
+  this.pointACross.hide();
+  this.pointBCross.hide();
+  this.pointCCross.hide();
   
-  if(this.pointACross) this.remove( this.pointACross );
-  if(this.pointBCross) this.remove( this.pointBCross );
-  if(this.pointCCross) this.remove( this.pointCCross );
+  this.sizeArrow.hide();
+  this.diaCircle.hide();
   
   this.position.copy( new THREE.Vector3() );
   this.setOrientation( new THREE.Vector3(0,0,1) );
@@ -71,49 +108,67 @@ DiameterHelper.prototype.setCenter = function( center, object ){
   if(center)  this.center = center;
   if(object)  this.object = object;
   
-  if(this.centerCross) this.remove( this.centerCross );
-   //center cross
-  this.centerCross = new CrossHelper({size:this.centerCrossSize,color:this.centerColor});
-  this.add( this.centerCross );
+  this.centerCross.show();
+  //FIXME: only needed if we do not offset this whole helper for positioning on the diam
+  //this.centerCross.position.copy( this.center );
 }
 
 //for 3 point variant
 DiameterHelper.prototype.setPointA = function( pointA, object ){
   if(pointA)  this.pointA = pointA;
   this.object = object;
-  
-  if(this.pointACross) this.remove( this.pointACross );
-   //pointA cross
-  this.pointACross = new CrossHelper({size:this.centerCrossSize});
   this.pointACross.position.copy( pointA );
-  this.add( this.pointACross );
+  this.pointACross.show();
 }
 
 DiameterHelper.prototype.setPointB = function( pointB, object ){
   if(pointB)  this.pointB = pointB;
   this.object = object;
-  
-  if(this.pointBCross) this.remove( this.pointBCross );
-   //pointB cross
-  this.pointBCross = new CrossHelper({size:this.centerCrossSize});
   this.pointBCross.position.copy( pointB );
-  this.add( this.pointBCross );
+  this.pointBCross.show();
 }
 
 DiameterHelper.prototype.setPointC = function( pointC, object ){
   if(pointC)  this.pointC = pointC;
   this.object = object;
-  
-  if(this.pointCCross) this.remove( this.pointCCross );
-   //pointC cross
-  this.pointCCross = new CrossHelper({size:this.centerCrossSize});
   this.pointCCross.position.copy( pointC );
-  this.add( this.pointCCross );
+  this.pointCCross.show();
   
   this.setDataFromThreePoints();
 }
 
-//compute center , dia/radius from three points
+DiameterHelper.prototype.setDiameter = function(diameter){
+  if(!diameter && ! this.diameter){ 
+    return
+  }  
+  this.diameter = diameter;
+  this.text     = this.diameter.toFixed(2);
+  
+  this.sizeArrow.setLength( this.diameter );
+  this.sizeArrow.setSideLength( this.diameter/2+10 );
+  this.sizeArrow.setText( "∅"+ this.diameter );
+  
+  this.diaCircle.setRadius( this.diameter/2);
+  
+  this.sizeArrow.show();
+  this.diaCircle.show();
+}
+
+DiameterHelper.prototype.setRadius = function(radius){
+  if(!radius && ! this.diameter){ 
+    return
+  }  
+  this.setDiameter( radius*2 );
+}
+
+/*Sets the radius/diameter from one 3d point
+*/
+DiameterHelper.prototype.setRadiusPoint = function(point, normal){
+  var radius = point.clone().sub( this.position ).length();
+  this.setDiameter( radius*2 );
+}
+
+//compute center , dia/radius from three 3d points
 DiameterHelper.prototype.setDataFromThreePoints = function(){
    var plane = new THREE.Plane().setFromCoplanarPoints( this.pointA, this.pointB, this.pointC );
 
@@ -223,36 +278,6 @@ DiameterHelper.prototype.setDataFromThreePoints = function(){
     
     var circRadius = Math.sqrt( tt*uu*vv * iwsl2*0.5);
     var circAxis   = w.divideScalar( Math.sqrt(wsl) );*/
-    
-}
-
-
-DiameterHelper.prototype.setDiameter = function(diameter){
-  if(!diameter && ! this.diameter){ 
-    return
-  }  
-  this.diameter = diameter;
-  this.text     = this.diameter.toFixed(2);
-  
-  this.drawCircle();
-  this.drawDimension();
-}
-
-DiameterHelper.prototype.setRadius = function(radius){
-  if(!radius && ! this.diameter){ 
-    return
-  }  
-  this.setDiameter( radius*2 );
-}
-
-/*Allows setting the radius/diameter from a 3d point
-
-*/
-DiameterHelper.prototype.setRadiusPoint = function(point, normal){
-  
-  var radius = point.clone().sub( this.position ).length();
-  //var plane = new THREE.Plane().setFromCoplanarPoints( this.end, this.mid, this.start );
-  this.setDiameter( radius*2 );
 }
 
 DiameterHelper.prototype.setOrientation = function(orientation){
@@ -265,52 +290,4 @@ DiameterHelper.prototype.setOrientation = function(orientation){
   this.rotation.setFromQuaternion( quaternion );
 }
 
-
-DiameterHelper.prototype.drawCircle = function(){
-  //draw main circle
-  var circleRadius = this.diameter/2;
-  var circleShape = new THREE.Shape();
-	circleShape.moveTo( 0, 0 );
-	circleShape.absarc( 0, 0, circleRadius, 0, Math.PI*2, false );
-  var points  = circleShape.createSpacedPointsGeometry( 100 );
-  this.diaCircle = new THREE.Line(points, this.lineMaterial );
-  
-  if(this.diaCircle) this.remove( this.diaCircle );
-  this.add( this.diaCircle );
-}
-
-DiameterHelper.prototype.drawDimension = function(){
-
-  console.log("drawDimension");
-  switch(this.dimDisplayType)
-  {
-    case "leaderLine":
-      this.drawLeaderLine();
-    break;
-    case "offsetLine":
-      this.drawOffsetLine();
-    break;
-  }
-}
-
-DiameterHelper.prototype.drawLeaderLine = function(){
-  //leader line
-  this.dimensionHelper = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
-  fontSize:this.fontSize, textColor: this.textColor, textBgColor:this.textBgColor});
-  
-  if(this.dimensionHelper) this.remove( this.dimensionHelper );
-  this.add( this.dimensionHelper );
-}
-
-DiameterHelper.prototype.drawOffsetLine = function(){
-  //offset line
-  console.log("textColor",this.textColor);
-  this.dimensionHelper = new SizeHelper({length:this.diameter, 
-  textColor: this.textColor, textBgColor:this.textBgColor, labelType:"frontFacing",sideLength:this.diameter/2+10
-  });
-  this.dimensionHelper.set();
-  
-  if(this.dimensionHelper) this.remove( this.dimensionHelper );
-  this.add( this.dimensionHelper );
-}
 

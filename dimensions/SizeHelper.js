@@ -128,11 +128,24 @@ SizeHelper.prototype.setDirection = function( direction ){
 
 
 SizeHelper.prototype.setLength = function( length ){
-   this.length = length !== undefined ? length : 10;
+  this.length = length !== undefined ? length : 10;
+  
+  this.start = this.direction.clone().multiplyScalar( -this.length/2).add( this._position );
+  this.end   = this.direction.clone().multiplyScalar( this.length/2).add( this._position );
  
-    this._recomputeMidDir();  
+  this._recomputeMidDir();  
 }
 
+SizeHelper.prototype.setSideLength = function( sideLength ){
+  this.sideLength = sideLength !== undefined ? sideLength : 0;
+  
+  this._recomputeMidDir();
+} 
+
+SizeHelper.prototype.setText = function( text ){
+  this.text = text !== undefined ? text : "";
+  this._recomputeMidDir();
+} 
 
 SizeHelper.prototype.setStart = function( start ){
 
@@ -155,6 +168,7 @@ SizeHelper.prototype.setEnd = function( end ){
   
   this._recomputeMidDir();
 } 
+
 
 //helpers
 SizeHelper.prototype._recomputeMidDir = function(){
