@@ -1,4 +1,72 @@
 
+BaseOutline = function(length, width, midPoint){
+  THREE.Object3D.call(this);
+  this.width = width;
+  this.length = length;
+  
+  //TODO: replace with buffer geometry
+  
+  var baseOutlineGeometry = new THREE.Geometry();
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(this.length/2, -this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(this.length/2, this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, this.width/2, 0));
+  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
+  baseOutlineGeometry.computeLineDistances();
+
+  
+  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, 
+  gapSize: 2, depthTest: false,linewidth:1, opacity:0.2,transparent:true} );
+  var baseOutlineBack = new THREE.Line( baseOutlineGeometry, dashMaterial, THREE.Lines );
+  baseOutlineBack.renderDepth = 1e20
+  baseOutlineBack.position.copy( new THREE.Vector3( midPoint.x, midPoint.y, midPoint.z-this.height/2) );
+  
+  var dashMaterial2 = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5,
+   gapSize: 2, depthTest: true,linewidth:1} );
+  var baseOutlineFront = baseOutlineBack.clone();
+  baseOutlineFront.material = dashMaterial2;
+  
+  this.add(baseOutlineBack);
+  this.add(baseOutlineFront);
+  this.baseOutlineBack  = baseOutlineBack;
+  this.baseOutlineFront = baseOutlineFront;
+  //THREE.Mesh.call(this, geometry, material);
+}
+
+BaseOutline.prototype = Object.create( THREE.Object3D.prototype );
+BaseOutline.prototype.constructor = BaseOutline;
+
+BaseOutline.prototype._updateGeometries = function(){
+  
+  var geoms = [this.baseOutlineBack.geometry,this.baseOutlineFront.geometry];
+
+  for(var i=0; i<geoms.length;i++)
+  {
+    var geom = geoms[i];
+    geom.vertices[0].copy( new THREE.Vector3(-this.length/2, -this.width/2, 0) );
+    geom.vertices[1].copy(new THREE.Vector3(this.length/2, -this.width/2, 0));
+    geom.vertices[2].copy(new THREE.Vector3(this.length/2, this.width/2, 0));
+    geom.vertices[3].copy(new THREE.Vector3(-this.length/2, this.width/2, 0));
+    geom.vertices[4].copy(new THREE.Vector3(-this.length/2, -this.width/2, 0));
+    
+    geom.dynamic = true;
+    geom.verticesNeedUpdate = true;
+  }
+  
+  //mesh.geometry.verticesNeedUpdate = true;
+}
+
+BaseOutline.prototype.setWidth = function( width ){
+  this.width = width;
+  this._updateGeometries();
+}
+
+BaseOutline.prototype.setLength = function( length ){
+  this.length = length;
+  this._updateGeometries();
+}
+
+
 ObjectDimensionsHelper = function (options) {
   BaseHelper.call( this );
   var options = options || {};
@@ -37,33 +105,8 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   this.meshBoundingBox = new THREE.Mesh(baseCubeGeom,new THREE.MeshBasicMaterial({wireframe:true,color:0xff0000}))
   //this.add( this.meshBoundingBox )
 
-  var baseOutlineGeometry = new THREE.Geometry();
-  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
-  baseOutlineGeometry.vertices.push(new THREE.Vector3(this.length/2, -this.width/2, 0));
-  baseOutlineGeometry.vertices.push(new THREE.Vector3(this.length/2, this.width/2, 0));
-  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, this.width/2, 0));
-  baseOutlineGeometry.vertices.push(new THREE.Vector3(-this.length/2, -this.width/2, 0));
-  baseOutlineGeometry.computeLineDistances();
-
-  var baseOutline = new THREE.Object3D();
-  
-  var dashMaterial = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5, 
-  gapSize: 2, depthTest: false,linewidth:1, opacity:0.2,transparent:true} );
-  var baseOutlineBack = new THREE.Line( baseOutlineGeometry, dashMaterial, THREE.Lines );
-  baseOutlineBack.renderDepth = 1e20
-  baseOutlineBack.position.copy( new THREE.Vector3(delta.x,delta.y,delta.z-this.height/2) );
-  
-  var dashMaterial2 = new THREE.LineDashedMaterial( { color: 0x000000, dashSize: 2.5,
-   gapSize: 2, depthTest: true,linewidth:1} );
-  var baseOutlineFront = baseOutlineBack.clone();
-  baseOutlineFront.material = dashMaterial2;
-  
-  baseOutline.add(baseOutlineBack);
-  baseOutline.add(baseOutlineFront);
-  
-  this.baseOutline = baseOutline; 
-  this.add(baseOutline);
-  
+  this.baseOutline = new BaseOutline(this.length, this.width, delta);
+  this.add( this.baseOutline );
 
   var widthArrowPos = new THREE.Vector3(delta.x+this.length/2,delta.y,delta.z-this.height/2); 
   var lengthArrowPos = new THREE.Vector3( delta.x, delta.y+this.width/2, delta.z-this.height/2)
@@ -73,15 +116,20 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   
   //length, sideLength, position, direction, color, text, textSize,
   this.widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,
-  position:widthArrowPos,direction:new THREE.Vector3(0,1,0), 
+  direction:new THREE.Vector3(0,1,0), 
   textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
+  
   this.lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,
-  position:lengthArrowPos,direction:new THREE.Vector3(-1,0,0), 
+  direction:new THREE.Vector3(-1,0,0), 
   textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
-  this.heightArrow = new SizeHelper( {length:this.height,
-  sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,0,1), 
+  
+  this.heightArrow = new SizeHelper( {length:this.height,sideLength:sideLength,
+  direction:new THREE.Vector3(0,0,1), 
   textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType });
   
+  this.lengthArrow.position.copy( lengthArrowPos );
+  this.widthArrow.position.copy( widthArrowPos );
+  this.heightArrow.position.copy( heightArrowPos );
   
   this.arrows = new THREE.Object3D();
   this.arrows.add( this.widthArrow );
@@ -120,10 +168,24 @@ ObjectDimensionsHelper.prototype.update = function(){
     this.length = dims[0];
     this.height = dims[2];
     
-    var delta = this.computeMiddlePoint(mesh);
-    this.widthArrow.setLength(this.width);
-    this.lengthArrow.setLength(this.length);
-    this.heightArrow.setLength(this.height);
+    //update base outline
+    this.baseOutline.setLength( this.length );
+    this.baseOutline.setWidth( this.width );
+    
+    var midPoint = this.computeMiddlePoint(mesh);
+    var lengthArrowPos = new THREE.Vector3( midPoint.x, midPoint.y+this.width/2, midPoint.z-this.height/2 );
+    var widthArrowPos = new THREE.Vector3( midPoint.x+this.length/2, midPoint.y, midPoint.z-this.height/2 ); 
+    var heightArrowPos = new THREE.Vector3( midPoint.x-this.length/2, delta.y+this.width/2, midPoint.z );
+
+    this.lengthArrow.setLength( this.length );
+    this.widthArrow.setLength( this.width );
+    this.heightArrow.setLength( this.height );
+
+    this.lengthArrow.position.copy( lengthArrowPos );
+    this.widthArrow.position.copy( widthArrowPos );
+    this.heightArrow.position.copy( heightArrowPos );
+    
+    this.baseOutline.position.z = midPoint.z-this.height/2;
  }
   
 }

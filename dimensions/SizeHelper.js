@@ -101,19 +101,14 @@ SizeHelper.prototype = Object.create( BaseHelper.prototype );
 SizeHelper.prototype.constructor = SizeHelper;
 
 SizeHelper.prototype.set = function(){
-  //this._position= options.position !== undefined ? options.position : new THREE.Vector3();
-
   //for debugging only
   if(this.debug) this._drawDebugHelpers();
-
   this._drawLabel();
   this._drawArrows();
   this._drawSideLines();
-  
 }
 
 //setters
-
 SizeHelper.prototype.setUp = function( up ){
 
   this.up = up !== undefined ? up : new THREE.Vector3(0,0,1);
