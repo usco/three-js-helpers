@@ -49,7 +49,7 @@ ThicknessHelper = function(options)
 ThicknessHelper.prototype = Object.create( BaseHelper.prototype );
 ThicknessHelper.prototype.constructor = ThicknessHelper;
 
-ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
+ThicknessHelper.prototype.set = function(entryInteresect )//, selectedObject)
 {
   var normalType = this.normalType;
   var normal  = entryInteresect.face.normal.clone();
@@ -67,13 +67,15 @@ ThicknessHelper.prototype.set = function(entryInteresect, selectedObject)
       normal = new THREE.Vector3(0,0,1);
     break;
   }
-      
+  
+  var selectedObject = entryInteresect.object;
+  if( !selectedObject ) return;
+  
   var point = entryInteresect.point.clone();
   var flippedNormal = entryInteresect.face.normal.clone().negate();
   var offsetPoint = point.clone().add( flippedNormal.clone().multiplyScalar(1000));
   
   //get escape point
-  if( !selectedObject ) return; //FIXME, should work without selection?
   var raycaster = new THREE.Raycaster(offsetPoint, normal.clone().normalize());
   var intersects = raycaster.intersectObjects([selectedObject], true);
   
