@@ -107,7 +107,7 @@ SizeHelper.prototype.set = function(){
   if(this.debug) this._drawDebugHelpers();
 
   this._drawLabel();
-  if(this.drawArrows) this._drawArrows();
+  this._drawArrows();
   this._drawSideLines();
   
 }
@@ -209,22 +209,19 @@ SizeHelper.prototype._recomputeMidDir = function(){
     
     var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
     var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
-    if( this.drawLeftArrow && this.drawArrows ){  
-      leftArrowHeadSize = arrowHeadSize;
-      leftArrowHeadWidth=this.arrowHeadWidth;
+    if(this.drawLeftArrow){ leftArrowHeadSize = arrowHeadSize; leftArrowHeadWidth=this.arrowHeadWidth}
+    if(this.drawRightArrow){ rightArrowHeadSize = arrowHeadSize; rightArrowHeadWidth= this.arrowHeadWidth}
+    
+    this.mainArrowLeft.position.copy( this.leftArrowPos );
+    this.mainArrowLeft.setDirection( this.leftArrowDir );
+    this.mainArrowLeft.setLength( arrowSize, leftArrowHeadSize, leftArrowHeadWidth );
       
-      this.mainArrowLeft.position.copy( this.leftArrowPos );
-      this.mainArrowLeft.setDirection( this.leftArrowDir );
-      this.mainArrowLeft.setLength( arrowSize, leftArrowHeadSize, leftArrowHeadWidth );
-      
-    }
-    if( this.drawRightArrow && this.drawArrows ){ 
-      rightArrowHeadSize = arrowHeadSize; 
-      rightArrowHeadWidth= this.arrowHeadWidth;
-      this.mainArrowRight.position.copy( this.rightArrowPos );
-      this.mainArrowRight.setDirection( this.rightArrowDir );
-      this.mainArrowRight.setLength( arrowSize, rightArrowHeadSize, rightArrowHeadWidth );
-    }
+    this.mainArrowRight.position.copy( this.rightArrowPos );
+    this.mainArrowRight.setDirection( this.rightArrowDir );
+    this.mainArrowRight.setLength( arrowSize, rightArrowHeadSize, rightArrowHeadWidth );
+    
+    this.mainArrowRight.visible = this.drawArrows;
+    this.mainArrowLeft.visible = this.drawArrows;
     
     //update side lines
     //TODO: make truely dynamic
