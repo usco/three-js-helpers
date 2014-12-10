@@ -8,6 +8,7 @@ ObjectDimensionsHelper = function (options) {
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  this.sideLength = options.sideLength!== undefined ? options.sideLength : 10; 
 }
 
 ObjectDimensionsHelper.prototype = Object.create( BaseHelper.prototype );
@@ -15,7 +16,6 @@ ObjectDimensionsHelper.prototype.constructor = ObjectDimensionsHelper;
 
 
 ObjectDimensionsHelper.prototype.attach = function(mesh){
-  console.log("attaching");
   var color = this.color;
   var mesh = this.mesh = mesh;
   var lineMat = new THREE.MeshBasicMaterial({color: color, wireframe: true, shading:THREE.FlatShading});
@@ -24,12 +24,13 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   matrixWorld.setFromMatrixPosition( mesh.matrixWorld );
   this.position.copy( matrixWorld );*/
 
-  this.getBounds(mesh);
+  var dims   = this.getBounds(mesh);
+  var length = this.length = dims[0];
+  var width  = this.width  = dims[1];
+  var height = this.height = dims[2];
+  
   var delta = this.computeMiddlePoint(mesh);
   
-  var width = this.width;
-  var length = this.length;
-  var height = this.height;
   //console.log("w",width,"l",length,"h",height,delta);
   
   var baseCubeGeom = new THREE.BoxGeometry(this.length, this.width,this.height)
@@ -68,27 +69,24 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   var lengthArrowPos = new THREE.Vector3( delta.x, delta.y+this.width/2, delta.z-this.height/2)
   var heightArrowPos = new THREE.Vector3( delta.x-this.length/2,delta.y+this.width/2,delta.z)
   //console.log("width", this.width, "length", this.length, "height", this.height,"delta",delta, "widthArrowPos", widthArrowPos)
-  var sideLength =10;
+  var sideLength = this.sideLength;
   
   //length, sideLength, position, direction, color, text, textSize,
-  var widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,
+  this.widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,
   position:widthArrowPos,direction:new THREE.Vector3(0,1,0), 
   textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
-  var lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,
+  this.lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,
   position:lengthArrowPos,direction:new THREE.Vector3(-1,0,0), 
   textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
-  var heightArrow = new SizeHelper( {length:this.height,
+  this.heightArrow = new SizeHelper( {length:this.height,
   sideLength:sideLength,position:heightArrowPos,direction:new THREE.Vector3(0,0,1), 
   textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType });
   
-  widthArrow.set();
-  lengthArrow.set();
-  heightArrow.set();
   
   this.arrows = new THREE.Object3D();
-  this.arrows.add( widthArrow );
-  this.arrows.add( lengthArrow );
-  this.arrows.add( heightArrow );
+  this.arrows.add( this.widthArrow );
+  this.arrows.add( this.lengthArrow );
+  this.arrows.add( this.heightArrow );
   
   this.add( this.arrows );
   
@@ -99,7 +97,6 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
 }
 
 ObjectDimensionsHelper.prototype.detach = function(mesh){
-  console.log("detaching");
   this.mesh = null;
   //this.remove( this.meshBoundingBox );
   this.remove( this.baseOutline );
@@ -113,6 +110,22 @@ ObjectDimensionsHelper.prototype.update = function(){
   var foo = this.mesh.position.clone().sub( this.objectOriginalPosition );
   this.position.add( foo );
   this.objectOriginalPosition = this.mesh.position.clone();
+  
+  //check if scale update is needed
+ var dims = this.getBounds(this.mesh);
+ if( this.length != dims[0] || this.width != dims[1] || this.height != dims[2] )
+ {
+    var mesh = this.mesh;
+    this.width  = dims[1];
+    this.length = dims[0];
+    this.height = dims[2];
+    
+    var delta = this.computeMiddlePoint(mesh);
+    this.widthArrow.setLength(this.width);
+    this.lengthArrow.setLength(this.length);
+    this.heightArrow.setLength(this.height);
+ }
+  
 }
 
 ObjectDimensionsHelper.prototype.computeMiddlePoint=function(mesh)
@@ -132,10 +145,6 @@ ObjectDimensionsHelper.prototype.getBounds=function(mesh)
   var length = ( (bbox.max.x-bbox.min.x).toFixed(2) )/1; // division by one to coerce to number
   var width  = ( (bbox.max.y-bbox.min.y).toFixed(2) )/1;
   var height = ( (bbox.max.z-bbox.min.z).toFixed(2) )/1;
-
-  this.width = width;
-  this.height = height;
-  this.length = length;
 
   return [length,width, height];
 }
