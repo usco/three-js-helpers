@@ -175,7 +175,7 @@ ObjectDimensionsHelper.prototype.update = function(){
     var midPoint = this.computeMiddlePoint(mesh);
     var lengthArrowPos = new THREE.Vector3( midPoint.x, midPoint.y+this.width/2, midPoint.z-this.height/2 );
     var widthArrowPos = new THREE.Vector3( midPoint.x+this.length/2, midPoint.y, midPoint.z-this.height/2 ); 
-    var heightArrowPos = new THREE.Vector3( midPoint.x-this.length/2, delta.y+this.width/2, midPoint.z );
+    var heightArrowPos = new THREE.Vector3( midPoint.x-this.length/2, midPoint.y+this.width/2, midPoint.z );
 
     this.lengthArrow.setLength( this.length );
     this.widthArrow.setLength( this.width );
