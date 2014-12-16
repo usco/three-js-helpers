@@ -3,7 +3,7 @@
 */
 NoteHelper = function(options)
 {
-  BaseHelper.call( this );
+  AnnotationHelper.call( this );
 
   var options = options || {};
   /*this.distance = distance || 30;
@@ -64,7 +64,7 @@ NoteHelper = function(options)
   this.object= undefined;
 }
 
-NoteHelper.prototype = Object.create( BaseHelper.prototype );
+NoteHelper.prototype = Object.create( AnnotationHelper.prototype );
 NoteHelper.prototype.constructor = NoteHelper;
 
 

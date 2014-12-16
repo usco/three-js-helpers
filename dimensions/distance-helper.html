@@ -15,7 +15,7 @@
         this.helper = new DistanceHelper({arrowColor:0x000000,textBgColor:"#ffd200"});
       },
       onPicked:function(e){
-        //console.log("picked", this.localName);
+        console.log("picked", this.localName);
         pickingDatas = e.detail.pickingInfos;
         if(pickingDatas.length == 0) return;
         
@@ -36,7 +36,6 @@
             startObject: this.helper.startObject, endObject: this.helper.endObject});
             
           this.helper.start = undefined;
-          //this.helper.hide();
         }
       }
      });

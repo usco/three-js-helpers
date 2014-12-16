@@ -1,6 +1,6 @@
 DistanceHelper = function(options)
 {
-  BaseHelper.call( this );
+  AnnotationHelper.call( this );
   var options = options || {};
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0xFF0000;
 
@@ -33,9 +33,10 @@ DistanceHelper = function(options)
   if( options.start ) this.setStart( options.start, this.startObject );
   if( options.end )   this.setEnd( options.end, this.endObject );
  
+  this.updatable = false;
 }
 
-DistanceHelper.prototype = Object.create( BaseHelper.prototype );
+DistanceHelper.prototype = Object.create( AnnotationHelper.prototype );
 DistanceHelper.prototype.constructor = DistanceHelper;
 
 DistanceHelper.prototype.toggleText = function(toggle)
@@ -101,15 +102,17 @@ DistanceHelper.prototype.setEnd = function( end, object )
 
 DistanceHelper.prototype.unset = function( )
 {
-  //this.remove( this.startCross );
-  //this.remove( this.arrow );
   this.startCross.hide();
   this.sizeArrow.hide();
+  
+  this._endHook = null;
+  this._startHook = null;
 }
 
 DistanceHelper.prototype.update = function(){
   //TODO: find a way to only call this when needed
   if(!this.visible) return;
+  if(!this.updatable) return;
   var changed = false;
   
   this.startObject.updateMatrix();

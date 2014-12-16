@@ -1,6 +1,6 @@
 ThicknessHelper = function(options)
 {
-  BaseHelper.call( this );
+  AnnotationHelper.call( this );
   var options = options || {};
   
   
@@ -46,7 +46,7 @@ ThicknessHelper = function(options)
   
 }
 
-ThicknessHelper.prototype = Object.create( BaseHelper.prototype );
+ThicknessHelper.prototype = Object.create( AnnotationHelper.prototype );
 ThicknessHelper.prototype.constructor = ThicknessHelper;
 
 ThicknessHelper.prototype.set = function(entryInteresect )//, selectedObject)

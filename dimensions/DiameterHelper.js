@@ -7,7 +7,7 @@
 */
 DiameterHelper = function(options)
 {
-  BaseHelper.call( this );
+  AnnotationHelper.call( this );
   var options = options || {};
 
   this.distance = options.distance || 30;
@@ -81,7 +81,7 @@ DiameterHelper = function(options)
   if( options.orientation ) this.setOrientation( options.orientation );
 }
 
-DiameterHelper.prototype = Object.create( BaseHelper.prototype );
+DiameterHelper.prototype = Object.create( AnnotationHelper.prototype );
 DiameterHelper.prototype.constructor = DiameterHelper;
 
 DiameterHelper.prototype.set = function(){
