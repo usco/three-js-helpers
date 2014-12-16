@@ -1,13 +1,8 @@
 
-/*
-  Made of two main arrows, and two lines perpendicular to the main arrow, at both its ends
-  If the VISUAL distance between star & end of the helper is too short to fit text + arrow:
-   * arrows should be on the outside
-   * if text does not fit either, offset it to the side
-*/
+
 AngularDimHelper = function(options)
 {
-  BaseHelper.call( this );
+  AnnotationHelper.call( this );
   var options = options || {};
   //Todo : auto adjust arrows : if not enough space, arrows shoud be outside
   this.up = new THREE.Vector3(0,0,1);
@@ -42,75 +37,102 @@ AngularDimHelper = function(options)
   this.radius = 20 ;
   
   
-  this.start           = undefined;
-  this.startObject     = undefined;
-  this.mid             = undefined;
-  this.midObject       = undefined;
-  this.end             = undefined;
-  this.endObject       = undefined;
+  //initialise internal sub objects
+  this.startCross = new CrossHelper({color:0xFF0000});
+  this.startCross.hide();
+  this.add( this.startCross );
+  
+  this.midCross = new CrossHelper({color:0x0000FF});
+  this.midCross.hide();
+  this.add( this.midCross );
+  
+  this.endCross = new CrossHelper({color:0x00FF00});
+  this.endCross.hide();
+  this.add( this.endCross );
+  
+  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+  this.label.hide();
+  this.add( this.label );
+  
+  //line from start to mid
+  this.startMidLine = new SizeHelper( { drawLeftArrow:false, arrowsPlacement:"inside", 
+  drawLabel:false, arrowColor:this.arrowColor, 
+    linesColor:this.arrowColor,
+    textBgColor:this.textBgColor,textColor:this.textColor, labelType:
+    this.labelType} ); 
+  this.startMidLine.hide();
+  this.add( this.startMidLine );
+  
+   //line from mid to end
+  this.midEndLine = new SizeHelper( { drawRightArrow:false, arrowsPlacement:"inside", 
+  drawLabel:false,  arrowColor:this.arrowColor, 
+    linesColor:this.arrowColor,
+    textBgColor:this.textBgColor,textColor:this.textColor, labelType:
+    this.labelType} ); 
+  this.midEndLine.hide();
+  this.add( this.midEndLine );
+  this.add( this.midEndLine );
+  
+  this.arc = new ArcHelper({textBgColor:this.textBgColor});
+  this.arc.hide();
+  this.add( this.arc );
+  
+  
+  this.start           = options.start!== undefined ? options.start : undefined;
+  this.startObject     = options.startObject!== undefined ? options.startObject : undefined;
+  this.mid             = options.mid!== undefined ? options.mid : undefined;
+  this.midObject       = options.midObject!== undefined ? options.midObject : undefined;
+  this.end             = options.end!== undefined ? options.end : undefined;
+  this.endObject       = options.endObject!== undefined ? options.endObject : undefined;
+  
   this.angle = angle*Math.PI/180;
   
-  
-  //this.set();
+  if( options.start ) this.setStart( this.start, this.startObject );
+  if( options.mid ) this.setMid( this.mid, this.midObject );
+  if( options.end )   this.setEnd( this.end, this.endObject );
 }
 
-AngularDimHelper.prototype = Object.create( BaseHelper.prototype );
+AngularDimHelper.prototype = Object.create( AnnotationHelper.prototype );
 AngularDimHelper.prototype.constructor = AngularDimHelper;
 
-AngularDimHelper.prototype.computeAngle = function(start, mid, end){
-  var v1 = start.clone().sub( mid );
-  var v2 = end.clone().sub( mid );
-  var angle = v1.angleTo( v2 );
-  return angle;
-}
 
 AngularDimHelper.prototype.setStart = function( start, object ){
   this.start = start;
   this.startObject = object;
   
-  this.startCross = new CrossHelper({position:start, color:0xFF0000});
-  this.add( this.startCross );
+  this.startCross.position.copy( this.start );
+  this.startCross.show();
+  
+  this.startMidLine.setStart( this.start );
 }
 
 AngularDimHelper.prototype.setMid = function( mid, object ){
   this.mid = mid;
   this.midObject = object;
   
-  this.midCross = new CrossHelper({position:mid, color:0x0000FF});
-  this.add( this.midCross );
+  this.midCross.position.copy( this.mid );
+  this.midCross.show();  
   
-  //draw line from start to mid
-  var startMidLineGeometry = new THREE.Geometry();
-  startMidLineGeometry.vertices.push( this.start );
-  startMidLineGeometry.vertices.push( this.mid );
+  this.startMidLine.setEnd( this.mid );
+  this.startMidLine.show();
   
-  var lineMaterial = new THREE.LineBasicMaterial( { color: this.linesColor, linewidth:1, depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.8, transparent:true } )
-  
-  this.startMidLine = new THREE.Line( startMidLineGeometry, lineMaterial );
-  this.add( this.startMidLine );
+  this.midEndLine.setStart( this.mid );
 }
 
 AngularDimHelper.prototype.setEnd = function( end, object ){
   this.end = end;
   this.endObject = object;
   
-  this.endCross = new CrossHelper({position:end, color:0x00FF00});
-  this.add( this.endCross );
-  
-  //draw line from start to mid
-  var midEndLineGeometry = new THREE.Geometry();
-  midEndLineGeometry.vertices.push( this.mid );
-  midEndLineGeometry.vertices.push( this.end );
-  
-  var lineMaterial = new THREE.LineBasicMaterial( { color: this.linesColor, linewidth:1, depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.8, transparent:true } )
-  
-  this.midEndLine = new THREE.Line( midEndLineGeometry, lineMaterial );
-  this.add( this.midEndLine );
+  this.endCross.position.copy( this.end );
+  this.endCross.show();
   
   //compute angle from star, mid & end points
   if(this.start && this.mid && this.end){
     this.angle = this.computeAngle( this.start, this.mid, this.end );
   }
+  
+  this.midEndLine.setEnd( this.end );
+  this.midEndLine.show();
   
   
   //EXPERIMENTAL
@@ -155,29 +177,11 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
 	var arcAngleStart= - Math.PI/2 + midToStartAngle;
 	var arcAngleEnd = arcAngleStart + arcAngle;
 	
-	//var insetPos = midToEnd.clone().multiplyScalar( arcInnerRadius ); 
-	//var outsetPos= midToStart.clone().multiplyScalar( arcOuterRadius );
 	
-	var circleShape = new THREE.Shape();
-	//circleShape.moveTo( outsetPos.x, outsetPos.y );
-	//circleShape.absarc( 0, 0, arcOuterRadius, -this.angle/2*1.1, this.angle/2, true );
-	//circleShape.absarc( 0, 0, arcInnerRadius, -this.angle/2, this.angle/2*1.1,  false );
-	
-  circleShape.absarc( 0, 0, arcOuterRadius, arcAngleStart, arcAngleEnd, true );
-	circleShape.absarc( 0, 0, arcInnerRadius, arcAngleStart, arcAngleEnd,  false );
-	
-	//circleShape.lineTo( arcOuterRadius, 0 );
-	//circleShape.lineTo( outsetPos.x, outsetPos.y );
-	
-  var points = circleShape.createPointsGeometry();
-  //points.vertices.shift();
-  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0xFF0000,depthTest:false,depthWrite:false, opacity:0.4, transparent:true, linewidth: 2 } )
-	this.arcLine = new THREE.Line( points, this.lineMaterial );
-	
-	var filledArcGeometry = new THREE.ShapeGeometry( circleShape, {curveSegments:30} );
-	this.arcLine = new THREE.Mesh( filledArcGeometry, new THREE.MeshBasicMaterial({color:this.textBgColor,
-	depthTest:false,depthWrite:false,side : THREE.DoubleSide } ) );
-	this.arcLine.renderDepth = 1e20;
+	this.arc.setStart( arcAngleStart );
+	this.arc.setEnd( arcAngleEnd );
+	this.arc.setOuterRadius( arcOuterRadius );
+	this.arc.setInnerRadius( arcInnerRadius );
 	
 	var arcCenter = this.end.clone().sub( offsetStart ).divideScalar( 2 ).add( offsetStart );
 	var direction = (arcCenter.clone()).sub( this.mid ).normalize();
@@ -188,7 +192,14 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
 	var defaultOrientation = new THREE.Vector3(1,0,0); 
   var quaternion = new THREE.Quaternion();
   quaternion.setFromUnitVectors ( new THREE.Vector3(0,0,1), plane.normal.clone() );
-  this.arcLine.rotation.setFromQuaternion( quaternion );
+  this.arc.rotation.setFromQuaternion( quaternion );
+  
+  this.arc.position.copy( this.mid );
+  this.arc.show();
+  
+  this.label.setText( (this.angle*180/Math.PI).toFixed(2) );
+  this.label.position.copy( arcCenter );
+  this.label.show();
   
   /*var quaternion = new THREE.Quaternion();
   quaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
@@ -209,13 +220,13 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
 	
 	  this.add( this.debugHelpers );
 	}
-	
-	this.add( this.arcLine );
-  this.arcLine.position.copy( this.mid );
-  //this.set(); 
-  
-  this._drawLabel();
-  this.label.position.copy( arcCenter );
+}
+
+AngularDimHelper.prototype.computeAngle = function(start, mid, end){
+  var v1 = start.clone().sub( mid );
+  var v2 = end.clone().sub( mid );
+  var angle = v1.angleTo( v2 );
+  return angle;
 }
 
 AngularDimHelper.prototype.set = function(){
@@ -337,31 +348,21 @@ AngularDimHelper.prototype.set = function(){
 
 AngularDimHelper.prototype.unset = function(){
 
-  this.remove( this.label);
-  this.remove( this.arcLine );
-  this.remove( this.mainArrowLeft );
-  this.remove( this.mainArrowRight );
+  this.label.hide();
+  this.arc.hide();
   
-  if( this.startCross ) this.remove( this.startCross );
-  if( this.midCross )   this.remove( this.midCross );
-  if( this.endCross )   this.remove( this.endCross );
-    
-  if( this.startSideLine ) this.remove( this.startSideLine );
-  if( this.endSideLine )   this.remove( this.endSideLine );
+  this.startCross.hide();
+  this.midCross.hide();
+  this.endCross.hide();
   
-  if( this.startMidLine ) this.remove( this.startMidLine );
-  if( this.midEndLine )   this.remove( this.midEndLine );
+  this.startMidLine.hide();
+  this.midEndLine.hide();
   
-  if( this.debugHelpers ) this.remove( this.debugHelpers );
-}
-
-AngularDimHelper.prototype.drawArc = function(){
-
+  //if( this.debugHelpers ) this.remove( this.debugHelpers );
 }
 
 
-AngularDimHelper.prototype._drawLabel = function(){
-  //draw angle / text
+AngularDimHelper.prototype.setLabelType = function(){
   
   var degAngle = this.angle*180/Math.PI;
   this.text = new String(degAngle.toFixed(2))+"°";
@@ -376,32 +377,9 @@ AngularDimHelper.prototype._drawLabel = function(){
     break;
   }
   
-  
   this.label.position.copy( this.mid );
-  
-  
-  
-  //this.label.rotation.z = Math.PI;
-  
-  //var labelWidth = this.label.width;
-  //var reqWith = labelWidth + 2*arrowHeadSize;
-  
-  /*if(reqWith>length)//if the labe + arrows would not fit
-  {
-    arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
-    var arrowXPos = length/2+arrowSize;
-  
-    leftArrowDir = new THREE.Vector3(-1,0,0);//reverse orientation of arrows
-    rightArrowDir = new THREE.Vector3(1,0,0);
-    leftArrowPos = new THREE.Vector3(arrowXPos,sideLength,0);
-    rightArrowPos = new THREE.Vector3(-arrowXPos,sideLength,0);
-    if(labelWidth>length)//if even the label itself does not fit
-    {
-      this.label.position.y += 5;
-    }
-  }*/
-  this.add( this.label );
 }
+
 
   
 

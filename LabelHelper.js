@@ -25,6 +25,12 @@ LabelHelper = function (options) {
 LabelHelper.prototype = Object.create( BaseHelper.prototype );
 LabelHelper.prototype.constructor = LabelHelper;
 
+LabelHelper.prototype.setText = function( text ){
+  this.text = text;
+  this.generateTextFromCanvas();
+  this.generate();
+}
+
 LabelHelper.prototype.generateTextFromCanvas = function()
 {
   var canvas, context, material, plane, texture;
@@ -129,7 +135,7 @@ LabelHelper3d.prototype.generate = function() {
 LabelHelperPlane = function(options)
 {
   LabelHelper.call( this, options );
-  this.generate(options);
+  this.generate();
 }
 
 LabelHelperPlane.prototype = Object.create( LabelHelper.prototype );
@@ -153,9 +159,8 @@ LabelHelperPlane.prototype.generate = function() {
   var textPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(width, height), material);
   textPlane.renderDepth =1e20;
   
+  if( this.textMesh ) this.remove( this.textMesh );
+  
   this.textMesh = textPlane;
   this.add( textPlane );
-  
-  //var testCube = new THREE.Mesh(new THREE.CubeGeometry(width, height,  0.1), new THREE.MeshBasicMaterial({color:0xFF0000}));
-  //this.add( testCube );
 };
