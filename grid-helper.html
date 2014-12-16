@@ -39,6 +39,9 @@
       upChanged:function(){
         this.object.setUp( new THREE.Vector3(this.up[0],this.up[1],this.up[2]) );  
       },
+      sizeChanged:function(){
+        this.object.resize( this.size );  
+      }
     });
   </script>
 </polymer-element>
