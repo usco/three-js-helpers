@@ -190,20 +190,27 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
 	}
 	
 	var defaultOrientation = new THREE.Vector3(1,0,0); 
-  var quaternion = new THREE.Quaternion();
-  quaternion.setFromUnitVectors ( new THREE.Vector3(0,0,1), plane.normal.clone() );
-  this.arc.rotation.setFromQuaternion( quaternion );
+  var planeQuaternion = new THREE.Quaternion();
+  planeQuaternion.setFromUnitVectors ( new THREE.Vector3(0,0,1), plane.normal.clone() );
   
+  var frontFacingQuaternion = new THREE.Quaternion();
+  frontFacingQuaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
+  //this.arc.rotation.setFromQuaternion( quaternion );
+  
+  var comboQuaternion = new THREE.Quaternion();
+  comboQuaternion.multiplyQuaternions( frontFacingQuaternion, planeQuaternion );
+  
+  var foo = new THREE.Quaternion();
+  foo.setFromUnitVectors ( new THREE.Vector3(1,0,1), plane.normal.clone().add(direction.clone()) );
+  
+  this.arc.rotation.setFromQuaternion( foo );
   this.arc.position.copy( this.mid );
   this.arc.show();
   
   this.label.setText( (this.angle*180/Math.PI).toFixed(2) );
   this.label.position.copy( arcCenter );
   this.label.show();
-  
-  /*var quaternion = new THREE.Quaternion();
-  quaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
-  this.arcLine.rotation.setFromQuaternion( quaternion );*/
+ 
   
 	if( this.debug ){
 	  this.debugHelpers = new THREE.Object3D();

@@ -11,8 +11,9 @@ ArcHelper = function(options)
   
   var direction = this.direction = options.direction || new THREE.Vector3();
   this.color  = options.color!== undefined ? options.color : "#000";
-  this.radius   = options.radius!== undefined ? options.radius : 10;
+  
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
+  this.mode = options.mode!== undefined ? options.mode : "line";//filled or line
   
   this.outerRadius = 0;
   this.innerRadius = 0;
@@ -37,18 +38,18 @@ ArcHelper.prototype._generate = function(){
   circleShape.absarc( 0, 0, this.outerRadius, this.start, this.end, true );
 	circleShape.absarc( 0, 0, this.innerRadius, this.start, this.end,  false );
 	
-  var points = circleShape.createPointsGeometry();
-  //points.vertices.shift();
-	//this.arcLine = new THREE.Line( points, this.lineMaterial );
-	
 	if(this.arcLine) this.remove( this.arcLine );
 	
-	var filledArcGeometry = new THREE.ShapeGeometry( circleShape, {curveSegments:30} );
-	this.arcLine = new THREE.Mesh( filledArcGeometry, this.material );
-	this.arcLine.renderDepth = 1e20;
+  var points = circleShape.createPointsGeometry();
+  //points.vertices.shift();
+	if(this.mode == "line") this.arcLine = new THREE.Line( points, this.lineMaterial );
+	else if(this.mode == "filled"){
+	  var filledArcGeometry = new THREE.ShapeGeometry( circleShape, {curveSegments:30} );
+	  this.arcLine = new THREE.Mesh( filledArcGeometry, this.material );
+	  this.arcLine.renderDepth = 1e20;
+	}
 	
 	this.add( this.arcLine );
-
 }
 
 ArcHelper.prototype.setRadius = function( radius ){
