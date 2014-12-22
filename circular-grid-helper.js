@@ -1,9 +1,8 @@
 
-GridHelper = function ( width, length, step , upVector, color, opacity, text, textColor, textPosition) {
+CircularGridHelper = function ( diameter, step , upVector, color, opacity, text, textColor, textPosition) {
 	
       defaults = {
-        width: 200,
-        length:200,
+        diameter: 200,
         step: 100,
         color: 0xFFFFFF,
         opacity: 0.1,
@@ -14,8 +13,7 @@ GridHelper = function ( width, length, step , upVector, color, opacity, text, te
       };
       THREE.Object3D.call( this );
       
-      this.width        = width || 200;
-      this.length       = length || 200;
+      this.diameter     = diameter || 200;
       this.step         = step || 100;
       this.color        = color ||  0x00baff;
       this.opacity      = opacity || 0.2;
@@ -39,9 +37,9 @@ GridHelper = function ( width, length, step , upVector, color, opacity, text, te
       this.lookAt(upVector);
 };
 
-GridHelper.prototype = Object.create( THREE.Object3D.prototype );
+CircularGridHelper.prototype = Object.create( THREE.Object3D.prototype );
 
-GridHelper.prototype._drawGrid = function() {
+CircularGridHelper.prototype._drawGrid = function() {
       var gridGeometry, gridMaterial, mainGridZ, planeFragmentShader, planeGeometry, planeMaterial, subGridGeometry, subGridMaterial, subGridZ;
       
       //offset to avoid z fighting
@@ -64,140 +62,110 @@ GridHelper.prototype._drawGrid = function() {
       
       var step = this.step;
       var stepSubDivisions = this.stepSubDivisions;
-      var width = this.width;
-      var length = this.length;
+      var diameter = this.diameter;
+      var radius = diameter/2;
+      var width = this.diameter;
+      var length = this.diameter;
       
       var centerBased = true
+      
+      
+      function getStart( offset ){
+        var angle = Math.asin( offset / radius );
+      
+        var start = Math.cos( angle ) * radius;
+        return start
+      }
+      
       
       if(centerBased)
       {
         for (var i = 0; i <= width/2; i += step/stepSubDivisions)
     	  {
-          subGridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, subGridZ) );
-          subGridGeometry.vertices.push( new THREE.Vector3(length / 2, i, subGridZ) );
+    	    var start = getStart( i );
+    	  
+          subGridGeometry.vertices.push( new THREE.Vector3(-start, i, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(start, i, subGridZ) );
           
-          subGridGeometry.vertices.push( new THREE.Vector3(-length / 2, -i, subGridZ) );
-          subGridGeometry.vertices.push( new THREE.Vector3(length / 2, -i, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(-start, -i, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(start, -i, subGridZ) );
           
           if( i%step == 0 )
           {
-            gridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, mainGridZ) );
-            gridGeometry.vertices.push( new THREE.Vector3(length / 2, i, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(-start, i, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(start, i, mainGridZ) );
             
-            gridGeometry.vertices.push( new THREE.Vector3(-length / 2, -i, mainGridZ) );
-            gridGeometry.vertices.push( new THREE.Vector3(length / 2, -i, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(-start, -i, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(start, -i, mainGridZ) );
           }
         }
         for (var i = 0; i <= length/2; i += step/stepSubDivisions)
     	  {
-          subGridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, subGridZ) );
-          subGridGeometry.vertices.push( new THREE.Vector3(i, width / 2, subGridZ) );
+    	    var start = getStart( i );
+          subGridGeometry.vertices.push( new THREE.Vector3(i, -start, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(i, start, subGridZ) );
           
-          subGridGeometry.vertices.push( new THREE.Vector3(-i, -width / 2, subGridZ) );
-          subGridGeometry.vertices.push( new THREE.Vector3(-i, width / 2, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(-i, -start, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(-i, start, subGridZ) );
           
           if( i%step == 0 )
           {
-            gridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, mainGridZ) );
-            gridGeometry.vertices.push( new THREE.Vector3(i, width / 2, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(i, -start, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(i, start, mainGridZ) );
             
-            gridGeometry.vertices.push( new THREE.Vector3(-i, -width / 2, mainGridZ) );
-            gridGeometry.vertices.push( new THREE.Vector3(-i, width / 2, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(-i, -start, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(-i, start, mainGridZ) );
           }
         }
       }
-      else{
-        for (var i = -width/2; i <= width/2; i += step/stepSubDivisions)
-    	  {
-          subGridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, subGridZ));
-          subGridGeometry.vertices.push( new THREE.Vector3(length / 2, i, subGridZ));
-          
-          if( i%step == 0 )
-          {
-            gridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, mainGridZ));
-            gridGeometry.vertices.push( new THREE.Vector3(length / 2, i, mainGridZ));
-          }
-        }
-        for (var i = -length/2; i <= length/2; i += step/stepSubDivisions)
-    	  {
-          subGridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, subGridZ));
-          subGridGeometry.vertices.push( new THREE.Vector3(i, width / 2, subGridZ));
-          
-          if( i%step == 0 )
-          {
-            gridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, mainGridZ));
-            gridGeometry.vertices.push( new THREE.Vector3(i, width / 2, mainGridZ));
-          }
-        }
-      }
-      
+      //create main & sub grid objects
       this.mainGrid = new THREE.Line(gridGeometry, gridMaterial, THREE.LinePieces);
-      //create sub grid geometry object
       this.subGrid = new THREE.Line(subGridGeometry, subGridMaterial, THREE.LinePieces);
 
       //create margin
       var offsetWidth  = width + this.marginSize;
       var offsetLength = length + this.marginSize;
+      var segments = 128;
       
-      var marginGeometry = new THREE.Geometry();
-      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, -width/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(length / 2, -width/2, subGridZ));
+      var marginGeometry = new THREE.CircleGeometry( diameter/2 + this.marginSize/2 , segments );			
+      var marginGeometry2 = new THREE.CircleGeometry( diameter/2 , segments );		
       
-      marginGeometry.vertices.push( new THREE.Vector3(length / 2, -width/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(length / 2, width/2, subGridZ));
+      marginGeometry.vertices.shift();
+      marginGeometry2.vertices.shift();
+      marginGeometry.merge( marginGeometry2 );
       
-      marginGeometry.vertices.push( new THREE.Vector3(length / 2, width/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, width/2, subGridZ));
-      
-      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, width/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, -width/2, subGridZ));
-      
-      
-      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, -offsetWidth/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, -offsetWidth/2, subGridZ));
-      
-      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, -offsetWidth/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, offsetWidth/2, subGridZ));
-      
-      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, offsetWidth/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, offsetWidth/2, subGridZ));
-      
-      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, offsetWidth/2, subGridZ));
-      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, -offsetWidth/2, subGridZ));
-      
-      
-      var  strongGridMaterial = new THREE.LineBasicMaterial({
+      var strongGridMaterial = new THREE.LineBasicMaterial({
         color: new THREE.Color().setHex(this.color),
         opacity: this.opacity*2,
         linewidth: 2,
         transparent: true
       });
-      this.margin = new THREE.Line(marginGeometry, strongGridMaterial, THREE.LinePieces);
+      this.margin = new THREE.Line(marginGeometry, strongGridMaterial);
       
       //add all grids, subgrids, margins etc
       this.add( this.mainGrid );
       this.add( this.subGrid );
       this.add( this.margin );
       
-      this._drawNumbering();
+      //this._drawNumbering();
 };
 
 
-GridHelper.prototype.toggle = function(toggle) {
+CircularGridHelper.prototype.toggle = function(toggle) {
 	//apply visibility settings to all children 
       this.traverse( function( child ) {
       	child.visible = toggle;
       });
 };
 
-GridHelper.prototype.setOpacity = function(opacity) {
+CircularGridHelper.prototype.setOpacity = function(opacity) {
       this.opacity = opacity;
       this.mainGrid.material.opacity = opacity;
       this.subGrid.material.opacity = opacity/2;
       this.margin.material.opacity = opacity*2;
 };
 
-GridHelper.prototype.setColor = function(color) {
+CircularGridHelper.prototype.setColor = function(color) {
       this.color = color;
       this.mainGrid.material.color = new THREE.Color().setHex(this.color);
       this.subGrid.material.color = new THREE.Color().setHex(this.color);
@@ -205,7 +173,7 @@ GridHelper.prototype.setColor = function(color) {
 };
 
 
-GridHelper.prototype.toggleText = function(toggle) {
+CircularGridHelper.prototype.toggleText = function(toggle) {
   this.text = toggle;
   var labels = this.labels.children;
   for (var i = 0; i < this.labels.children.length; i++) {
@@ -214,26 +182,26 @@ GridHelper.prototype.toggleText = function(toggle) {
   }
 };
 
-GridHelper.prototype.setTextColor = function(color) {
+CircularGridHelper.prototype.setTextColor = function(color) {
   this.textColor = color;
   this._drawNumbering();
 };
 
-GridHelper.prototype.setTextLocation = function(location) {
+CircularGridHelper.prototype.setTextLocation = function(location) {
   this.textLocation = location;
   return this._drawNumbering();
 };
 
-GridHelper.prototype.setUp = function(upVector) {
+CircularGridHelper.prototype.setUp = function(upVector) {
   this.upVector = upVector;
   this.up = upVector;
   this.lookAt(upVector);
 };
 
-GridHelper.prototype.resize = function( width, length ) {
+CircularGridHelper.prototype.resize = function( width, length ) {
   if (width && length ) {
     var width = Math.max(width,10);
-    this.width = width;
+    this.diameter = width;
     
     var length = Math.max(length,10);
     this.length = length;
@@ -248,7 +216,7 @@ GridHelper.prototype.resize = function( width, length ) {
   }
 };
 
-GridHelper.prototype._drawNumbering = function() {
+CircularGridHelper.prototype._drawNumbering = function() {
       var label, sizeLabel, sizeLabel2, xLabelsLeft, xLabelsRight, yLabelsBack, yLabelsFront;
       var step = this.step;
 
@@ -335,7 +303,7 @@ GridHelper.prototype._drawNumbering = function() {
       this.mainGrid.add(this.labels);
 };
 
-GridHelper.prototype.drawTextOnPlane = function(text, size) {
+CircularGridHelper.prototype.drawTextOnPlane = function(text, size) {
   var canvas, context, material, plane, texture;
   
   if (size == null) {
@@ -377,7 +345,7 @@ GridHelper.prototype.drawTextOnPlane = function(text, size) {
 
 //autoresize, disabled for now
 /*
-GridHelper.prototype.updateGridSize = function() {
+CircularGridHelper.prototype.updateGridSize = function() {
       var max, maxX, maxY, min, minX, minY, size, subchild, _getBounds, _i, _len, _ref,
         _this = this;
       minX = 99999;

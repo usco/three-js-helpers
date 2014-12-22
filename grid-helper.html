@@ -1,6 +1,7 @@
 <script src="custom-grid-helper.js"></script>
+<script src="circular-grid-helper.js"></script>
 
-<polymer-element name="grid-helper" extends="three-js-helper" attributes="width length step color opacity textColor up">
+<polymer-element name="grid-helper" extends="three-js-helper" attributes="width length step color opacity textColor up type">
   <script>Polymer('grid-helper',{
       object:null,
       width:200,
@@ -12,8 +13,10 @@
       textColor: "#000000",
       textLocation: "f",
       up:[0,1,0],
+      type:"rectangular",
       ready: function() {
         this.object = new GridHelper(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+        
         this.super();
       },
       attached:function()
@@ -46,6 +49,19 @@
       lengthChanged:function(){
         this.object.resize( this.width, this.length );  
       },
+      typeChanged:function(){
+         var parent = this.object.parent;
+         parent.remove( this.object );
+         if(this.type == "rectangular")
+         {
+          this.object = new GridHelper(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+         }else
+         {
+          console.log("bla");
+            this.object = new CircularGridHelper(this.width, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+         }
+         parent.add( this.object );
+      }
     });
   </script>
 </polymer-element>
