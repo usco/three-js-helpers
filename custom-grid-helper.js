@@ -1,8 +1,9 @@
 
-GridHelper = function ( size, step , upVector, color, opacity, text, textColor, textPosition) {
+GridHelper = function ( width, length, step , upVector, color, opacity, text, textColor, textPosition) {
 	
       defaults = {
-        size: 1000,
+        width: 200,
+        length:200,
         step: 100,
         color: 0xFFFFFF,
         opacity: 0.1,
@@ -13,7 +14,8 @@ GridHelper = function ( size, step , upVector, color, opacity, text, textColor, 
       };
       THREE.Object3D.call( this );
       
-      this.size         = size || 1000;
+      this.width        = width || 200;
+      this.length       = length || 200;
       this.step         = step || 100;
       this.color        = color ||  0x00baff;
       this.opacity      = opacity || 0.2;
@@ -23,6 +25,9 @@ GridHelper = function ( size, step , upVector, color, opacity, text, textColor, 
       this.upVector     = upVector || new THREE.Vector3(0,1,0);
       
       this.name = "grid";
+      
+      this.marginSize =10;
+      this.stepSubDivisions = 10;
       
       this._drawGrid();
 
@@ -37,9 +42,6 @@ GridHelper.prototype = Object.create( THREE.Object3D.prototype );
 GridHelper.prototype._drawGrid = function() {
       var gridGeometry, gridMaterial, mainGridZ, planeFragmentShader, planeGeometry, planeMaterial, subGridGeometry, subGridMaterial, subGridZ;
       
-      var size= this.size;
-      var step = this.step;
-      
       //offset to avoid z fighting
       mainGridZ = -0.05;
       gridGeometry = new THREE.Geometry();
@@ -50,15 +52,6 @@ GridHelper.prototype._drawGrid = function() {
         transparent: true
       });
       
-      for (var i = -size/2; i <= size/2; i += step)
-  	  {
-        gridGeometry.vertices.push(new THREE.Vector3(-size / 2, i, mainGridZ));
-        gridGeometry.vertices.push(new THREE.Vector3(size / 2, i, mainGridZ));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -size / 2, mainGridZ));
-        gridGeometry.vertices.push(new THREE.Vector3(i, size / 2, mainGridZ));
-      }
-      
-      this.mainGrid = new THREE.Line(gridGeometry, gridMaterial, THREE.LinePieces);
       subGridZ = -0.05;
       subGridGeometry = new THREE.Geometry();
       subGridMaterial = new THREE.LineBasicMaterial({
@@ -67,72 +60,128 @@ GridHelper.prototype._drawGrid = function() {
         transparent: true
       });
       
-      for (var i = -size/2; i <= size/2; i += step/10)
+      var step = this.step;
+      var stepSubDivisions = this.stepSubDivisions;
+      var width = this.width;
+      var length = this.length;
+      
+      var centerBased = true
+      
+      if(centerBased)
       {
-        subGridGeometry.vertices.push(new THREE.Vector3(-size / 2, i, subGridZ));
-        subGridGeometry.vertices.push(new THREE.Vector3(size / 2, i, subGridZ));
-        subGridGeometry.vertices.push(new THREE.Vector3(i, -size / 2, subGridZ));
-        subGridGeometry.vertices.push(new THREE.Vector3(i, size / 2, subGridZ));
-      }  
+        for (var i = 0; i <= width/2; i += step/stepSubDivisions)
+    	  {
+          subGridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(length / 2, i, subGridZ) );
+          
+          subGridGeometry.vertices.push( new THREE.Vector3(-length / 2, -i, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(length / 2, -i, subGridZ) );
+          
+          if( i%step == 0 )
+          {
+            gridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(length / 2, i, mainGridZ) );
+            
+            gridGeometry.vertices.push( new THREE.Vector3(-length / 2, -i, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(length / 2, -i, mainGridZ) );
+          }
+        }
+        for (var i = 0; i <= length/2; i += step/stepSubDivisions)
+    	  {
+          subGridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(i, width / 2, subGridZ) );
+          
+          subGridGeometry.vertices.push( new THREE.Vector3(-i, -width / 2, subGridZ) );
+          subGridGeometry.vertices.push( new THREE.Vector3(-i, width / 2, subGridZ) );
+          
+          if( i%step == 0 )
+          {
+            gridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(i, width / 2, mainGridZ) );
+            
+            gridGeometry.vertices.push( new THREE.Vector3(-i, -width / 2, mainGridZ) );
+            gridGeometry.vertices.push( new THREE.Vector3(-i, width / 2, mainGridZ) );
+          }
+        }
+      }
+      else{
+        for (var i = -width/2; i <= width/2; i += step/stepSubDivisions)
+    	  {
+          subGridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, subGridZ));
+          subGridGeometry.vertices.push( new THREE.Vector3(length / 2, i, subGridZ));
+          
+          if( i%step == 0 )
+          {
+            gridGeometry.vertices.push( new THREE.Vector3(-length / 2, i, mainGridZ));
+            gridGeometry.vertices.push( new THREE.Vector3(length / 2, i, mainGridZ));
+          }
+        }
+        for (var i = -length/2; i <= length/2; i += step/stepSubDivisions)
+    	  {
+          subGridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, subGridZ));
+          subGridGeometry.vertices.push( new THREE.Vector3(i, width / 2, subGridZ));
+          
+          if( i%step == 0 )
+          {
+            gridGeometry.vertices.push( new THREE.Vector3(i, -width / 2, mainGridZ));
+            gridGeometry.vertices.push( new THREE.Vector3(i, width / 2, mainGridZ));
+          }
+        }
+      }
+      
+      this.mainGrid = new THREE.Line(gridGeometry, gridMaterial, THREE.LinePieces);
       //create sub grid geometry object
       this.subGrid = new THREE.Line(subGridGeometry, subGridMaterial, THREE.LinePieces);
 
-		//create plane for shadow projection      
-      PlaneBufferGeometry = new THREE.PlaneBufferGeometry(-size, size, 5, 5);
-      planeFragmentShader = [
-      "uniform vec3 diffuse;",
-      "uniform float opacity;",
-      //"uniform vec3 shadowColor;",
-      THREE.ShaderChunk["color_pars_fragment"],
-      THREE.ShaderChunk["map_pars_fragment"],
-      THREE.ShaderChunk["lightmap_pars_fragment"],
-      THREE.ShaderChunk["envmap_pars_fragment"],
-      THREE.ShaderChunk["fog_pars_fragment"], 
-      THREE.ShaderChunk["shadowmap_pars_fragment"], 
-      THREE.ShaderChunk["specularmap_pars_fragment"], 
-      "void main() {",
-      	"gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );",
-      	THREE.ShaderChunk["map_fragment"],
-      	THREE.ShaderChunk["alphatest_fragment"], 
-      	THREE.ShaderChunk["specularmap_fragment"], 
-      	THREE.ShaderChunk["lightmap_fragment"], 
-      	THREE.ShaderChunk["color_fragment"], 
-      	THREE.ShaderChunk["envmap_fragment"], 
-      	THREE.ShaderChunk["shadowmap_fragment"], 
-      	THREE.ShaderChunk["linear_to_gamma_fragment"], 
-      	THREE.ShaderChunk["fog_fragment"], 
-      	"gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 - shadowColor.x );",
-      	"}"
-      	].join("\n");
-      	
-      //= vec3(0.0,0.0,0.0) 
-      var uniforms = THREE.ShaderLib['basic'].uniforms;
-      //if( ! ("shadowColor" in uniforms) ) {uniforms["shadowColor"] = {type:'c',value:new THREE.Color(0,1,1) } }
-  
-      planeMaterial = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: THREE.ShaderLib['basic'].vertexShader,
-        fragmentShader: planeFragmentShader,
-        color: 0x0000FF,
+      //create margin
+      var offsetWidth  = width + this.marginSize;
+      var offsetLength = length + this.marginSize;
+      
+      var marginGeometry = new THREE.Geometry();
+      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, -width/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(length / 2, -width/2, subGridZ));
+      
+      marginGeometry.vertices.push( new THREE.Vector3(length / 2, -width/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(length / 2, width/2, subGridZ));
+      
+      marginGeometry.vertices.push( new THREE.Vector3(length / 2, width/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, width/2, subGridZ));
+      
+      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, width/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(-length / 2, -width/2, subGridZ));
+      
+      
+      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, -offsetWidth/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, -offsetWidth/2, subGridZ));
+      
+      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, -offsetWidth/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, offsetWidth/2, subGridZ));
+      
+      marginGeometry.vertices.push( new THREE.Vector3(offsetLength / 2, offsetWidth/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, offsetWidth/2, subGridZ));
+      
+      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, offsetWidth/2, subGridZ));
+      marginGeometry.vertices.push( new THREE.Vector3(-offsetLength / 2, -offsetWidth/2, subGridZ));
+      
+      
+      var  strongGridMaterial = new THREE.LineBasicMaterial({
+        color: new THREE.Color().setHex(this.color),
+        opacity: this.opacity*2,
+        linewidth: 2,
         transparent: true
       });
+      this.margin = new THREE.Line(marginGeometry, strongGridMaterial, THREE.LinePieces);
       
-      this.plane = new THREE.Mesh(planeGeometry);//, planeMaterial);
-      this.plane.rotation.x = Math.PI;
-      this.plane.position.z = -0.8;
-      this.plane.name = "workplane";
-      this.plane.receiveShadow = true;
+      //add all grids, subgrids, margins etc
+      this.add( this.mainGrid );
+      this.add( this.subGrid );
+      this.add( this.margin );
       
-      //add all grids, subgrids, and plane
-      this.add(this.mainGrid);
-      this.add(this.subGrid);
-      //this.add(this.plane);
       this._drawNumbering();
 };
 
 
 GridHelper.prototype.toggle = function(toggle) {
-	
 	//apply visibility settings to all children 
       this.traverse( function( child ) {
       	child.visible = toggle;
@@ -142,13 +191,15 @@ GridHelper.prototype.toggle = function(toggle) {
 GridHelper.prototype.setOpacity = function(opacity) {
       this.opacity = opacity;
       this.mainGrid.material.opacity = opacity;
-      this.subGrid.material.opacity = opacity;
+      this.subGrid.material.opacity = opacity/2;
+      this.margin.material.opacity = opacity*2;
 };
 
 GridHelper.prototype.setColor = function(color) {
       this.color = color;
       this.mainGrid.material.color = new THREE.Color().setHex(this.color);
       this.subGrid.material.color = new THREE.Color().setHex(this.color);
+      this.margin.material.color = new THREE.Color().setHex(this.color);
 };
 
 
@@ -177,71 +228,100 @@ GridHelper.prototype.setUp = function(upVector) {
   this.lookAt(upVector);
 };
 
-GridHelper.prototype.resize = function(size) {
-  if (size ) {
-    var size = Math.max(size,10);
+GridHelper.prototype.resize = function( width, length ) {
+  if (width && length ) {
+    var width = Math.max(width,10);
+    this.width = width;
+    
+    var length = Math.max(length,10);
+    this.length = length;
+    
     this.step = Math.max(this.step,5);
-    this.size = size;
+    
     this.remove(this.mainGrid);
     this.remove(this.subGrid);
-    this.remove(this.plane);
+    this.remove( this.margin );
+    //this.remove(this.plane);
     return this._drawGrid();
   }
-  else{console.log("aaargh, size", size);}
 };
 
 GridHelper.prototype._drawNumbering = function() {
       var label, sizeLabel, sizeLabel2, xLabelsLeft, xLabelsRight, yLabelsBack, yLabelsFront;
-      var size = this.size;
       var step = this.step;
-      
-      //this fails completely in polymer.js, very weird bug: (in firefox aurora)
-      //TypeError: Argument 6 is not valid for any of the 6-argument overloads of WebGLRenderingContext.texImage2D.
-      //any attempts at rendering a texture from canvas seem to fail as well (sprite material tested as well)
-		      
+
+      this._labelStore = {};		      
 	  
       if (this.labels != null) {
         this.mainGrid.remove(this.labels);
       }
       this.labels = new THREE.Object3D();
       
-      xLabelsFront = new THREE.Object3D();
-      yLabelsRight = new THREE.Object3D();
       
-      for (var i = -size/2; i <= size/2; i += step)
-  	  {
-        sizeLabel = this.drawTextOnPlane("" + i, 32);
-        sizeLabel2 = sizeLabel.clone();
-        sizeLabel.rotation.z = Math.PI / 2;
-        sizeLabel.position.set(i, this.size / 2, 0.1);
-        yLabelsRight.add(sizeLabel);
-        if (this.textLocation === "center") {
-          if (i !== 0) {
-            sizeLabel2.position.set(this.size / 2, i, 0.1);
-            sizeLabel2.rotation.z = Math.PI / 2;
-            xLabelsFront.add(sizeLabel2);
-          }
-        } else {
-          if (i !== this.size / 2 && i !== -this.size / 2) {
-            sizeLabel2.position.set(this.size / 2, -i, 0.1);
-            sizeLabel2.rotation.z = Math.PI / 2;
-            xLabelsFront.add(sizeLabel2);
-          }
+      var width = this.width;
+      var length = this.length;
+      var numbering = this.numbering = "centerBased";
+      
+      var labelsFront = new THREE.Object3D();
+      var labelsSideRight = new THREE.Object3D();
+      
+      if(numbering == "centerBased" )
+      {
+        for (var i = 0 ; i <= width/2; i += step)
+        {
+          var sizeLabel = this.drawTextOnPlane("" + i, 32);
+          var sizeLabel2 = sizeLabel.clone();
+          
+          sizeLabel.position.set(length/2, -i, 0.1);
+          sizeLabel.rotation.z = -Math.PI / 2;
+          labelsFront.add( sizeLabel );
+          
+          sizeLabel2.position.set(length/2, i, 0.1);
+          sizeLabel2.rotation.z = -Math.PI / 2;
+          labelsFront.add( sizeLabel2 );
         }
+        
+        for (var i = 0 ; i <= length/2; i += step)
+        {
+          var sizeLabel = this.drawTextOnPlane("" + i, 32);
+          var sizeLabel2 = sizeLabel.clone();
+          
+          sizeLabel.position.set(-i, width/2, 0.1);
+          //sizeLabel.rotation.z = -Math.PI / 2;
+          labelsSideRight.add( sizeLabel );
+          
+          sizeLabel2.position.set(i, width/2, 0.1);
+          //sizeLabel2.rotation.z = -Math.PI / 2;
+          labelsSideRight.add( sizeLabel2 );
+        }
+        
+        labelsSideLeft = labelsSideRight.clone();
+        labelsSideLeft.rotation.z = -Math.PI ;
+        //labelsSideLeft = labelsSideRight.clone().translateY(- width );
+        
+        labelsBack = labelsFront.clone();
+        labelsBack.rotation.z = -Math.PI ;
       }
+       
+        
       
-      if (this.textLocation === "center") {
-        yLabelsRight.translateY(-this.size / 2);
-        xLabelsFront.translateX(-this.size / 2);
+      /*if (this.textLocation === "center") {
+        yLabelsRight.translateY(- length/ 2);
+        xLabelsFront.translateX(- width / 2);
       } else {
-        yLabelsLeft = yLabelsRight.clone().translateY(-this.size);
-        xLabelsBack = xLabelsFront.clone().translateX(-this.size);
+        yLabelsLeft = yLabelsRight.clone().translateY( -width );
+        xLabelsBack = xLabelsFront.clone().translateX( -length );
         
         this.labels.add( yLabelsLeft );
         this.labels.add( xLabelsBack) ;
-      }
-      this.labels.add( yLabelsRight );
-      this.labels.add( xLabelsFront );
+      }*/
+      //this.labels.add( yLabelsRight );
+      this.labels.add( labelsFront );
+      this.labels.add( labelsBack );
+      
+      this.labels.add( labelsSideRight );
+      this.labels.add( labelsSideLeft );
+      
       
       //apply visibility settings to all labels
       var textVisible = this.text;

@@ -1,9 +1,10 @@
 <script src="custom-grid-helper.js"></script>
 
-<polymer-element name="grid-helper" extends="three-js-helper" attributes="size step color opacity textColor up">
+<polymer-element name="grid-helper" extends="three-js-helper" attributes="width length step color opacity textColor up">
   <script>Polymer('grid-helper',{
       object:null,
-      size: 200,
+      width:200,
+      length:30,
       step: 10,
       color: 0x00baff,
       opacity: 0.2,
@@ -12,7 +13,7 @@
       textLocation: "f",
       up:[0,1,0],
       ready: function() {
-        this.object = new GridHelper(this.size, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+        this.object = new GridHelper(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
         this.super();
       },
       attached:function()
@@ -22,7 +23,7 @@
       stepChanged:function()
       {
         this.object.step = this.step;
-        this.object.resize(this.size);
+        this.object.resize( this.width, this.length );  
       },
       colorChanged:function()
       {
@@ -39,9 +40,12 @@
       upChanged:function(){
         this.object.setUp( new THREE.Vector3(this.up[0],this.up[1],this.up[2]) );  
       },
-      sizeChanged:function(){
-        this.object.resize( this.size );  
-      }
+      widthChanged:function(){
+        this.object.resize( this.width, this.length );  
+      },
+      lengthChanged:function(){
+        this.object.resize( this.width, this.length );  
+      },
     });
   </script>
 </polymer-element>
