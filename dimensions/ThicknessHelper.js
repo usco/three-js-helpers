@@ -45,7 +45,7 @@ ThicknessHelper = function(options)
   
   this.setAsSelectionRoot( true );
   //FIXME: do this in a more coherent way
-  this.setName();
+  this._setName();
 }
 
 ThicknessHelper.prototype = Object.create( AnnotationHelper.prototype );
@@ -119,10 +119,10 @@ ThicknessHelper.prototype.setNormal = function( normal ){
   this.done();    
 }
 
-ThicknessHelper.prototype.setName = function( ){
-  var tmpThickness = this.thickness;
-  if(tmpThickness) tmpThickness= tmpThickness.toFixed(2);
-  this.name = "Thickness: "+tmpThickness;
+ThicknessHelper.prototype._setName = function( ){
+  var tmpValue = this.thickness;
+  if( tmpValue ) tmpValue = tmpValue.toFixed( 2 );
+  this.name = "Thickness: " + tmpValue;
 }
 
 ThicknessHelper.prototype.unset = function(){

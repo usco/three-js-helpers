@@ -79,6 +79,10 @@ DiameterHelper = function(options)
   if( options.center )   this.setCenter( options.center );
   if( options.diameter ) this.setDiameter( options.diameter );
   if( options.orientation ) this.setOrientation( options.orientation );
+  
+  this.setAsSelectionRoot( true );
+  //FIXME: do this in a more coherent way
+  this._setName();
 }
 
 DiameterHelper.prototype = Object.create( AnnotationHelper.prototype );
@@ -288,6 +292,13 @@ DiameterHelper.prototype.setOrientation = function(orientation){
   var quaternion = new THREE.Quaternion();
   quaternion.setFromUnitVectors ( defaultOrientation, this.orientation.clone() );
   this.rotation.setFromQuaternion( quaternion );
+}
+
+
+DiameterHelper.prototype._setName = function( ){
+  var tmpValue = this.diameter;
+  if( tmpValue ) tmpValue = tmpValue.toFixed( 2 );
+  this.name = "Diameter: " + tmpValue;
 }
 
 

@@ -34,6 +34,10 @@ DistanceHelper = function(options)
   if( options.end )   this.setEnd( options.end, this.endObject );
  
   this.updatable = false;
+  
+  this.setAsSelectionRoot( true );
+  //FIXME: do this in a more coherent way
+  this._setName();
 }
 
 DistanceHelper.prototype = Object.create( AnnotationHelper.prototype );
@@ -45,7 +49,6 @@ DistanceHelper.prototype.toggleText = function(toggle)
   //Fixme:
   this.label.textSprite.visible = toggle;
 }
-
 
 /*start: vector3D
 object: optional : on which object is the start point
@@ -67,7 +70,6 @@ DistanceHelper.prototype.setStart = function( start, object )
     this._startHook.position.copy( this.start.clone().sub( object.position ) );//object.worldToLocal(this.start) );
     object.add( this._startHook );
   }
-  
   
   this.startCross.show();
   this.startCross.position.copy( this.start );
@@ -173,4 +175,12 @@ DistanceHelper.prototype.update = function(){
   
   this.setStart( this.startObject.localToWorld( this._startHook.position.clone() ) );
   this.setEnd( this.endObject.localToWorld( this._endHook.position.clone()) );
+  
+  this._setName();
+}
+
+DistanceHelper.prototype._setName = function( ){
+  var tmpValue = this.distance;
+  if( tmpValue ) tmpValue = tmpValue.toFixed( 2 );
+  this.name = "Distance: " + tmpValue;
 }

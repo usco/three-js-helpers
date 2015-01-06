@@ -65,7 +65,7 @@ GizmoLineMaterial = function ( parameters ) {
 		this.opacity = 0.8;
 		this.setValues( parameters );
 		
-		this.highlightColor = parameters.highlightColor !== undefined ? options.parameters : 0xFFFF00;
+		this.highlightColor = parameters.highlightColor !== undefined ? options.parameters : "#ffd200";
 
 		this.oldColor = this.color.clone();
 		this.oldOpacity = this.opacity;

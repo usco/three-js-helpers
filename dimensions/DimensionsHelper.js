@@ -202,7 +202,8 @@ ObjectDimensionsHelper.prototype.computeMiddlePoint=function(mesh)
 
 ObjectDimensionsHelper.prototype.getBounds=function(mesh)
 {
-  var bbox = new THREE.Box3().setFromObject( mesh );
+  var bbox = new THREE.Box3().setFromObject( mesh );//FIXME: needs to ignore any helpers 
+  //in the hierarchy
 
   var length = ( (bbox.max.x-bbox.min.x).toFixed(2) )/1; // division by one to coerce to number
   var width  = ( (bbox.max.y-bbox.min.y).toFixed(2) )/1;

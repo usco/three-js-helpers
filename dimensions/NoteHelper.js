@@ -6,12 +6,6 @@ NoteHelper = function(options)
   AnnotationHelper.call( this );
 
   var options = options || {};
-  /*this.distance = distance || 30;
-  this.diameter = diameter || 20;
-  this.endLength = endLength || 20;
-  this.color = color || "#000000" ;
-  this.text = this.diameter;*/
-  
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
@@ -24,7 +18,7 @@ NoteHelper = function(options)
   this.title      = options.title     !== undefined ? options.title : "";
 
   //initialise internal sub objects
-  this.pointCross = new CrossHelper({size:this.centerCrossSize,color:this.crossColor});
+  this.pointCross = new CrossHelper({size:2.5,color:this.crossColor});
   this.pointCross.hide();
   this.add( this.pointCross );
   
@@ -33,6 +27,10 @@ NoteHelper = function(options)
   this.object     = options.object!== undefined ? options.object : undefined;
   
   if( options.point ) this.setPoint( this.point, this.object );
+  
+  this.setAsSelectionRoot( true );
+  //FIXME: do this in a more coherent way
+  this._setName();
 }
 
 NoteHelper.prototype = Object.create( AnnotationHelper.prototype );
@@ -50,5 +48,9 @@ NoteHelper.prototype.setPoint = function( point, object ){
   //point location cross
   this.pointCross.position.copy( this.point );
   this.pointCross.show();
+}
+
+NoteHelper.prototype._setName = function( ){
+  this.name = "Note: " + this.title;
 }
 

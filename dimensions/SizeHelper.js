@@ -253,8 +253,8 @@ SizeHelper.prototype._drawArrows = function(){
   this.add( mainArrowRight );
 
   //material settings : FIXME, move this elsewhere
-  this.arrowLineMaterial = new THREE.LineBasicMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
-  this.arrowConeMaterial = new THREE.MeshBasicMaterial({color:this.arrowColor, 
+  this.arrowLineMaterial = new GizmoLineMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
+  this.arrowConeMaterial = new GizmoMaterial({color:this.arrowColor, 
 depthTest:false, depthWrite:false});
   
   mainArrowRight.line.material = mainArrowLeft.line.material = this.arrowLineMaterial;
@@ -349,7 +349,7 @@ SizeHelper.prototype._drawSideLines = function(){
     sideLineGeometry.vertices.push( sideLineStart );
     sideLineGeometry.vertices.push( sideLineEnd );
     
-    var leftSideLine = new THREE.Line( sideLineGeometry, new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.4, transparent:true } ) );
+    var leftSideLine = new THREE.Line( sideLineGeometry, new GizmoLineMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.4, transparent:true } ) );
     
     var leftToRightOffset = this.end.clone().sub( this.start );
     

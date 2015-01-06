@@ -90,6 +90,10 @@ AngularDimHelper = function(options)
   if( options.start ) this.setStart( this.start, this.startObject );
   if( options.mid ) this.setMid( this.mid, this.midObject );
   if( options.end )   this.setEnd( this.end, this.endObject );
+  
+  this.setAsSelectionRoot( true );
+  //FIXME: do this in a more coherent way
+  this._setName();
 }
 
 AngularDimHelper.prototype = Object.create( AnnotationHelper.prototype );
@@ -368,7 +372,6 @@ AngularDimHelper.prototype.unset = function(){
   //if( this.debugHelpers ) this.remove( this.debugHelpers );
 }
 
-
 AngularDimHelper.prototype.setLabelType = function(){
   
   var degAngle = this.angle*180/Math.PI;
@@ -387,6 +390,11 @@ AngularDimHelper.prototype.setLabelType = function(){
   this.label.position.copy( this.mid );
 }
 
+AngularDimHelper.prototype._setName = function( ){
+  var tmpValue = this.angle;
+  if( tmpValue ) tmpValue = tmpValue.toFixed( 2 );
+  this.name = "Angle: " + tmpValue;
+}
 
   
 

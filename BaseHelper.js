@@ -31,12 +31,21 @@ BaseHelper.prototype.show = function () {
 	});
 };
 
-BaseHelper.prototype.highlight = function ( item ) {
+BaseHelper.prototype.highlight = function ( flag ) {
+	this.traverse(function( child ) {
+		if ( child.material && child.material.highlight ){
+				child.material.highlight( flag );
+			}
+	});
+};
+
+
+BaseHelper.prototype.highlight2 = function ( item ) {
 	this.traverse(function( child ) {
 		if ( child.material && child.material.highlight ){
 			if ( child === item ) {
-			  console.log("highlight",item);
 				child.material.highlight( true );
+				return
 			} else {
 				child.material.highlight( false );
 			}
