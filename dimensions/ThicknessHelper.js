@@ -39,11 +39,13 @@ ThicknessHelper = function(options)
   this.thicknessHelperLabel.hide();
   this.add( this.thicknessHelperLabel );
   
-  
   if( options.thickness )this.setThickness( options.thickness );
   if( options.point ) this.setPoint( options.point );
   if( options.normal )this.setNormal( options.normal );
   
+  this.setAsSelectionRoot( true );
+  //FIXME: do this in a more coherent way
+  this.setName();
 }
 
 ThicknessHelper.prototype = Object.create( AnnotationHelper.prototype );
@@ -95,17 +97,8 @@ ThicknessHelper.prototype.set = function(entryInteresect )//, selectedObject)
   //compute actual thickness
   this.thickness = escapePoint.clone().sub( point).length();
   //set various internal attributes
-  
-  
   this.setPoint( point, entryInteresect.object);
   this.setNormal( normal );
-  
-  /*this.point  = point;
-  this.escapePoint = escapePoint;
-  this.normal = normal;
-  this.object = entryInteresect.object;*/
-
-  
   //this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
   this.done();
 }
@@ -126,6 +119,12 @@ ThicknessHelper.prototype.setNormal = function( normal ){
   this.done();    
 }
 
+ThicknessHelper.prototype.setName = function( ){
+  var tmpThickness = this.thickness;
+  if(tmpThickness) tmpThickness= tmpThickness.toFixed(2);
+  this.name = "Thickness: "+tmpThickness;
+}
+
 ThicknessHelper.prototype.unset = function(){
   this.thicknessHelperArrows.hide();
   this.thicknessHelperLabel.hide();
@@ -133,7 +132,6 @@ ThicknessHelper.prototype.unset = function(){
 
 //call this when everything has been set ?
 ThicknessHelper.prototype.done = function(){
-
   this.thicknessHelperArrows.show();
   this.thicknessHelperArrows.setStart( this.point );
   this.thicknessHelperArrows.setEnd( this.escapePoint );
