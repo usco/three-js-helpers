@@ -21,6 +21,12 @@
         
         var point = pickingDatas[0].point;//closest point
         var object = pickingDatas[0].object;
+        
+        //set point coordinates to be local , not global
+        //FIXME: are we sure about this?
+        //helper final instance will become attached to "object", do the same here
+        //this.helper.position.setFromMatrixPosition( entryInteresect.object.matrixWorld );
+        //object.worldToLocal( point );
       
         if(! this.helper.start){
           this.helper.unset();

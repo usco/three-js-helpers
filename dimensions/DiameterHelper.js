@@ -75,7 +75,6 @@ DiameterHelper = function(options)
   //this.dimensionHelper = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
   //fontSize:this.fontSize, textColor: this.textColor, textBgColor:this.textBgColor});
   
-  
   if( options.center )   this.setCenter( options.center );
   if( options.diameter ) this.setDiameter( options.diameter );
   if( options.orientation ) this.setOrientation( options.orientation );

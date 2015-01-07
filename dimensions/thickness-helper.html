@@ -19,8 +19,16 @@
         if(pickingDatas.length == 0) return;
         var entryInteresect = pickingDatas[0];
         
+        //var object = pickingDatas[0].object;//closest point
+        
         this.helper.unset();
         this.helper.set( entryInteresect );//, this.selectedObject );
+        
+        //set point coordinates to be local , not global
+        //FIXME: are we sure about this?
+        //helper final instance will become attached to "object", do the same here
+        this.helper.position.setFromMatrixPosition( entryInteresect.object.matrixWorld );
+        this.helper.object.worldToLocal( this.helper.point );
         
         this.annotationDone({type:"thickness", value:this.helper.thickness,
         point:this.helper.point, object:this.helper.object, normal:this.helper.normal});

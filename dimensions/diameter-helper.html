@@ -20,6 +20,11 @@
         var point = pickingDatas[0].point;//closest point
         var object= pickingDatas[0].object;//closest point
         
+        //FIXME: are we sure about this?
+        object.worldToLocal( point );
+        
+        
+        console.log("foo");
         if(this.mode == "2point")
         {
           if( !this.helper.center )
@@ -47,7 +52,9 @@
            {
               this.helper.unset();
               this.helper.setPointA( point, object );
-              this.helper.object = object;
+              //helper final instance will become attached to "object", do the same here
+              this.helper.position.setFromMatrixPosition( object.matrixWorld );
+              //this.helper.object = object;
               return;
            }
            if( !this.helper.pointB )
@@ -66,6 +73,8 @@
               this.helper.pointA = undefined;
               this.helper.pointB = undefined;
               this.helper.pointC = undefined;
+              
+              this.helper.unset();
            }
          }
       }

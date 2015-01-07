@@ -19,6 +19,12 @@
         var point = pickingDatas[0].point;//closest point
         var object = pickingDatas[0].object; 
         
+        //set point coordinates to be local , not global
+        //FIXME: are we sure about this?
+        object.worldToLocal( point );
+        //helper final instance will become attached to "object", do the same here
+        this.helper.position.setFromMatrixPosition( object.matrixWorld );
+        
         if(! this.helper.start){
             this.helper.unset();
             //console.log("setting angle start point");
@@ -50,6 +56,8 @@
               this.helper.start = undefined;
               this.helper.end   = undefined;
               this.helper.mid   = undefined;
+              
+              this.helper.unset();
             }
           }
       }
