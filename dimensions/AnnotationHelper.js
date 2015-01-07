@@ -17,6 +17,9 @@ AnnotationHelper = function(options)
   should name uniqueness be enforced ? yes, makes sense!
   */
   this.name = "";
+  
+  //FIXME: not too sure, this is a pointer to the data structure 
+  //this.note =
 }
 
 AnnotationHelper.prototype = Object.create( BaseHelper.prototype );

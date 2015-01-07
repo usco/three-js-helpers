@@ -66,7 +66,6 @@ BaseOutline.prototype.setLength = function( length ){
   this._updateGeometries();
 }
 
-
 ObjectDimensionsHelper = function (options) {
   BaseHelper.call( this );
   var options = options || {};
@@ -155,6 +154,7 @@ ObjectDimensionsHelper.prototype.detach = function(mesh){
 }
 
 ObjectDimensionsHelper.prototype.update = function(){
+  //FIXME: VERY costly, needs optimising : is all this needed all the time ?
   var foo = this.mesh.position.clone().sub( this.objectOriginalPosition );
   this.position.add( foo );
   this.objectOriginalPosition = this.mesh.position.clone();
@@ -202,7 +202,9 @@ ObjectDimensionsHelper.prototype.computeMiddlePoint=function(mesh)
 
 ObjectDimensionsHelper.prototype.getBounds=function(mesh)
 {
-  var bbox = new THREE.Box3().setFromObject( mesh );//FIXME: needs to ignore any helpers 
+  //console.log("gna");
+  var bbox = new Box3C().setFromObject( mesh ); //new THREE.Box3().setFromObject( mesh );
+  //FIXME: needs to ignore any helpers 
   //in the hierarchy
 
   var length = ( (bbox.max.x-bbox.min.x).toFixed(2) )/1; // division by one to coerce to number
