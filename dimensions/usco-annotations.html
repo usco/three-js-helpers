@@ -5,9 +5,9 @@
 <link rel="import" href="note-helper.html">
 <link rel="import" href="dimensions-helper-group.html">
 
-<!--FIXME: temporary name-->
-<polymer-element name="usco-annotations" extends="dimensions-helper-group" attributes="activeType" 
-on-annotation-done="{{measureDone}}">
+<!--FIXME: handle "partWaiters" better-->
+<polymer-element name="usco-annotations" extends="dimensions-helper-group" attributes="activeType annotations parts partWaiters showAnnotations" 
+on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityHandler}}">
   <template>
     <!-- measurements system test -->
     <!--<dimensions-helper-group id="dimensions" selectedObject="{{selectedObject}}" 
@@ -23,8 +23,14 @@ on-annotation-done="{{measureDone}}">
   <script>
     Polymer("usco-annotations",{
       activeType: null,
-      annotations: [],
+      annotations: [],//note: annotation positions are relative to their parent
       annotationTypes:[],
+      //FIXME: is this needed ? shoud it be here ?
+      _annotationMeshes: [],//list of all annotation 3d meshes
+      
+      parts: {},
+      partWaiters:{},
+      
       created:function(){
         this.annotations  = [];
       },
@@ -38,38 +44,214 @@ on-annotation-done="{{measureDone}}">
         //if(this.activeType != this.selectedMeasurement ){
         this.selectedMeasurement = this.activeType;
       },
-      //event handlers
-      annotationDone:function(e,detail,sender){
-        var measurement = detail;
-        return;
-        //FIXME , do this better
-        for(key in measurement)
+      showAnnotationsChanged:function( oldShowAnnotations, newShowAnnotations ){
+        var _annotationMeshes = this._annotationMeshes;
+        for(var i=0;i<_annotationMeshes.length;i++)
         {
-          if(measurement[key] instanceof THREE.Vector3)
+          if(newShowAnnotations){
+          _annotationMeshes[i].show();
+          }else
           {
-            measurement[key] = measurement[key].toArray();
+            _annotationMeshes[i].hide();
           }
-          if(measurement[key] instanceof THREE.Object3D)
+        }
+      },
+      annotationsChanged:function( oldAnnotations, newAnnotations ){
+        //FIXME: needed because of some strange behaviour not fillign old/new params correctly
+        var removedAnnotations = [];
+        if(oldAnnotations){
+          if(oldAnnotations.length == 1)
           {
-            measurement.partId = measurement[key].userData.part.id;
-            delete measurement[key];
+            var curData = oldAnnotations[0];
+            var newAnnotations = [];
+            if("removed" in curData ){
+              //console.log("array observer");
+              if("addedCount" in curData && curData.addedCount > 0 )
+              {
+                newAnnotations = [ this.annotations[ curData.index ] ];
+              }
+              removedAnnotations = curData.removed;
+            }
+          }
+        }
+        //console.log("annotationschanged", "old", oldAnnotations, "new", newAnnotations, "this",this.annotations);
+        /*for(var i=0;i<removedAnnotations.length;i++)
+        {
+        }*/
+        //console.log("parts", this.parts);
+        
+        //partWaiters : external to annotations, common for all part related items
+        
+        var self = this;
+        var Q = require("q");
+        
+        for(var i=0;i<newAnnotations.length;i++)
+        {
+          addAnnotation( newAnnotations[i] );
+        }
+        
+        function addAnnotation( annotationData ){
+          var annotationHelper = null;
+          
+          var annotation = {};
+          //fixme: hack:
+          annotation._orig = annotationData;
+          
+          for (var key in annotationData)
+          {
+            if(["position","normal","orientation","center","start","mid","end"].indexOf( key ) > -1 )
+            {
+              annotation[key] = new THREE.Vector3().fromArray( annotationData[key] );
+            }
+            else if(["object","startObject","midObject","endObject"].indexOf( key ) > -1 ){
+              if(!annotation._instances) annotation._instances = {};
+              annotation._instances[key] = annotationData[key];//push( annotationData[key] );
+            }
+            else{
+              annotation[key] = annotationData[key];
+            }
+          }
+          //console.log("annotation",annotation);
+          
+          var partsToWaitFor = [];
+          var argNames = [];
+          for( var key in annotation._instances  )//var i=0;i<annotation._instances.length;i++)
+          {
+            var partId = annotation._instances[key];
+            
+            if(!self.partWaiters[ partId ] )
+            {
+              self.partWaiters[ partId ] = Q.defer();
+            }
+            partsToWaitFor.push( self.partWaiters[ partId ].promise );
+            argNames.push( key );
+            
+            //resolve all waiters where 
+            if( partId in self.parts)
+            {
+              self.partWaiters[ partId ].resolve( self.parts[ partId ] );
+            }
+          }
+          //only add annotation once ALL its dependency parts have been loaded
+          Q.all( partsToWaitFor).then(function(res)
+          {
+            for(var i=0;i<argNames.length;i++)
+            {
+              var key = argNames[i];
+              annotation[key] = res[i];
+            }
+            finalizeAnnotation();
+          });
+          
+          function finalizeAnnotation(){
+            var annotationHelper = null;
+            switch(annotation.type)
+            {
+              case "distance":
+                var annotationHelper = new DistanceHelper({arrowColor:0x000000,
+                  textBgColor:"#ffd200",
+                  start:annotation.start, end:annotation.end,
+                  startObject:annotation.startObject,
+                  endObject:annotation.endObject
+                  });
+                //annotationHelper.position.sub( annotation.startObject.position );
+                //annotation.startObject.add( annotationHelper );
+                //TODO: uughh do not like this
+                //this.threeJs.updatables.push( annotationHelper ); 
+                //annotationHelper.set( {start:annotationHelper.start, end:annotationHelper.end} );
+                annotationHelper.updatable = true;
+                //FIXME: hack !!
+                annotation.startObject.parent.add( annotationHelper );
+                //self.addToScene( annotationHelper, "main", {autoResize:false, autoCenter:false, persistent:false, select:false } );
+                
+              break;
+              case "thickness":
+                var annotationHelper = new ThicknessHelper({arrowColor:0x000000,
+                  textBgColor:"#ffd200",
+                  thickness:annotation.value, point:annotation.position,
+                  normal: annotation.normal});
+                  
+                annotation.object.add( annotationHelper );
+              break;
+              
+              case "diameter":
+                var annotationHelper = new DiameterHelper({arrowColor:0x000000,
+                  textBgColor:"#ffd200",
+                  diameter:annotation.value, orientation:annotation.orientation,
+                  center:annotation.center});
+                  
+                annotation.object.add( annotationHelper );
+              break;
+              case "angle":
+                var annotationHelper = new AngularDimHelper({arrowColor:0x000000,
+                  textBgColor:"#ffd200",
+                  start:annotation.start, mid: annotation.mid, end:annotation.end,
+                  startObject:annotation.startObject,
+                  midObject:annotation.midObject,
+                  endObject:annotation.endObject});
+                  
+                annotation.startObject.add( annotationHelper );
+              break;
+              case "note":
+                var annotationHelper = new NoteHelper({arrowColor:0x000000,
+                  textBgColor:"#ffd200",
+                  point:annotation.position, object:annotation.object})
+               
+                annotation.object.add( annotationHelper );
+            }
+            
+            annotationHelper._orig = annotation._orig;
+            //add pointer back to original data
+            annotationHelper.userData.data = annotation._orig;
+            //store annotation object/mesh
+            self._annotationMeshes.push( annotationHelper );
+          }
+        }
+      },
+      //event handlers
+      annotationDoneHandler:function( e, detail, sender){
+        var annotation = detail;
+        console.log("annotation done in usco-annotations", annotation);
+        //add annotationData to storage, convert data formats to generic json
+        //TODO: clean this up
+        for(key in annotation)
+        {
+          if(annotation[key] instanceof THREE.Vector3)
+          {
+            annotation[key] = annotation[key].toArray();
+          }
+          if(annotation[key] instanceof THREE.Object3D)
+          {
+            annotation.partId = annotation[key].userData.part.id;
+            annotation[key] = annotation[key].userData.part.id;
+            //delete annotation[key];
           }
           if(key === "point")
           {
-            measurement["position"] = measurement[key];
-            delete measurement[key];
+            annotation["position"] = annotation[key];
+            delete annotation[key];
           }
         }
-        console.log("within annotations element : measure done", measurement);
-        //this.measurements.push( measurement );
-        this.annotations.push( measurement );
-        //console.log(  this.measurements ); 
+        //add generic fields
+        annotation.notes = "";
+        annotation.title = "";
+        console.log("annotation done", annotation);
+        this.annotations.push( annotation );
       },
-      
+      deleteEntityHandler:function( event, detail, sender ){
+        console.log("delete entity in usco-annotation", detail);
+        var entity = detail.entity;
+        var index = this.annotations.indexOf( entity );
+        this.annotations.splice( index, 1 );
+        
+        if( index > -1 ){
+          console.log("deleted annotation", entity);
+          this.fire( "annotation-deleted", {entity:entity} );
+        }
+       }
       /*onPicked:function( e ){
         this.$.dimensions.onPicked( e );
       }*/
-    
     });
    </script>
  </polymer-element>  

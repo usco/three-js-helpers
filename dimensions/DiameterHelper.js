@@ -285,7 +285,7 @@ DiameterHelper.prototype.setDataFromThreePoints = function(){
 
 DiameterHelper.prototype.setOrientation = function(orientation){
   this.orientation = orientation;
-  console.log("this.orientation",this.orientation);
+  //console.log("this.orientation",this.orientation);
   
   var defaultOrientation = new THREE.Vector3(0,0,1); 
   var quaternion = new THREE.Quaternion();
