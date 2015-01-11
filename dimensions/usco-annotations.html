@@ -25,10 +25,14 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
       activeType: null,
       annotations: [],//note: annotation positions are relative to their parent
       annotationTypes:[],
+      
+      //map of annotations by type
+      _annotationsByType: {},
       //FIXME: is this needed ? shoud it be here ?
       _annotationMeshes: [],//list of all annotation 3d meshes
       
       parts: {},
+      //partWaiters : external to annotations, common for all part related items
       partWaiters:{},
       
       created:function(){
@@ -75,15 +79,25 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           }
         }
         //console.log("annotationschanged", "old", oldAnnotations, "new", newAnnotations, "this",this.annotations);
-        /*for(var i=0;i<removedAnnotations.length;i++)
-        {
-        }*/
-        //console.log("parts", this.parts);
-        
-        //partWaiters : external to annotations, common for all part related items
-        
         var self = this;
         var Q = require("q");
+        
+        for(var i=0;i<removedAnnotations.length;i++)
+        {
+          console.log("removedAnnotations",removedAnnotations[ i ]);
+          var removedAnnotation = removedAnnotations[ i ];
+          
+          for(var j=0;j<self._annotationMeshes.length;j++)
+          {
+            var mesh = self._annotationMeshes[ j ];
+            if( removedAnnotation.uuid == mesh.userData.data.uuid )
+            {
+              if( mesh.parent ) mesh.parent.remove( mesh );
+              //delete self._annotationMeshes[ j ];
+            }
+          }
+        }        
+        
         
         for(var i=0;i<newAnnotations.length;i++)
         {
@@ -156,13 +170,17 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                   });
                 //annotationHelper.position.sub( annotation.startObject.position );
                 //annotation.startObject.add( annotationHelper );
-                //TODO: uughh do not like this
-                //this.threeJs.updatables.push( annotationHelper ); 
                 //annotationHelper.set( {start:annotationHelper.start, end:annotationHelper.end} );
                 annotationHelper.updatable = true;
-                //FIXME: hack !!
-                annotation.startObject.parent.add( annotationHelper );
-                //self.addToScene( annotationHelper, "main", {autoResize:false, autoCenter:false, persistent:false, select:false } );
+                //FIXME: hack and hack !!
+                var pseudoParent = self.parentNode.host.threeJs;
+                console.log("annotation.startObject.parent",annotation.startObject.parent,pseudoParent);
+                //annotation.startObject.parent.add( annotationHelper );
+                
+                //TODO: uughh do not like this
+                //this.threeJs.updatables.push( annotationHelper ); 
+                
+                pseudoParent.addToScene( annotationHelper, "main", {autoResize:false, autoCenter:false, persistent:false, select:false } );
                 
               break;
               case "thickness":
@@ -232,9 +250,22 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             delete annotation[key];
           }
         }
+        
+        //store the number of annotation by type
+        if(! this._annotationsByType[annotation.type] ) this._annotationsByType[annotation.type] = 0;
+        this._annotationsByType[annotation.type] += 1;
+        
         //add generic fields
+        annotation.uuid  =  THREE.Math.generateUUID(); 
+        annotation.name  =  annotation.type[0].toUpperCase() + this._annotationsByType[ annotation.type ];
         annotation.notes = "";
         annotation.title = "";
+        annotation.varName = "";//TODO: explore further: this could allow for some interesing
+        
+        
+        
+        
+        //parametric stuff
         console.log("annotation done", annotation);
         this.annotations.push( annotation );
       },
@@ -242,10 +273,12 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
         console.log("delete entity in usco-annotation", detail);
         var entity = detail.entity;
         var index = this.annotations.indexOf( entity );
-        this.annotations.splice( index, 1 );
         
         if( index > -1 ){
           console.log("deleted annotation", entity);
+          this.annotations.splice( index, 1 );
+          this._annotationsByType[ entity.type ] -= 1 ;
+          
           this.fire( "annotation-deleted", {entity:entity} );
         }
        }
