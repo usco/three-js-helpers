@@ -16,7 +16,7 @@ AngularDimHelper = function(options)
   this.linesColor = options.linesColor !== undefined ? options.linesColor : 0x000000;
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
   
-  var fontSize  = options.fontSize  !== undefined? options.fontSize: 10;
+  var fontSize  = options.fontSize  !== undefined? options.fontSize: 5;
   var precision = options.precision !== undefined? options.precision: 2;
   var text      = options.text      !== undefined? options.text   : angle.toFixed(precision) + "";//coerce as str
   this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
@@ -38,21 +38,24 @@ AngularDimHelper = function(options)
   
   
   //initialise internal sub objects
-  this.startCross = new CrossHelper({color:0xFF0000});
+  this.startCross = new CrossHelper({color:0xFF0000,size:5});
   this.startCross.hide();
   this.add( this.startCross );
   
-  this.midCross = new CrossHelper({color:0x0000FF});
+  this.midCross = new CrossHelper({color:0x0000FF,size:5});
   this.midCross.hide();
   this.add( this.midCross );
   
-  this.endCross = new CrossHelper({color:0x00FF00});
+  this.endCross = new CrossHelper({color:0x00FF00,size:5});
   this.endCross.hide();
   this.add( this.endCross );
   
-  this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+  //TODO: this is too specific, needs a wrapper
+  //this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+  this.label = new LabelHelper3d({text:this.text, fontSize:this.fontSize, bgColor:this.textBgColor});
   this.label.hide();
   this.add( this.label );
+  //this.setLabelType();
   
   //line from start to mid
   this.startMidLine = new SizeHelper( { drawLeftArrow:false, arrowsPlacement:"inside", 
@@ -178,20 +181,27 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
 	//console.log("midToStartAngle",midToStartAngle*180/Math.PI); 
 	
 	var arcAngle = this.angle;
-	var arcAngleStart= - Math.PI/2 + midToStartAngle;
-	var arcAngleEnd = arcAngleStart + arcAngle;
+	var arcAngleStart = - Math.PI/2 + midToStartAngle;
+	var arcAngleEnd   = arcAngleStart + arcAngle;
 	
-	
-	this.arc.setStart( arcAngleStart );
-	this.arc.setEnd( arcAngleEnd );
-	this.arc.setOuterRadius( arcOuterRadius );
-	this.arc.setInnerRadius( arcInnerRadius );
-	
+	//console.log("Start Angle (rad/deg)", arcAngleStart, (arcAngleStart*180/Math.PI).toFixed(2) );
+	//console.log("End   Angle (rad/deg)",   arcAngleEnd,  (arcAngleEnd*180/Math.PI).toFixed(2) );
 	var arcCenter = this.end.clone().sub( offsetStart ).divideScalar( 2 ).add( offsetStart );
 	var direction = (arcCenter.clone()).sub( this.mid ).normalize();
 	if(this.opositeAngle){
 	  direction.negate();
 	}
+	var offsetMid = this.mid.clone().add( direction.multiplyScalar( radius ) );
+	
+	/*this.arc.setStart( arcAngleStart );
+	this.arc.setEnd( arcAngleEnd );
+	this.arc.setOuterRadius( arcOuterRadius );
+	this.arc.setInnerRadius( arcInnerRadius );*/
+	this.arc.setStart( offsetStart );
+	this.arc.setMid( offsetMid );
+	this.arc.setEnd( this.end );
+	
+	/*
 	
 	var defaultOrientation = new THREE.Vector3(1,0,0); 
   var planeQuaternion = new THREE.Quaternion();
@@ -199,17 +209,26 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
   
   var frontFacingQuaternion = new THREE.Quaternion();
   frontFacingQuaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
-  //this.arc.rotation.setFromQuaternion( quaternion );
+  //this.arc.rotation.setFromQuaternion( frontFacingQuaternion );
   
   var comboQuaternion = new THREE.Quaternion();
   comboQuaternion.multiplyQuaternions( frontFacingQuaternion, planeQuaternion );
   
   var foo = new THREE.Quaternion();
-  foo.setFromUnitVectors ( new THREE.Vector3(1,0,1), plane.normal.clone().add(direction.clone()) );
+  foo.setFromUnitVectors ( new THREE.Vector3(1,0,1), plane.normal.clone().add(direction.clone()) );*/
   
-  this.arc.rotation.setFromQuaternion( foo );
-  this.arc.position.copy( this.mid );
+  //this.arc.rotation.setFromQuaternion( foo );
+  //this.arc.position.copy( this.mid );
+  
   this.arc.show();
+  
+  // some methods to create and draw great circles on a sphere
+
+  /*this.arc2 = drawCurve( createSphereArc( this.start, this.end ),  new THREE.Color(0xff0000) );
+  
+  console.log("start", this.start, "end", this.end);
+  //this.arc2.rotation.setFromQuaternion( planeQuaternion );
+  this.add( this.arc2 );*/
   
   this.label.setText( (this.angle*180/Math.PI).toFixed(2) );
   this.label.position.copy( arcCenter );
@@ -376,7 +395,7 @@ AngularDimHelper.prototype.setLabelType = function(){
   
   var degAngle = this.angle*180/Math.PI;
   this.text = new String(degAngle.toFixed(2))+"°";
-  
+  this.remove( this.label );
   switch(this.labelType)
   {
     case "flat":
@@ -386,8 +405,9 @@ AngularDimHelper.prototype.setLabelType = function(){
       this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
     break;
   }
-  
-  this.label.position.copy( this.mid );
+  this.label.hide();
+  this.add( this.label );
+  //this.label.position.copy( this.mid );
 }
 
 AngularDimHelper.prototype._setName = function( ){

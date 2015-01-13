@@ -8,7 +8,7 @@ LabelHelper = function (options) {
   this.color = options.color || "rgba(0, 0, 0, 1)";
   this.fontFace = options.fontFace || "Jura"; 
   this.fontWeight = options.fontWeight || "normal bolder";
-  this.fontSize = options.fontSize || 13;
+  this.fontSize = options.fontSize || 10;
   this.background = options.background !== undefined ? options.background : true;
 
   this.bgColor = options.bgColor || "rgba(255, 255, 255, 1)";
