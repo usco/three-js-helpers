@@ -3,10 +3,10 @@
 <link rel="import" href="diameter-helper.html">
 <link rel="import" href="angle-helper.html">
 <link rel="import" href="note-helper.html">
-<link rel="import" href="dimensions-helper-group.html">
+<link rel="import" href="annotation-helper-group.html">
 
 <!--FIXME: handle "partWaiters" better-->
-<polymer-element name="usco-annotations" extends="dimensions-helper-group" attributes="activeType annotations parts partWaiters showAnnotations" 
+<polymer-element name="usco-annotations" extends="annotation-helper-group" attributes="activeType annotations parts partWaiters showAnnotations" 
 on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityHandler}}">
   <template>
     <!-- measurements system test -->

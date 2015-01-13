@@ -1,11 +1,11 @@
-<polymer-element name="dimensions-helper-group" attributes="selectedObject selectedMeasurement" >
+<polymer-element name="annotation-helper-group" attributes="selectedObject selectedMeasurement" >
   <template>
     <core-selection id="selection" on-core-select="{{selectAction}}">
      <content></content>
     </core-selection>
   </template>
   <script>
-    Polymer('dimensions-helper-group', {
+    Polymer('annotation-helper-group', {
       active:null,
       pointerPosition:null,
       selectedObject:null,
