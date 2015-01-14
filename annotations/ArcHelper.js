@@ -79,8 +79,6 @@ ArcHelper.prototype._generate = function(){
     }*/
     //this.origin;
     //var offsetPoint = curve.getPointAt( this.arrowsLength );
-    console.log("here");
-    
     var midToEnd = this.end.clone().sub( this.mid );
     midToEnd.normalize();
     var rightArrowStart = this.end.clone().sub( midToEnd.clone().multiplyScalar( this.arrowsLength ) );
