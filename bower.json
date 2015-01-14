@@ -1,0 +1,9 @@
+{
+  "name": "three-js-helpers",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "webcomponentsjs": "Polymer/webcomponentsjs#~0.5.1",
+    "polymer": "Polymer/polymer#master",
+  }
+}

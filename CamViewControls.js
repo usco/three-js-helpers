@@ -431,11 +431,11 @@ CamViewControls.prototype.init = function( camera, domElement ){
 	this.camPosition = camPosition;
 	this.camRotation = camRotation;
   
-  domElement.addEventListener( "mousedown", onPointerDown, true );
-	domElement.addEventListener( "touchstart", onPointerDown, true );
-
   var useCapture = false;
   
+  domElement.addEventListener( "mousedown", onPointerDown, useCapture );
+	domElement.addEventListener( "touchstart", onPointerDown, useCapture );
+
 	domElement.addEventListener( "mousemove", onPointerMove, useCapture );
 	domElement.addEventListener( "touchmove", onPointerMove, useCapture );
 
