@@ -44,7 +44,7 @@ ArcHelper = function(options)
 	depthTest:false,depthWrite:false,side : THREE.DoubleSide } );
   this.material = options.material!== undefined ? options.material : defaultMaterial;
   
-  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000,depthTest:false,depthWrite:false, opacity:0.4, transparent:true, linewidth: 2 } );
+  this.lineMaterial = new GizmoLineMaterial( { color: 0x000000,depthTest:false,depthWrite:false, opacity:0.4, transparent:true, linewidth: 2 } );
   
   //this.setRadius(this.radius);
   this._generate();

@@ -4,14 +4,14 @@ LabelHelper = function (options) {
   BaseHelper.call( this );
 
   var options = options || {};
-  this.text = options.text !== undefined ? options.text : " ";
-  this.color = options.color || "rgba(0, 0, 0, 1)";
-  this.fontFace = options.fontFace || "Jura"; 
-  this.fontWeight = options.fontWeight || "normal bolder";
-  this.fontSize = options.fontSize || 10;
+  this.text       = options.text !== undefined ? options.text : " ";
+  this.color      = options.color || "rgba(0, 0, 0, 1)";
+  this.fontFace   = options.fontFace || "Jura"; 
+  this.fontWeight = options.fontWeight || "bold";//"normal bolder";
+  this.fontSize   = options.fontSize || 10;
   this.background = options.background !== undefined ? options.background : true;
 
-  this.bgColor = options.bgColor || "rgba(255, 255, 255, 1)";
+  this.bgColor    = options.bgColor || "rgba(255, 255, 255, 1)";
   
   this._resolutionMultiplier = 8;
   this._alphaTest = 0.1;
@@ -31,6 +31,12 @@ LabelHelper.prototype.setText = function( text ){
   this.generate();
 }
 
+
+
+
+
+
+
 LabelHelper.prototype.generateTextFromCanvas = function()
 {
   var canvas, context, material, plane, texture;
@@ -43,8 +49,10 @@ LabelHelper.prototype.generateTextFromCanvas = function()
   var bgColor = this.bgColor;
   var borderThickness = 1;
   
+  //var spriteAlignment = THREE.SpriteAlignment.topLeft;
+  
   //for background drawing
-  var bgRect = function(ctx, x, y, w, h, r) {
+  var bgRect = function(ctx, x, y, w, h) {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + w, y);
@@ -53,36 +61,68 @@ LabelHelper.prototype.generateTextFromCanvas = function()
     ctx.lineTo(x, y);
     ctx.closePath();
     ctx.fill();
-    return ctx.stroke();
+    //ctx.stroke();
   };
   
-  canvas = document.createElement('canvas');
-  context = canvas.getContext('2d');
-  context.font = fontWeight +" "+ fontSize+"px "+fontFace;
-  context.textAlign = 'center';
-
-  var metrics = context.measureText(text);
-  var resMult = this._resolutionMultiplier;
-  canvas.height = this.fontSize  * resMult;
-  canvas.width = metrics.width * resMult;
-  context.font = fontWeight +" "+ (fontSize*resMult)+"px "+fontFace;
-  context.textAlign = 'center';
-  
-  this.width = metrics.width/4;
-  
-  if (background) {
-    var upscaledFontSize = fontSize * resMult;
-    var textWidth = context.measureText(text).width*resMult;
-    context.fillStyle = bgColor;
-    context.strokeStyle = bgColor;
-    bgRect(context, canvas.width / 2 - upscaledFontSize -10, canvas.height / 2 - upscaledFontSize, textWidth + borderThickness, upscaledFontSize * 1.4 + borderThickness, 0);
+  // function for drawing rounded rectangles
+  function roundRect(ctx, x, y, w, h, r) 
+  {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.lineTo(x+w-r, y);
+      ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+      ctx.lineTo(x+w, y+h-r);
+      ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+      ctx.lineTo(x+r, y+h);
+      ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+      ctx.lineTo(x, y+r);
+      ctx.quadraticCurveTo(x, y, x+r, y);
+      ctx.closePath();
+      ctx.fill();
+	    ctx.stroke();   
   }
   
+  //this forces a higher resolution (for texts)
+  var resMult = this._resolutionMultiplier;
+  var borderSize = 5;
+  //background = false;
+  
+  canvas = document.createElement('canvas');
+  //  canvas.width = 340;
+  context = canvas.getContext('2d');
+  context.save();
+  
+  var rawFont = fontWeight + " " + (fontSize* resMult * 1.5) +"px "+fontFace;
+  context.font = rawFont;
+  context.textBaseline = "top"; 
+  context.textAlign    = "center";
+  
+  var metrics = context.measureText(text);
+  var width  = metrics.width ;
+  var height = fontSize  * resMult * 1.5 + borderSize;
+  
+  var fullWidth  = width  + borderSize*2;
+  var fullHeight = height + borderSize*2;
+
+  //console.log(" width",canvas.width, fullWidth);
+
+  //console.log(" width", width, "height", height,metrics.width, fontSize,resMult,context.font, rawFont );
+  this.width  = (fullWidth)/resMult/4;
+  this.height = (fullHeight)/resMult/4;
+  
+  if (background){
+    context.fillStyle   = bgColor;
+    context.strokeStyle = bgColor;
+    context.fillRect(0, 0, fullWidth, fullHeight);
+  }
+
+  context.scale(0.9, 0.9);
   context.fillStyle = color;
-  context.fillText(text, canvas.width / 2, canvas.height / 1.3);
-  context.lineWidth = 3;
+  context.fillText(text, width/2+borderSize/2,0 )//width/2, height/2);
+  //context.lineWidth = 3;
   context.strokeStyle = color;
-  context.strokeText(text, canvas.width / 2, canvas.height / 1.3);
+  context.strokeText(text, width/2+borderSize/2 ,0);
+  context.restore();
   
   texture = new THREE.Texture(canvas);
   texture.needsUpdate = true;

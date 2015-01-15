@@ -91,7 +91,7 @@ AngularDimHelper = function(options)
   this.angle = angle*Math.PI/180;
   
   if( options.start ) this.setStart( this.start, this.startObject );
-  if( options.mid ) this.setMid( this.mid, this.midObject );
+  if( options.mid )   this.setMid( this.mid, this.midObject );
   if( options.end )   this.setEnd( this.end, this.endObject );
   
   this.setAsSelectionRoot( true );
@@ -201,39 +201,13 @@ AngularDimHelper.prototype.setEnd = function( end, object ){
 	this.arc.setMid( offsetMid );
 	this.arc.setEnd( this.end );
 	
-	/*
-	
-	var defaultOrientation = new THREE.Vector3(1,0,0); 
-  var planeQuaternion = new THREE.Quaternion();
-  planeQuaternion.setFromUnitVectors ( new THREE.Vector3(0,0,1), plane.normal.clone() );
-  
-  var frontFacingQuaternion = new THREE.Quaternion();
-  frontFacingQuaternion.setFromUnitVectors ( defaultOrientation, direction.clone() );
-  //this.arc.rotation.setFromQuaternion( frontFacingQuaternion );
-  
-  var comboQuaternion = new THREE.Quaternion();
-  comboQuaternion.multiplyQuaternions( frontFacingQuaternion, planeQuaternion );
-  
-  var foo = new THREE.Quaternion();
-  foo.setFromUnitVectors ( new THREE.Vector3(1,0,1), plane.normal.clone().add(direction.clone()) );*/
-  
-  //this.arc.rotation.setFromQuaternion( foo );
-  //this.arc.position.copy( this.mid );
-  
   this.arc.show();
   
   // some methods to create and draw great circles on a sphere
-
-  /*this.arc2 = drawCurve( createSphereArc( this.start, this.end ),  new THREE.Color(0xff0000) );
-  
-  console.log("start", this.start, "end", this.end);
-  //this.arc2.rotation.setFromQuaternion( planeQuaternion );
-  this.add( this.arc2 );*/
   
   this.label.setText( (this.angle*180/Math.PI).toFixed(2) );
   this.label.position.copy( arcCenter );
   this.label.show();
- 
   
 	if( this.debug ){
 	  this.debugHelpers = new THREE.Object3D();
@@ -411,8 +385,8 @@ AngularDimHelper.prototype.setLabelType = function(){
 }
 
 AngularDimHelper.prototype._setName = function( ){
-  var tmpValue = this.angle;
-  if( tmpValue ) tmpValue = tmpValue.toFixed( 2 );
+  var tmpValue = this.angle; //TODO: store angles in radians or degrees?
+  if( tmpValue ) tmpValue = (tmpValue*180/Math.PI).toFixed( 2 );
   this.name = "Angle: " + tmpValue;
 }
 
