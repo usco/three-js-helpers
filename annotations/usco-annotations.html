@@ -23,6 +23,8 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
   <script>
     Polymer("usco-annotations",{
       activeType: null,
+      
+      showAnnotations:false,
       annotations: [],//note: annotation positions are relative to their parent
       annotationTypes:[],
       
@@ -223,6 +225,16 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             annotationHelper.userData.data = annotation._orig;
             //store annotation object/mesh
             self._annotationMeshes.push( annotationHelper );
+            
+            //set visibility
+            console.log("settign annotation visibility");
+            if(self.showAnnotations){
+              annotationHelper.show();
+            }else
+            {
+              annotationHelper.hide();
+            }
+            
           }
         }
       },
