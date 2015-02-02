@@ -20,6 +20,9 @@ AnnotationHelper = function(options)
   
   //FIXME: not too sure, this is a pointer to the data structure 
   //this.note =
+  
+  //can this object be translated/rotated/scaled on its own ? NOPE
+  this.transformable = false;
 }
 
 AnnotationHelper.prototype = Object.create( BaseHelper.prototype );
