@@ -152,9 +152,9 @@ LabelHelper3d.prototype.generate = function() {
     scaleByViewport: false,
     color: 0xffffff,
     side : THREE.DoubleSide,
-    depthTest:false,
-    depthWrite:false,
-    renderDepth : 1e20
+    //depthTest:false,
+    //depthWrite:false,
+    //renderDepth : 1e20
   });
   
   var width = this.width;
@@ -188,9 +188,9 @@ LabelHelperPlane.prototype.generate = function() {
     color: 0xffffff,
     alphaTest: this._alphaTest,
     side : THREE.DoubleSide,
-    depthTest:false,
+    /*depthTest:false,
     depthWrite:false,
-    renderDepth : 1e20,
+    renderDepth : 1e20,*/
   });
   
   var width = this.width;

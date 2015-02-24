@@ -6,7 +6,7 @@
 <link rel="import" href="annotation-helper-group.html">
 
 <!--FIXME: handle "partWaiters" better-->
-<polymer-element name="usco-annotations" extends="annotation-helper-group" attributes="activeType annotations parts partWaiters showAnnotations" 
+<polymer-element name="usco-annotations" extends="annotation-helper-group" attributes="activeType annotations parts partWaiters showAnnotations uiMode " 
 on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityHandler}}">
   <template>
     <!-- measurements system test -->
@@ -41,8 +41,26 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
         this.annotations  = [];
       },
       domReady:function(){
-        this.annotationTypes = Object.keys(this._helpers)
+        this.annotationTypes = Object.keys(this._helpers);
+        
+        //reload
+        this.annotations = JSON.parse( localStorage.getItem("ultiviewer-data-annotations") );
         //console.log("annotations", this.annotationTypes );
+        if(!this.annotations) this.annotations = [];
+        var self = this;
+        Nested.observe(this.annotations, function( changeData ){
+          console.log("change in annotations", changeData);
+          localStorage.setItem("ultiviewer-data-annotations", JSON.stringify( self.annotations ) );
+        })
+        
+        Nested.unobserve(this.assembly, function( bla ){
+          console.log("change in annotations(unobserve)", bla);
+          localStorage.setItem("ultiviewer-data-annotations", JSON.stringify( self.annotations ) );
+        })
+        /*Nested.deliverChangeRecords(function(blo){
+          console.log("blo", blo);
+        })*/
+        
       },
       //attriubte change handlers
       activeTypeChanged:function(){
@@ -62,8 +80,66 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           }
         }
       },
+      uiModeChanged:function(){
+        var self = this;
+        
+        
+        function changeVisuals(flag)
+        {
+          console.log("changing visuals of annotations", flag);
+          for(var j=0;j<self._annotationMeshes.length;j++)
+          {
+            var mesh = self._annotationMeshes[ j ];
+            
+            mesh.traverse(function( node ){
+            
+              if(flag)
+              {
+                if(node.material)
+                {
+                  node.material._oldOpacity = node.material.opacity;
+                  node.material._oldTransp  = node.material.transparent;
+                  
+                  node.material.opacity = 0.1;
+                  node.material.transparent = true;
+                  
+                  //console.log("node to",node, "oldOp",node.material._oldOpacity,
+                  //"oldTransp",node.material._oldTransp,"op", node.material.opacity,"tran",node.material.transparent);
+                }
+              
+              }
+              else
+              {
+                if( node.material && node.material._oldOpacity )
+                {
+                    //console.log("node back",node, "oldOp",node.material._oldOpacity,
+                  //"oldTransp",node.material._oldTransp,"op");  
+                
+                   node.material.opacity = node.material._oldOpacity;
+                   node.material.transparent  = node.material._oldTransp;
+                   
+                   node.material.opacity = 1;
+                   
+                }
+              }
+            });
+          }
+        }
+
+        switch(this.uiMode){
+          case "default":
+            changeVisuals(false);
+           break;
+           case "camera":
+            changeVisuals(true);
+           break;
+           default:
+            changeVisuals(false);
+           break;
+         }
+      },
       annotationsChanged:function( oldAnnotations, newAnnotations ){
-        //FIXME: needed because of some strange behaviour not fillign old/new params correctly
+        //FIXME: needed because of some strange behaviour not filling old/new params correctly
         var removedAnnotations = [];
         if(oldAnnotations){
           if(oldAnnotations.length == 1)
@@ -100,7 +176,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           }
         }        
         
-        
         for(var i=0;i<newAnnotations.length;i++)
         {
           addAnnotation( newAnnotations[i] );
@@ -129,7 +204,7 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           }
           //console.log("annotation",annotation);
           
-          var partsToWaitFor = [];
+          var partMeshesToWaitFor = [];
           var argNames = [];
           for( var key in annotation._instances  )//var i=0;i<annotation._instances.length;i++)
           {
@@ -139,17 +214,17 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             {
               self.partWaiters[ partId ] = Q.defer();
             }
-            partsToWaitFor.push( self.partWaiters[ partId ].promise );
+            partMeshesToWaitFor.push( self.partWaiters[ partId ].promise );
             argNames.push( key );
             
-            //resolve all waiters where 
+            //resolve all waiters where: FIXME : WTH horrible hack???
             if( partId in self.parts)
             {
               self.partWaiters[ partId ].resolve( self.parts[ partId ] );
             }
           }
           //only add annotation once ALL its dependency parts have been loaded
-          Q.all( partsToWaitFor).then(function(res)
+          Q.all( partMeshesToWaitFor ).then(function(res)
           {
             for(var i=0;i<argNames.length;i++)
             {
@@ -227,7 +302,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             self._annotationMeshes.push( annotationHelper );
             
             //set visibility
-            console.log("settign annotation visibility");
             if(self.showAnnotations){
               annotationHelper.show();
             }else
@@ -241,7 +315,11 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
       //event handlers
       annotationDoneHandler:function( e, detail, sender){
         var annotation = detail;
-        console.log("annotation done in usco-annotations", annotation);
+        //TODO: if annotations is between objects, it can only be PER INSTANCE
+        //but if within a single object , it can be either per instance or per class
+        //of course this applies only to distance and angle annotations
+        
+        //console.log("annotation done in usco-annotations", annotation);
         //add annotationData to storage, convert data formats to generic json
         //TODO: clean this up
         for(key in annotation)
@@ -253,7 +331,10 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           if(annotation[key] instanceof THREE.Object3D)
           {
             annotation.partId = annotation[key].userData.part.id;
-            annotation[key] = annotation[key].userData.part.id;
+            annotation.instId = annotation[key].userData.part.instId;
+            annotation[key]   = annotation[key].userData.part.id;
+            
+            console.log("annotation.instId",annotation.instId);
             //delete annotation[key];
           }
           if(key === "point")
@@ -261,6 +342,23 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             annotation["position"] = annotation[key];
             delete annotation[key];
           }
+          
+          //FIXME: bad event 
+          var self = this;
+          var msg = {type:"createAnnotation",
+            data:annotation,
+            undo:function(){
+              console.log("undo");
+              var idx = self.annotations.indexOf( annotation );
+              self.annotations.splice( idx , 1 );
+            },
+            redo:function(){
+              console.log("redo");
+              self.annotations.push( annotation );
+            }
+            };
+          var event = new CustomEvent('newOperation',{detail: {msg: msg }});
+          this.dispatchEvent(event);
         }
         
         //store the number of annotation by type
@@ -273,9 +371,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
         annotation.notes = "";
         annotation.title = "";
         annotation.varName = "";//TODO: explore further: this could allow for some interesing
-        
-        
-        
         
         //parametric stuff
         console.log("annotation done", annotation);

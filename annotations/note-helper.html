@@ -16,7 +16,7 @@
       onPicked:function(e){
         //console.log("picked", this.localName);
         pickingDatas = e.detail.pickingInfos;
-        if(pickingDatas.length == 0 || !this.selectedObject) return;
+        if(pickingDatas.length == 0 ) return;
         
         var point = pickingDatas[0].point;//closest point
         var object= pickingDatas[0].object;//closest point

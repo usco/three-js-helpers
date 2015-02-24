@@ -76,6 +76,11 @@ ObjectDimensionsHelper = function (options) {
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   this.sideLength = options.sideLength!== undefined ? options.sideLength : 10; 
+  
+  this.textBgColor = "#f5f5f5";//"rgba(255, 255, 255, 0)"
+  this.textColor = options.textBgColor;
+  this.color = 0xf00;
+  
 }
 
 ObjectDimensionsHelper.prototype = Object.create( BaseHelper.prototype );

@@ -28,7 +28,8 @@ DiameterHelper = function(options)
   
   this.text   = options.text !== undefined ? options.text : this.diameter.toFixed(2);
   
-  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000, depthTest:false, depthWrite:false,renderDepth : 1e20});
+  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000});
+  //depthTest:false, depthWrite:false,renderDepth : 1e20
  
   this.dimDisplayType = options.dimDisplayType!== undefined ? options.dimDisplayType : "offsetLine";
   this.centerCrossSize = 1.5;
@@ -65,7 +66,7 @@ DiameterHelper = function(options)
   this.add( this.diaCircle );
   
   this.sizeArrow = new SizeHelper({
-  textColor: this.textColor, textBgColor:this.textBgColor, labelType:"frontFacing",
+  textColor: this.textColor, textBgColor:this.textBgColor, labelType:this.labelType,
   });
   this.sizeArrow.hide();
   this.add( this.sizeArrow );

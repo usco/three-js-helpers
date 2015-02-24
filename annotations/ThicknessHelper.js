@@ -14,7 +14,11 @@ ThicknessHelper = function(options)
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
-  this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+  
+  //FIXME
+  this.textBgColor = "#f5f5f5";//"rgba(255, 255, 255, 0)"
+  this.textColor   = options.textBgColor;
   
   
   this.debug      = options.debug!== undefined ? options.debug : false;
@@ -26,14 +30,14 @@ ThicknessHelper = function(options)
   //initialise internal sub objects
   this.thicknessHelperArrows = new SizeHelper({
   textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
-  labelType:"frontFacing",sideLength:0, drawLabel:false
+  labelType:this.labelType,sideLength:0, drawLabel:false
   });
   this.thicknessHelperArrows.hide();
   this.add( this.thicknessHelperArrows );
   
   this.thicknessHelperLabel = new SizeHelper({
   textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
-  labelType:"frontFacing",sideLength:this.sideLength, drawArrows:false
+  labelType:this.labelType,sideLength:this.sideLength, drawArrows:false
   });
   
   this.thicknessHelperLabel.hide();
@@ -132,9 +136,9 @@ ThicknessHelper.prototype.unset = function(){
 
 //call this when everything has been set ?
 ThicknessHelper.prototype.done = function(){
-  this.thicknessHelperArrows.show();
+  /*this.thicknessHelperArrows.show();
   this.thicknessHelperArrows.setStart( this.point );
-  this.thicknessHelperArrows.setEnd( this.escapePoint );
+  this.thicknessHelperArrows.setEnd( this.escapePoint );*/
   
   this.thicknessHelperLabel.show();
   this.thicknessHelperLabel.setStart( this.point );

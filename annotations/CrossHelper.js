@@ -28,7 +28,11 @@ CrossHelper = function(options)
   startCrossGeometry.vertices.push( new THREE.Vector3( offsetPos, 0 , 0 ) );
   startCrossGeometry.vertices.push( new THREE.Vector3( id/2, 0 , 0 ) );
   
-  this.centerCross = new THREE.Line( startCrossGeometry, new GizmoLineMaterial( { color: this.color,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:opacity, transparent:true } ),THREE.LinePieces );
+  this.centerCross = new THREE.Line( startCrossGeometry, new GizmoLineMaterial( { color: this.color, opacity:opacity, transparent:true } ),THREE.LinePieces );
+  this.centerCross.material.depthTest   = true;
+  this.centerCross.material.depthWrite  = true;
+  this.centerCross.material.renderDepth = 1e20;
+  
   this.add( this.centerCross ) ;
   this.position.copy( position );
 }

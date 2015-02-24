@@ -253,13 +253,15 @@ SizeHelper.prototype._drawArrows = function(){
   this.add( mainArrowRight );
 
   //material settings : FIXME, move this elsewhere
-  this.arrowLineMaterial = new GizmoLineMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
-  this.arrowConeMaterial = new GizmoMaterial({color:this.arrowColor, 
-depthTest:false, depthWrite:false});
+  this.arrowLineMaterial = new GizmoLineMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter"});
+  this.arrowConeMaterial = new GizmoMaterial({color:this.arrowColor});
   
   mainArrowRight.line.material = mainArrowLeft.line.material = this.arrowLineMaterial;
   mainArrowRight.cone.material = mainArrowLeft.cone.material = this.arrowConeMaterial;
+  
   mainArrowRight.renderDepth = mainArrowLeft.renderDepth = 1e20;
+  mainArrowRight.depthTest   = mainArrowLeft.depthTest = true;
+  mainArrowRight.depthWrite  = mainArrowLeft.depthWrite = true;
   
   this.mainArrowRight = mainArrowRight;
   this.mainArrowLeft  = mainArrowLeft;
@@ -349,7 +351,10 @@ SizeHelper.prototype._drawSideLines = function(){
     sideLineGeometry.vertices.push( sideLineStart );
     sideLineGeometry.vertices.push( sideLineEnd );
     
-    var leftSideLine = new THREE.Line( sideLineGeometry, new GizmoLineMaterial( { color: 0x000000,depthTest:false,depthWrite:false,renderDepth : 1e20, opacity:0.4, transparent:true } ) );
+    
+    var material     = new GizmoLineMaterial( { color: 0x000000, opacity:0.4, transparent:true } );
+    //depthTest:false, depthWrite:false,renderDepth : 1e20
+    var leftSideLine = new THREE.Line( sideLineGeometry, material );
     
     var leftToRightOffset = this.end.clone().sub( this.start );
     

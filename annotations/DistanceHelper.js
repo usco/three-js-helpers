@@ -8,7 +8,7 @@ DistanceHelper = function(options)
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
-  this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
+  this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   
   this.arrowHeadSize   = 4;
   this.start           = undefined;
