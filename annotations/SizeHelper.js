@@ -25,10 +25,12 @@ SizeHelper = function(options)
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";//frontFacing or flat
   this.drawLabel  = options.drawLabel!== undefined ? options.drawLabel : true;
   this.lengthAsLabel  = options.lengthAsLabel!== undefined ? options.lengthAsLabel : true;
+  this.labelLength = 0;
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
   this.sideLengthExtra = options.sideLengthExtra!== undefined ? options.sideLengthExtra : 2; 
+  this.sideLineColor   = options.sideLineColor !== undefined ? options.sideLineColor:0x000000;
   
   this.drawArrows      = options.drawArrows !== undefined ? options.drawArrows: true  ;
   this.drawLeftArrow   = options.drawLeftArrow !== undefined ? options.drawLeftArrow: true  ;
@@ -38,6 +40,9 @@ SizeHelper = function(options)
   this.arrowHeadSize   = 4;
   this.arrowHeadWidth  = 1;
   
+  //FIXME: temp hack
+  this.textBgColor     = "rgba(255, 255, 255, 0)";
+  //this.arrowColor = options.textColor;
   
   //this.start = start;
   //this.end = end;
@@ -237,7 +242,6 @@ SizeHelper.prototype._drawArrows = function(){
   
   var arrowHeadSize = this.arrowHeadSize;
   var arrowSize     = this.arrowSize; 
-  
     
   var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
   var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
@@ -247,8 +251,8 @@ SizeHelper.prototype._drawArrows = function(){
   //direction, origin, length, color, headLength, headRadius, headColor
   var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, leftArrowHeadWidth);
   var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, rightArrowHeadWidth);
-  //mainArrowLeft.scale.z =0.1;
-  //mainArrowRight.scale.z=0.1;
+  mainArrowLeft.scale.z =0.4;
+  mainArrowRight.scale.z=0.4;
   this.add( mainArrowLeft );
   this.add( mainArrowRight );
 
@@ -277,6 +281,7 @@ SizeHelper.prototype._drawLabel = function(){
   //not always displayed
   this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,color:this.textColor,bgColor:this.textBgColor});
   this.label.position.copy( this.leftArrowPos );
+  
   //this.label.setRotationFromAxisAngle(this.direction.clone().normalize(), angle);
   //console.log("dir,angl",this.direction, angle, this.label.up);
   
@@ -289,6 +294,7 @@ SizeHelper.prototype._drawLabel = function(){
   
   var labelWidth = this.label.width;
   var reqWith = labelWidth + 2 * this.arrowHeadSize;
+  this.labelLength = labelWidth;
   
   switch(this.labelType)
   {
@@ -301,6 +307,13 @@ SizeHelper.prototype._drawLabel = function(){
   }
   this.label.position.copy( this.leftArrowPos );
   //this.label.rotation.z = Math.PI;
+  
+  //calculate offset so that there is a hole between the two arrows to draw the label
+  //arrowSize -= 10;
+  //TODO: only needed when drawing label
+  var labelHoleExtra    = 1;
+  var labelHoleHalfSize = (this.labelLength+labelHoleExtra)/2;
+  
   
   if(this.drawLabel) this.add( this.label );
   
@@ -323,6 +336,11 @@ SizeHelper.prototype._drawLabel = function(){
         //this.label.position.add( this.direction.clone().multiplyScalar( 5 ) );
       }
     }
+    else{//if the label + arrows would fit
+      this.arrowSize -= labelHoleHalfSize;
+      this.leftArrowPos.add( this.leftArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
+      this.rightArrowPos.add( this.rightArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
+    }
   }else if( this.arrowsPlacement == "outside" ){
     //put the arrows outside of measure, pointing "inwards" towards center
     this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
@@ -333,6 +351,10 @@ SizeHelper.prototype._drawLabel = function(){
     
     this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
     this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
+  }else{
+     this.arrowSize -= labelHoleHalfSize;
+     this.leftArrowPos.add( this.leftArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
+     this.rightArrowPos.add( this.rightArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
   }
   
   
@@ -352,7 +374,7 @@ SizeHelper.prototype._drawSideLines = function(){
     sideLineGeometry.vertices.push( sideLineEnd );
     
     
-    var material     = new GizmoLineMaterial( { color: 0x000000, opacity:0.4, transparent:true } );
+    var material     = new GizmoLineMaterial( { color: this.sideLineColor, opacity:0.4, transparent:true } );
     //depthTest:false, depthWrite:false,renderDepth : 1e20
     var leftSideLine = new THREE.Line( sideLineGeometry, material );
     

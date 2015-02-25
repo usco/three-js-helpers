@@ -78,7 +78,7 @@ ObjectDimensionsHelper = function (options) {
   this.sideLength = options.sideLength!== undefined ? options.sideLength : 10; 
   
   this.textBgColor = "#f5f5f5";//"rgba(255, 255, 255, 0)"
-  this.textColor = options.textBgColor;
+  this.textColor = "#ff0077";//options.textBgColor;
   this.color = 0xf00;
   
 }
@@ -121,15 +121,15 @@ ObjectDimensionsHelper.prototype.attach = function(mesh){
   //length, sideLength, position, direction, color, text, textSize,
   this.widthArrow  = new SizeHelper( {length:this.width,sideLength:sideLength,
   direction:new THREE.Vector3(0,1,0), 
-  textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
+  textBgColor:this.textBgColor, textColor:this.textColor, arrowColor: this.textColor, sideLineColor:this.textColor, labelType:this.labelType  });
   
   this.lengthArrow = new SizeHelper( {length:this.length,sideLength:sideLength,
   direction:new THREE.Vector3(-1,0,0), 
-  textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType  });
+  textBgColor:this.textBgColor, textColor:this.textColor, arrowColor: this.textColor, sideLineColor:this.textColor, labelType:this.labelType  });
   
   this.heightArrow = new SizeHelper( {length:this.height,sideLength:sideLength,
   direction:new THREE.Vector3(0,0,1), 
-  textBgColor:this.textBgColor, textColor:this.textColor, labelType:this.labelType });
+  textBgColor:this.textBgColor, textColor:this.textColor,arrowColor: this.textColor, sideLineColor:this.textColor, labelType:this.labelType });
   
   this.lengthArrow.position.copy( lengthArrowPos );
   this.widthArrow.position.copy( widthArrowPos );
