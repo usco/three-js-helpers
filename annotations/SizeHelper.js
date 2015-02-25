@@ -13,7 +13,6 @@ SizeHelper = function(options)
   var options = options || {};
   
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0x000000;
-  this.linesColor = options.linesColor !== undefined ? options.linesColor : 0x000000;
   //TODO: how to ? would require not using simple lines but strips
   //see ANGLE issue on windows platforms
   this.lineWidth  = options.lineWidth !== undefined ? options.lineWidth : 1;
@@ -31,13 +30,14 @@ SizeHelper = function(options)
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 0; 
   this.sideLengthExtra = options.sideLengthExtra!== undefined ? options.sideLengthExtra : 2; 
   this.sideLineColor   = options.sideLineColor !== undefined ? options.sideLineColor:0x000000;
+  this.sideLineSide    = options.sideLineSide !== undefined ? options.sideLineSide:"front";
   
   this.drawArrows      = options.drawArrows !== undefined ? options.drawArrows: true  ;
   this.drawLeftArrow   = options.drawLeftArrow !== undefined ? options.drawLeftArrow: true  ;
   this.drawRightArrow  = options.drawRightArrow !== undefined ? options.drawRightArrow : true;
   //can be either, dynamic, inside, outside
   this.arrowsPlacement = options.arrowsPlacement!== undefined ? options.arrowsPlacement : 'dynamic';
-  this.arrowHeadSize   = 4;
+  this.arrowHeadSize   = 3;
   this.arrowHeadWidth  = 1;
   
   //FIXME: temp hack
@@ -89,9 +89,11 @@ SizeHelper = function(options)
   
   this.leftArrowDir = this.direction.clone();
   this.rightArrowDir = this.leftArrowDir.clone().negate();
+  
   var cross = this.direction.clone().cross( this.up );
   cross.normalize().multiplyScalar(this.sideLength);
   //console.log("mid", this.mid,"cross", cross);
+  
   this.leftArrowPos = this.mid.clone().add( cross );
   this.rightArrowPos = this.mid.clone().add( cross );
   
@@ -192,6 +194,11 @@ SizeHelper.prototype._recomputeMidDir = function(){
     var cross = this.direction.clone().cross( this.up );
     cross.normalize().multiplyScalar(this.sideLength);
     //console.log("mid", this.mid,"cross", cross);
+    
+    if(this.sideLineSide == "back")
+    {
+      cross.negate();
+    }
 
     this.leftArrowPos = this.mid.clone().add( cross );
     this.rightArrowPos = this.mid.clone().add( cross );
@@ -251,8 +258,8 @@ SizeHelper.prototype._drawArrows = function(){
   //direction, origin, length, color, headLength, headRadius, headColor
   var mainArrowLeft = new THREE.ArrowHelper(leftArrowDir, leftArrowPos, arrowSize, this.arrowColor,leftArrowHeadSize, leftArrowHeadWidth);
   var mainArrowRight = new THREE.ArrowHelper(rightArrowDir, rightArrowPos, arrowSize, this.arrowColor,rightArrowHeadSize, rightArrowHeadWidth);
-  mainArrowLeft.scale.z =0.4;
-  mainArrowRight.scale.z=0.4;
+  mainArrowLeft.scale.z =0.6;
+  mainArrowRight.scale.z=0.6;
   this.add( mainArrowLeft );
   this.add( mainArrowRight );
 

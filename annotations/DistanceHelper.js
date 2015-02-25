@@ -9,6 +9,14 @@ DistanceHelper = function(options)
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
+ 
+  this.crossSize  = options.crossSize!== undefined ? options.crossSize : 3;
+  this.crossColor = options.crossColor!== undefined ? options.crossColor : "#000";
+  
+  //FIXME: hack
+  this.textColor = "#ff0077";
+  this.arrowColor = this.textColor;
+  this.crossColor = this.textColor;
   
   this.arrowHeadSize   = 4;
   this.start           = undefined;
@@ -19,14 +27,16 @@ DistanceHelper = function(options)
   this.distance        = undefined;
   
   //initialise internal sub objects
-  this.startCross = new CrossHelper();
+  this.startCross = new CrossHelper({size:this.crossSize,color:this.crossColor});
   this.startCross.hide();
   this.add( this.startCross );
   
-  this.sizeArrow = new SizeHelper( { drawRightArrow:false, arrowColor:this.arrowColor, 
-    linesColor:this.arrowColor,
+  this.sizeArrow = new SizeHelper( { drawRightArrow:true, arrowColor:this.arrowColor, 
+    sideLineColor:this.textColor,
     textBgColor:this.textBgColor,textColor:this.textColor, labelType:
-    this.labelType} ); 
+    this.labelType,sideLength:6,sideLineSide:"back"} );
+    
+     
   this.sizeArrow.hide();
   this.add( this.sizeArrow );
   

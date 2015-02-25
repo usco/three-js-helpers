@@ -4,14 +4,14 @@
 CrossHelper = function(options)
 {
   BaseHelper.call( this );
-  
   var options = options || {}
+  //var position = options.position || new THREE.Vector3();
+  //var direction = this.direction = options.direction || new THREE.Vector3();
 
-  var position = options.position || new THREE.Vector3();
-  var direction = this.direction = options.direction || new THREE.Vector3();
-  this.color = options.color || 0x000000 ;
+  var size  = options.size!== undefined ? options.size : 10;
+  this.color = options.color!== undefined ? options.color : "#0F0";
+
   var opacity = this.opacity = options.opacity || 0.8;
-  var size = this.size = options.size || 10;
   var id = this.innerDia = options.id || 0;
 
   
@@ -34,7 +34,7 @@ CrossHelper = function(options)
   this.centerCross.material.renderDepth = 1e20;
   
   this.add( this.centerCross ) ;
-  this.position.copy( position );
+  //this.position.copy( position );
 }
 
 CrossHelper.prototype = Object.create( BaseHelper.prototype );

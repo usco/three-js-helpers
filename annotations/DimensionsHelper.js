@@ -79,8 +79,6 @@ ObjectDimensionsHelper = function (options) {
   
   this.textBgColor = "#f5f5f5";//"rgba(255, 255, 255, 0)"
   this.textColor = "#ff0077";//options.textBgColor;
-  this.color = 0xf00;
-  
 }
 
 ObjectDimensionsHelper.prototype = Object.create( BaseHelper.prototype );
