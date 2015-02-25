@@ -24,6 +24,7 @@ SizeHelper = function(options)
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";//frontFacing or flat
   this.drawLabel  = options.drawLabel!== undefined ? options.drawLabel : true;
   this.lengthAsLabel  = options.lengthAsLabel!== undefined ? options.lengthAsLabel : true;
+  this.textPrefix = options.textPrefix!== undefined ? options.textPrefix : "";//TODO: perhas a "textformat method would be better ??
   this.labelLength = 0;
   
   this.drawSideLines = options.drawSideLines!== undefined ? options.drawSideLines :true;
@@ -43,9 +44,10 @@ SizeHelper = function(options)
   //FIXME: temp hack
   this.textBgColor     = "rgba(255, 255, 255, 0)";
   //this.arrowColor = options.textColor;
+  //FIXME: not sure 
+  this._userSetText = false;
   
-  //this.start = start;
-  //this.end = end;
+  
   this.up       = options.up !== undefined ? options.up : new THREE.Vector3(0,0,1);
   this._position= options.position !== undefined ? options.position : new THREE.Vector3();
   this.direction= options.direction || new THREE.Vector3(1,0,0);
@@ -145,6 +147,7 @@ SizeHelper.prototype.setSideLength = function( sideLength ){
 
 SizeHelper.prototype.setText = function( text ){
   this.text = text !== undefined ? text : "";
+  //console.log("setting text to", this.text);
   this._recomputeMidDir();
 } 
 
@@ -177,7 +180,8 @@ SizeHelper.prototype._recomputeMidDir = function(){
     this.mid   = this.direction.clone().multiplyScalar( this.length/2 ).add( this.start );
     
     if(this.lengthAsLabel) {
-      this.text = this.length.toFixed(2);
+      this.text = this.textPrefix + this.length.toFixed(2);
+      
     }
     
     this.arrowSize = this.length/2;//size of arrows 

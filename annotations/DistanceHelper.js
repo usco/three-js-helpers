@@ -4,7 +4,7 @@ DistanceHelper = function(options)
   var options = options || {};
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0xFF0000;
 
-  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 8;
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
@@ -33,7 +33,9 @@ DistanceHelper = function(options)
   
   //FIXME: side of sideLineSide needs to be dynamic
   
-  this.sizeArrow = new SizeHelper( { arrowColor:this.arrowColor, 
+  this.sizeArrow = new SizeHelper( { 
+    fontSize: this.fontSize,
+    arrowColor:this.arrowColor, 
     sideLineColor:this.textColor,
     textBgColor:this.textBgColor,textColor:this.textColor, labelType:
     this.labelType,sideLength:6,sideLineSide:"back"} );
@@ -119,6 +121,7 @@ DistanceHelper.prototype.unset = function( )
 }
 
 DistanceHelper.prototype.update = function(){
+  return;
   //TODO: find a way to only call this when needed
   if(!this.visible) return;
   if(!this.updatable) return;

@@ -18,7 +18,7 @@ DiameterHelper = function(options)
   this._position   = options.position !== undefined ? options.position : new THREE.Vector3();
   this.orientation = options.orientation !== undefined ? options.orientation : new THREE.Vector3();
   
-  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 8;
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
@@ -34,9 +34,10 @@ DiameterHelper = function(options)
   this.arrowColor = this.textColor;
   this.centerColor = this.textColor;
   this.crossColor  = this.textColor;
+  this.textBgColor = "rgba(255, 255, 255, 0)";
   
   
-  this.lineMaterial = new THREE.LineBasicMaterial( { color: this.centerColor});
+  this.lineMaterial = new GizmoLineMaterial( { color: this.centerColor,linewidth: 2});
   //depthTest:false, depthWrite:false,renderDepth : 1e20
  
   this.dimDisplayType = options.dimDisplayType!== undefined ? options.dimDisplayType : "offsetLine";
@@ -73,18 +74,29 @@ DiameterHelper = function(options)
   this.diaCircle.hide();
   this.add( this.diaCircle );
   
-  this.sizeArrow = new SizeHelper({
+  /*this.sizeArrow = new SizeHelper({
+  fontSize: this.fontSize,
   textColor: this.textColor, textBgColor:this.textBgColor, labelType:this.labelType,
   arrowColor:this.textColor, 
   sideLineColor:this.textColor,
+  textPrefix:"∅ ",
   });
   this.sizeArrow.hide();
-  this.add( this.sizeArrow );
+  this.add( this.sizeArrow );*/
   
   //TODO: add settable swtich between size helper & leader line
   //leader line
-  //this.dimensionHelper = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
-  //fontSize:this.fontSize, textColor: this.textColor, textBgColor:this.textBgColor});
+  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
+  fontSize:this.fontSize, 
+    textColor: this.textColor, 
+    textBgColor:this.textBgColor,
+    labelType : this.labelType,
+    arrowColor:this.textColor,
+    linesColor:this.textColor
+    });
+  this.leaderLine.hide();
+  this.add( this.leaderLine );
+  
   
   if( options.center )   this.setCenter( options.center );
   if( options.diameter ) this.setDiameter( options.diameter );
@@ -110,7 +122,9 @@ DiameterHelper.prototype.unset = function(){
   this.pointBCross.hide();
   this.pointCCross.hide();
   
-  this.sizeArrow.hide();
+  //this.sizeArrow.hide();
+  this.leaderLine.hide();
+  
   this.diaCircle.hide();
   
   this.position.copy( new THREE.Vector3() );
@@ -158,13 +172,14 @@ DiameterHelper.prototype.setDiameter = function(diameter){
   this.diameter = diameter;
   this.text     = this.diameter.toFixed(2);
   
-  this.sizeArrow.setLength( this.diameter );
-  this.sizeArrow.setSideLength( this.diameter/2+10 );
-  this.sizeArrow.setText( "∅"+ this.diameter );
+  //this.sizeArrow.setLength( this.diameter );
+  //this.sizeArrow.setSideLength( this.diameter/2+10 );
   
   this.diaCircle.setRadius( this.diameter/2);
   
-  this.sizeArrow.show();
+  //this.sizeArrow.show();
+  this.leaderLine.show();
+  
   this.diaCircle.show();
 }
 

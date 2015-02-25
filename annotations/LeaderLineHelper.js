@@ -10,22 +10,33 @@ LeaderLineHelper = function(options)
   this.color = options.color || "#000000" ;
   this.text = options.text !== undefined ? options.text : " ";
   
-  
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0x000000;
+  this.arrowHeadSize = options.arrowHeadSize !== undefined ? options.arrowHeadSize : 2.0;
+  this.arrowHeadWidth = options.arrowHeadWidth !== undefined ? options.arrowHeadWidth : 0.8;
+  
   this.linesColor = options.linesColor !== undefined ? options.linesColor : 0x000000;
   this.lineWidth  = options.lineWidth !== undefined ? options.lineWidth : 1;
   
-  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 8;
+  this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelType  = options.labelType!== undefined ? options.labelType : "frontFacing";
   
-  var angle = options.angle !== undefined ? options.angle : 45;
-  var radius = options.radius !== undefined ? options.radius : 0;
-  var angleLength = options.angleLength || 20; 
-  var horizLength = options.horizLength || 10;
+  this.angle  = options.angle !== undefined ? options.angle : 45;
+  this.angleLength  = options.angleLength !== undefined ? options.angleLength : 5;
+  this.horizLength  = options.horizLength !== undefined ? options.horizLength : 5;
+  this.radius = options.radius !== undefined ? options.radius : 0;
+  
+  var angle       = this.angle;
+  var radius      = this.radius;
+  var angleLength = this.angleLength;
+  var horizLength = this.horizLength;
+  var horizLength = this.horizLength;
+  
+  
   var textBorder = options.textBorder || null;
-
-  var material = new THREE.LineBasicMaterial( { color: this.linesColor, depthTest:false,depthWrite:false});
+  var material = new GizmoLineMaterial( { color: this.linesColor});
+  //depthTest:false,depthWrite:false});
  
   var rAngle = angle;
   rAngle = rAngle*Math.PI/180;
@@ -37,10 +48,8 @@ LeaderLineHelper = function(options)
   angleEndPoint.x = -angleEndPoint.x;
   angleEndPoint.y = -angleEndPoint.y;
   
-  this.angleArrow = new THREE.ArrowHelper(angleArrowDir, angleEndPoint, angleLength,this.color,4,2);
-  this.angleArrow.scale.z =0.1;
-  
-  //var endLineEndPoint = arrowOffset.clone().add( new THREE.Vector3( this.endLength, 0, 0 ) ) ;
+  this.angleArrow = new THREE.ArrowHelper(angleArrowDir, angleEndPoint, angleLength, this.color,this.arrowHeadSize,this.arrowHeadWidth);
+  this.angleArrow.scale.z =0.6;
   
   var horizEndPoint = angleEndPoint.clone();
   horizEndPoint.x -= horizLength;
@@ -50,16 +59,15 @@ LeaderLineHelper = function(options)
   horizGeom.vertices.push( horizEndPoint );
   
   this.horizLine = new THREE.Line( horizGeom, material );
-  this.horizLine.renderDepth = 1e20;
   
   //draw dimention / text
   switch(this.labelType)
   {
     case "flat":
-      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),bgColor:this.textBgColor});
+      this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),color:this.textColor,bgColor:this.textBgColor});
     break;
     case "frontFacing":
-      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,bgColor:this.textBgColor});
+      this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize,color:this.textColor, bgColor:this.textBgColor});
     break;
   }
   this.label.rotation.z = Math.PI;
@@ -86,17 +94,28 @@ LeaderLineHelper = function(options)
   this.add( this.angleArrow );
   this.add( this.horizLine );
   this.add( this.label );
+
+
   
-  //material settings : FIXME, move this elsewhere
-  this.arrowLineMaterial = new THREE.LineBasicMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter",depthTest:false,depthWrite:false});
-  this.arrowConeMaterial = new THREE.MeshBasicMaterial({color:this.arrowColor, 
-depthTest:false, depthWrite:false});
+  //material settings
+  this.arrowLineMaterial = new GizmoLineMaterial({color:this.arrowColor, linewidth:this.lineWidth,linecap:"miter"});
+  this.arrowConeMaterial = new GizmoMaterial({color:this.arrowColor});
   
   this.angleArrow.line.material = this.arrowLineMaterial;
   this.angleArrow.cone.material =  this.arrowConeMaterial;
-  this.angleArrow.renderDepth = 1e20;
+  this.angleArrow.line.material.depthTest = this.angleArrow.line.material.depthTest = true;
+  this.angleArrow.line.material.depthWrite = this.angleArrow.line.material.depthWrite = true;
   
+  //this.angleArrow.renderDepth = 1e20;
+  this.horizLine.renderDepth = 1e20;
 }
 
 LeaderLineHelper.prototype = Object.create( BaseHelper.prototype );
 LeaderLineHelper.prototype.constructor = LeaderLineHelper;
+
+
+LeaderLineHelper.prototype.updateParams = function(){
+
+
+}
+

@@ -13,7 +13,7 @@ CircleHelper = function(options)
   this.color  = options.color!== undefined ? options.color : "#000";
   this.radius   = options.radius!== undefined ? options.radius : 10;
   
-  var defaultMaterial = new THREE.LineBasicMaterial( { color: this.color, 
+  var defaultMaterial = new GizmoLineMaterial( { color: this.color, 
   depthTest:false, depthWrite:false,renderDepth : 1e20});
   this.material = options.material!== undefined ? options.material : defaultMaterial;
   

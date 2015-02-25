@@ -15,7 +15,7 @@
       onPicked:function(e){
         console.log("picked", this.localName);
         pickingDatas = e.detail.pickingInfos;
-        if(pickingDatas.length == 0 || !this.selectedObject) return;
+        if(pickingDatas.length == 0) return;
         
         var point = pickingDatas[0].point;//closest point
         var object= pickingDatas[0].object;//closest point
@@ -23,8 +23,6 @@
         //FIXME: are we sure about this?
         object.worldToLocal( point );
         
-        
-        console.log("foo");
         if(this.mode == "2point")
         {
           if( !this.helper.center )

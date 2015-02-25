@@ -183,7 +183,7 @@ LabelHelperPlane.prototype = Object.create( LabelHelper.prototype );
 LabelHelperPlane.prototype.constructor = LabelHelperPlane;
 
 LabelHelperPlane.prototype.generate = function() {
-  var material = new THREE.MeshBasicMaterial({
+  var material = new GizmoMaterial({
     map: this._texture,
     transparent: true,
     color: 0xffffff,
