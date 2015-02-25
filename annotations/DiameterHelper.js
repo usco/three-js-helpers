@@ -25,10 +25,18 @@ DiameterHelper = function(options)
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
   
   this.centerColor = options.centerColor!== undefined ? options.centerColor : "#F00";
+  this.crossColor  = options.crossColor!== undefined ? options.crossColor : "#F00";
   
   this.text   = options.text !== undefined ? options.text : this.diameter.toFixed(2);
   
-  this.lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000});
+   //FIXME: hack
+  this.textColor = "#ff0077";
+  this.arrowColor = this.textColor;
+  this.centerColor = this.textColor;
+  this.crossColor  = this.textColor;
+  
+  
+  this.lineMaterial = new THREE.LineBasicMaterial( { color: this.centerColor});
   //depthTest:false, depthWrite:false,renderDepth : 1e20
  
   this.dimDisplayType = options.dimDisplayType!== undefined ? options.dimDisplayType : "offsetLine";
@@ -47,17 +55,17 @@ DiameterHelper = function(options)
   this.add( this.centerCross );
   
    //pointA cross
-  this.pointACross = new CrossHelper({size:this.centerCrossSize});
+  this.pointACross = new CrossHelper({size:this.centerCrossSize,color:this.crossColor});
   this.pointACross.hide();
   this.add( this.pointACross );
     
    //pointB cross
-  this.pointBCross = new CrossHelper({size:this.centerCrossSize});
+  this.pointBCross = new CrossHelper({size:this.centerCrossSize,color:this.crossColor});
   this.pointBCross.hide();
   this.add( this.pointBCross );
   
    //pointC cross
-  this.pointCCross = new CrossHelper({size:this.centerCrossSize});
+  this.pointCCross = new CrossHelper({size:this.centerCrossSize,color:this.crossColor});
   this.pointCCross.hide();
   this.add( this.pointCCross );
   
@@ -67,6 +75,8 @@ DiameterHelper = function(options)
   
   this.sizeArrow = new SizeHelper({
   textColor: this.textColor, textBgColor:this.textBgColor, labelType:this.labelType,
+  arrowColor:this.textColor, 
+  sideLineColor:this.textColor,
   });
   this.sizeArrow.hide();
   this.add( this.sizeArrow );

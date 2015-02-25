@@ -31,7 +31,9 @@ DistanceHelper = function(options)
   this.startCross.hide();
   this.add( this.startCross );
   
-  this.sizeArrow = new SizeHelper( { drawRightArrow:true, arrowColor:this.arrowColor, 
+  //FIXME: side of sideLineSide needs to be dynamic
+  
+  this.sizeArrow = new SizeHelper( { arrowColor:this.arrowColor, 
     sideLineColor:this.textColor,
     textBgColor:this.textBgColor,textColor:this.textColor, labelType:
     this.labelType,sideLength:6,sideLineSide:"back"} );
@@ -52,13 +54,6 @@ DistanceHelper = function(options)
 
 DistanceHelper.prototype = Object.create( AnnotationHelper.prototype );
 DistanceHelper.prototype.constructor = DistanceHelper;
-
-DistanceHelper.prototype.toggleText = function(toggle)
-{
-  this.label.visible = toggle;
-  //Fixme:
-  this.label.textSprite.visible = toggle;
-}
 
 /*start: vector3D
 object: optional : on which object is the start point
@@ -110,6 +105,8 @@ DistanceHelper.prototype.setEnd = function( end, object )
   
   this.sizeArrow.setEnd( this.end);
   this.sizeArrow.show();
+  
+    //this.sizeArrow.label.textMesh.material.opacity = 0.1;
 }
 
 DistanceHelper.prototype.unset = function( )

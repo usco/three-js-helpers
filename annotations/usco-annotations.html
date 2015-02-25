@@ -90,11 +90,21 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           for(var j=0;j<self._annotationMeshes.length;j++)
           {
             var mesh = self._annotationMeshes[ j ];
-            
+            if(flag){
+              //mesh.hide();
+              mesh.setOpacity(0.2);
+            }
+            else{
+              //mesh.show();
+              mesh.setOpacity(5);
+            }
+           }
+         }
+            /*
             mesh.traverse(function( node ){
-            
               if(flag)
               {
+                //console.log("NODE", node);
                 if(node.material)
                 {
                   node.material._oldOpacity = node.material.opacity;
@@ -103,8 +113,8 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                   node.material.opacity = 0.1;
                   node.material.transparent = true;
                   
-                  //console.log("node to",node, "oldOp",node.material._oldOpacity,
-                  //"oldTransp",node.material._oldTransp,"op", node.material.opacity,"tran",node.material.transparent);
+                  console.log("node to",node, "oldOp",node.material._oldOpacity,
+                  "oldTransp",node.material._oldTransp,"op", node.material.opacity,"tran",node.material.transparent);
                 }
               
               }
@@ -112,19 +122,18 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
               {
                 if( node.material && node.material._oldOpacity )
                 {
-                    //console.log("node back",node, "oldOp",node.material._oldOpacity,
+                  //console.log("node back",node, "oldOp",node.material._oldOpacity,
                   //"oldTransp",node.material._oldTransp,"op");  
                 
                    node.material.opacity = node.material._oldOpacity;
                    node.material.transparent  = node.material._oldTransp;
                    
                    node.material.opacity = 1;
-                   
                 }
               }
             });
           }
-        }
+        }*/
 
         switch(this.uiMode){
           case "default":
@@ -132,9 +141,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
            break;
            case "camera":
             changeVisuals(true);
-           break;
-           default:
-            changeVisuals(false);
            break;
          }
       },

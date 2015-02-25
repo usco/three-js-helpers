@@ -31,6 +31,25 @@ BaseHelper.prototype.show = function () {
 	});
 };
 
+BaseHelper.prototype.setOpacity = function (opacityPercent) {
+	this.traverse(function( child ) {
+	  if(child.material)
+	  {
+	    child.material.opacity = child.material.opacity*opacityPercent;
+	    if(child.material.opacity < 1)
+	    {
+	      child.material.transparent = true;
+	    }
+	    //console.log("applying opacity to ",child);
+	  }
+	  else{
+	    //console.log("not applying opacity to",child);
+	  }
+
+	});
+};
+
+
 BaseHelper.prototype.highlight = function ( flag ) {
 	this.traverse(function( child ) {
 		if ( child.material && child.material.highlight ){

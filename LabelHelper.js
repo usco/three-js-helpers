@@ -166,6 +166,7 @@ LabelHelper3d.prototype.generate = function() {
   this.textSprite = textSprite;
   this.add( textSprite );
   
+  
   //var testCube = new THREE.Mesh(new THREE.CubeGeometry(width, height,  0.1), new THREE.MeshBasicMaterial({color:0xFF0000}));
   //this.add( testCube );
 };
@@ -187,7 +188,7 @@ LabelHelperPlane.prototype.generate = function() {
     transparent: true,
     color: 0xffffff,
     alphaTest: this._alphaTest,
-    side : THREE.DoubleSide,
+    side : THREE.FrontSide,
     /*depthTest:false,
     depthWrite:false,
     renderDepth : 1e20,*/
@@ -197,10 +198,20 @@ LabelHelperPlane.prototype.generate = function() {
   var height = this.height;
   
   var textPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(width, height), material);
-  textPlane.renderDepth =1e20;
+  //textPlane.renderDepth =1e20;
   
   if( this.textMesh ) this.remove( this.textMesh );
   
   this.textMesh = textPlane;
   this.add( textPlane );
+  
+  if( this.textPlaneBack ) this.remove( this.textPlaneBack );
+  
+  this.textPlaneBack = textPlane.clone();
+  this.textPlaneBack.rotation.y = -Math.PI;
+  //this.textPlaneBack.scale = -1;
+  //this.textPlaneBack.material.side=THREE.Front;
+  this.add( this.textPlaneBack );
+  
+  
 };
