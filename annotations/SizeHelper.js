@@ -306,8 +306,8 @@ SizeHelper.prototype._drawLabel = function(){
   this.label.rotation.setFromQuaternion( quaternion );
   this.label.rotation.z += Math.PI;
   
-  var labelWidth = this.label.width;
-  var reqWith = labelWidth + 2 * this.arrowHeadSize;
+  var labelWidth = this.label.textWidth;
+  var reqWith = labelWidth + 1 * this.arrowHeadSize;
   this.labelLength = labelWidth;
   
   switch(this.labelType)
@@ -325,7 +325,7 @@ SizeHelper.prototype._drawLabel = function(){
   //calculate offset so that there is a hole between the two arrows to draw the label
   //arrowSize -= 10;
   //TODO: only needed when drawing label
-  var labelHoleExtra    = 1;
+  var labelHoleExtra    = 0.5;
   var labelHoleHalfSize = (this.labelLength+labelHoleExtra)/2;
   
   

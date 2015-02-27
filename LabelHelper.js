@@ -23,10 +23,12 @@ LabelHelper = function (options) {
   this.width  = 0;
   this.height = 0;
   
-  //this.generateTextFromCanvas();
+  
+  //texture upscaling ratio
+  this.upscale = 10;
   
   //convertion of canvas to webglUnits 
-  this.canvasGLRatio = 1; //0.25;
+  this.baseRatio = 4; 
 
   this.canvas = document.createElement('canvas');
   this.canvas.style.position = "absolute";
@@ -51,6 +53,19 @@ LabelHelper.prototype.setText = function( text ){
   this.generate();
 }
 
+LabelHelper.prototype.applyFontStyleToContext = function( measureMode ){
+  var measureMode = measureMode!== undefined ? measureMode : true;
+  
+  var fontSize = this.charHeight;
+  if(!measureMode) fontSize = this.scaledFontSize;
+  
+  var font = this.fontWeight +" "+ this.fontStyle +" " + fontSize +"px "+ this.fontFace;
+
+  this.context.font = font;
+  this.context.textBaseline = "middle"; 
+  this.context.textAlign    = "center"
+}
+
 LabelHelper.prototype.measureText = function( text ){
 
   var pixelRatio = window.devicePixelRatio || 1;
@@ -68,32 +83,57 @@ LabelHelper.prototype.measureText = function( text ){
   //canvas.height = canvas.clientHeight * pixelRatio;
   //console.log("canvas.width ",canvas.width ,"canvas.height",canvas.height);
   
-  var font = fontWeight +" "+ fontStyle +" " + charHeight +"px "+ fontFace;
-  font = font.trim()
+  //var font = fontWeight +" "+ fontStyle +" " + charHeight +"px "+ fontFace;
+  //font = font.trim()
   
-  context.font = font;
+  //context.font = font;
   //context.textBaseline = "center"; 
   //context.textAlign    = "center"
+  this.applyFontStyleToContext();
   
-  //FIXME: hackery based on measurement of specific characters 
-  charWidth = context.measureText(  Array(100+1).join('M') ).width / 100;
-  
-  this.charWidth  = charWidth;
-  this.charHeight = charHeight;
-  
-  this.width      = ( charWidth * this.text.length-1 ) * this.canvasGLRatio + borderSize*2;
-  this.height     = charHeight * this.canvasGLRatio + borderSize*2;
-  
-  
-  console.log("Measured",this.width,this.height);
-  
-  function powTwo(value, pow) {
+  function getPowerOfTwo(value, pow) {
 	  var pow = pow || 1;
-	  while( pow < value ) {
+	  while(pow<value) {
 		  pow *= 2;
 	  }
 	  return pow;
   }
+  
+  //FIXME: hackery based on measurement of specific characters 
+  charWidth = context.measureText(  Array(100+1).join('M') ).width / 100;
+  this.charWidth  = charWidth;
+  this.charHeight = charHeight;
+  
+  var charWidth = (context.measureText(  Array(100+1).join('M') ).width ) / 100;
+  var charHeight = this.fontSize; 
+
+  var rWidth  = charWidth * (this.text.length-1);
+  var rHeight = charHeight;
+  var textWidth = context.measureText(text).width;
+  var sqrWidth  = getPowerOfTwo(textWidth);
+  var sqrHeight = getPowerOfTwo(2*this.fontSize);
+  
+  var upscale   = this.upscale; 
+  var baseRatio = this.baseRatio; 
+  
+  sqrWidth  *= upscale;
+  sqrHeight *= upscale;
+  
+  this.canvasWidth     = sqrWidth;
+  this.canvasHeight    = sqrHeight;
+  
+  this.width = sqrWidth/(upscale*baseRatio);
+  this.height = sqrHeight/(upscale*baseRatio);
+  
+  this.scaledFontSize = this.fontSize * upscale;
+  
+  this.textWidth  = (textWidth*upscale)/(upscale*baseRatio);
+  this.textHeight = (rHeight*upscale)/(upscale*baseRatio);
+  
+  //this.width      = ( charWidth * this.text.length-1 ) * this.canvasGLRatio + borderSize*2;
+  //this.height     = charHeight * this.canvasGLRatio + borderSize*2;
+  
+  console.log("canvas",sqrWidth, sqrHeight,"Width/height",this.width,this.height,"text (glSizes)",this.textWidth,this.textHeight);
   
 }
 
@@ -111,36 +151,24 @@ LabelHelper.prototype.drawText = function()
   var fontFace   = this.fontFace;
   var charHeight = this.charHeight;
   
-  var font = fontWeight +" "+ fontStyle +" " + charHeight +"px "+ fontFace;
-  font = font.trim()
+  canvas.width = this.canvasWidth;
+  canvas.height = this.canvasHeight;
   
-  context.font = font;
-  context.textBaseline = "bottom"; 
-  context.textAlign    = "center";
+  this.applyFontStyleToContext( false );
   
-  
-  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
-  context.fillStyle = "#000000";
-  context.fillRect(0, 0, context.canvas.width, context.canvas.height); 
+  //context.fillStyle = "#000000";
+  //context.fillRect(0, 0, canvas.width, canvas.height); 
   
-  
-  /*var scalex = (canvas.width / this.width);
-  var scaley = (canvas.height / this.height);
-  var ypos = (canvas.height / (scaley  ));
-  context.scale(scalex, scaley)*/
-  
-
   context.fillStyle = "#ffffff";
-  //context.fillText(text,0,ypos);
-  context.fillText(text, canvas.width/2, canvas.height/2);//1*this.charHeight);
+  context.fillText(text, canvas.width/2, canvas.height/2);
+  
+  //textWidth
+  //ctx.strokeStyle="red";
+  //ctx.rect((canvas.width-rWidth)/2,(canvas.height-rHeight)/2,rWidth,rHeight);
+  //ctx.stroke();
 
-  
-  /*//context.lineWidth = 3;
-  context.strokeStyle = color;
-  context.strokeText(text, width/2+borderSize/2 ,0);
-  context.restore();*/
-  
   
   texture = new THREE.Texture(canvas);
   texture.needsUpdate = true;
@@ -149,7 +177,6 @@ LabelHelper.prototype.drawText = function()
   texture.minFilter = THREE.LinearFilter;
   
   console.log("texture", texture);
-  
   
   //texture.magFilter = THREE.NearestFilter;
   //texture.minFilter = THREE.LinearMipMapLinearFilter;
@@ -310,11 +337,11 @@ LabelHelperPlane.prototype.generate = function() {
   var width  = this.width;
   var height = this.height;
   
-  width = 128;
-  height = 128;
-  /*console.log("width", width,"height", height);
+  //width = this.canvasWidth;
+  //height = this.canvasHeight;
+  console.log("width", width,"height", height);
 
-  var dynamicTexture	= new DynamicTexture(width*10,height*10)
+  /*var dynamicTexture	= new DynamicTexture(width*10,height*10)
 	dynamicTexture.context.font	= "bold "+10+"px Arial";
 	dynamicTexture.clear();
 	dynamicTexture.drawText(this.text, undefined, height/2, 'blue')

@@ -279,7 +279,7 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                 var annotationHelper = new DiameterHelper({arrowColor:0x000000,
                   textBgColor:"#ffd200",
                   diameter:annotation.value, orientation:annotation.orientation,
-                  center:annotation.center});
+                  center:annotation.center,tolerance:annotation.tolerance});
                   
                 annotation.object.add( annotationHelper );
               break;

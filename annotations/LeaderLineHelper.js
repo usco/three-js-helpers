@@ -64,6 +64,7 @@ LeaderLineHelper = function(options)
   switch(this.labelType)
   {
     case "flat":
+      console.log("this.fontSize",this.fontSize);
       this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,background:(this.textBgColor!=null),color:this.textColor,bgColor:this.textBgColor});
     break;
     case "frontFacing":
@@ -71,10 +72,23 @@ LeaderLineHelper = function(options)
     break;
   }
   this.label.rotation.z = Math.PI;
-  var labelSize=this.label.width/2 + 2 //label size, plus some extra
+  var labelSize=this.label.textWidth/2 + 1 //label size, plus some extra
   var labelPosition = horizEndPoint.clone().sub(new THREE.Vector3(labelSize,0,0))
   this.label.position.add( labelPosition );
   
+  /*
+  var precisionLabelPos = new THREE.Vector3().copy( labelPosition );
+  precisionLabelPos.x += this.label.width;
+  
+  //TODO: this is both needed in the data structures & in the visuals (here)
+  this.precision = 0.12;
+  this.precisionText = "+"+this.precision+"\n"+"-"+this.precision;
+  this.precisionLabel = new LabelHelperPlane({text:this.precisionText,fontSize:this.fontSize/1.5,background:(this.textBgColor!=null),color:this.textColor,bgColor:this.textBgColor});
+  this.add( this.precisionLabel );
+  
+  this.precisionLabel.rotation.z = Math.PI;
+  this.precisionLabel.position.copy( precisionLabelPos );*/
+ 
  
   var crossHelper = new CrossHelper({size:3});
   this.add( crossHelper );

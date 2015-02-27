@@ -35,8 +35,7 @@ var ctx = c.getContext("2d");
 var text = "∅"+25.47+"±0.15"; //"A";
 var fontSize = 22;
 var font = "bold "+fontSize+"px serif";
-  
-    
+      
 ctx.font = font;
 ctx.textBaseline = "middle"; 
 ctx.textAlign    = "center";
@@ -47,13 +46,15 @@ console.log("FONT", font);
 var charWidth = (ctx.measureText(  Array(100+1).join('M') ).width ) / 100;
 var charHeight = fontSize; 
 
-var rWidth  = charWidth * text.length;
+var rWidth  = charWidth * (text.length-1);
 var rHeight = charHeight;
 var textWidth = ctx.measureText(text).width;
 var sqrWidth  = getPowerOfTwo(textWidth);
 var sqrHeight = getPowerOfTwo(2*fontSize);
 
-console.log("charWidth", rWidth,"textWidh", textWidth,"sqrWidth",sqrWidth,"rHeight",rHeight,"sqrHeight",sqrHeight);
+    rWidth = textWidth;
+
+console.log("text.length",text.length,"charWidth", rWidth,"textWidh", textWidth,"sqrWidth",sqrWidth,"rHeight",rHeight,"sqrHeight",sqrHeight);
     
     c.width = sqrWidth;
     c.height = sqrHeight;
@@ -67,6 +68,10 @@ ctx.textAlign    = "center";
     
 ctx.fillStyle = "#ff00ff";
 ctx.fillText(text, c.width/2 , c.height/2);
+
+ctx.strokeStyle="red";
+ctx.rect((c.width-rWidth)/2,(c.height-rHeight)/2,rWidth,rHeight);
+ctx.stroke();
 
 </script>
 

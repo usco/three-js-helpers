@@ -36,6 +36,9 @@ DiameterHelper = function(options)
   this.crossColor  = this.textColor;
   this.textBgColor = "rgba(255, 255, 255, 0)";
   
+  //FIXME: this needs to be in all of the numerical measurement or not ? 
+  this.tolerance = options.tolerance !== undefined ? options.tolerance : 0;
+  
   
   this.lineMaterial = new GizmoLineMaterial( { color: this.centerColor,linewidth: 2});
   //depthTest:false, depthWrite:false,renderDepth : 1e20
@@ -86,8 +89,13 @@ DiameterHelper = function(options)
   
   //TODO: add settable swtich between size helper & leader line
   //leader line
-  this.leaderLine = new LeaderLineHelper({text:"∅"+this.text,radius:this.diameter/2,
-  fontSize:this.fontSize, 
+  
+  //var text = this.text; 
+  var text = this.tolerance === 0 ? this.text : this.text+"±"+this.tolerance;
+  //text:"∅"+this.text+"±0.15"
+  
+  this.leaderLine = new LeaderLineHelper({text:text,radius:this.diameter/2,
+    fontSize:this.fontSize, 
     textColor: this.textColor, 
     textBgColor:this.textBgColor,
     labelType : this.labelType,
