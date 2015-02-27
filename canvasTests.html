@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" 
+style="border:1px solid #c3c3c3;" >
+</canvas>
+
+<script>
+/* things learned:
+- text size is not proportionate to canvas size 
+- after changes to canvas size, need to reapply
+    context settings(font etc)
+
+
+*/
+
+function getPowerOfTwo(value, pow) {
+	var pow = pow || 1;
+	while(pow<value) {
+		pow *= 2;
+	}
+	return pow;
+}
+    
+
+var cWidth = 256;
+var cHeight = 256;
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+    
+    /*c.width  = cWidth;
+    c.height = cHeight;*/
+
+var text = "∅"+25.47+"±0.15"; //"A";
+var fontSize = 22;
+var font = "bold "+fontSize+"px serif";
+  
+    
+ctx.font = font;
+ctx.textBaseline = "middle"; 
+ctx.textAlign    = "center";
+    
+console.log("FONT", font);
+
+//measure height & width of chars
+var charWidth = (ctx.measureText(  Array(100+1).join('M') ).width ) / 100;
+var charHeight = fontSize; 
+
+var rWidth  = charWidth * text.length;
+var rHeight = charHeight;
+var textWidth = ctx.measureText(text).width;
+var sqrWidth  = getPowerOfTwo(textWidth);
+var sqrHeight = getPowerOfTwo(2*fontSize);
+
+console.log("charWidth", rWidth,"textWidh", textWidth,"sqrWidth",sqrWidth,"rHeight",rHeight,"sqrHeight",sqrHeight);
+    
+    c.width = sqrWidth;
+    c.height = sqrHeight;
+console.log(c.width, c.height);
+ 
+//ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); 
+
+ctx.font = font;
+ctx.textBaseline = "middle"; 
+ctx.textAlign    = "center";
+    
+ctx.fillStyle = "#ff00ff";
+ctx.fillText(text, c.width/2 , c.height/2);
+
+</script>
+
+</body>
+</html>
+

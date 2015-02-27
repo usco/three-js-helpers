@@ -6,9 +6,12 @@ LabelHelper = function (options) {
   var options = options || {};
   this.text       = options.text !== undefined ? options.text : " ";
   this.color      = options.color || "rgba(0, 0, 0, 1)";
+  
+  //this.textColor  = options.textColor !== undefined ? options.textColor : "rgba(0, 0, 0, 1)";
   this.fontFace   = options.fontFace || "Jura"; 
   this.fontWeight = options.fontWeight || "bold";//"normal bolder";
   this.fontSize   = options.fontSize || 10;
+  this.fontStyle  = "";
   this.background = options.background !== undefined ? options.background : true;
 
   this.bgColor    = options.bgColor || "rgba(255, 255, 255, 1)";
@@ -16,10 +19,27 @@ LabelHelper = function (options) {
   this._resolutionMultiplier = 8;
   this._alphaTest = 0.1;
   
-  this.width = 0;
-  this.height = this.fontSize/4;
+  this.borderSize = 0;
+  this.width  = 0;
+  this.height = 0;
   
-  this.generateTextFromCanvas();
+  //this.generateTextFromCanvas();
+  
+  //convertion of canvas to webglUnits 
+  this.canvasGLRatio = 1; //0.25;
+
+  this.canvas = document.createElement('canvas');
+  this.canvas.style.position = "absolute";
+  this.canvas.width  = 256;
+  this.canvas.height = 256;
+  
+  this.context= this.canvas.getContext('2d');
+  
+  var texture	= new THREE.Texture(this.canvas);
+	this.texture	= texture;
+  
+  this.measureText();
+  this.drawText();
 }
 
 LabelHelper.prototype = Object.create( BaseHelper.prototype );
@@ -31,11 +51,112 @@ LabelHelper.prototype.setText = function( text ){
   this.generate();
 }
 
+LabelHelper.prototype.measureText = function( text ){
+
+  var pixelRatio = window.devicePixelRatio || 1;
+  var charWidth   = 0;
+  var charHeight  = pixelRatio * this.fontSize;
+  
+  var canvas     = this.canvas;
+  var context    = this.context;
+  var fontFace   = this.fontFace;
+  var fontWeight = this.fontWeight;
+  var fontStyle  = this.fontStyle;
+  var borderSize = this.borderSize;
+  
+  //canvas.width  = canvas.clientWidth  * pixelRatio;
+  //canvas.height = canvas.clientHeight * pixelRatio;
+  //console.log("canvas.width ",canvas.width ,"canvas.height",canvas.height);
+  
+  var font = fontWeight +" "+ fontStyle +" " + charHeight +"px "+ fontFace;
+  font = font.trim()
+  
+  context.font = font;
+  //context.textBaseline = "center"; 
+  //context.textAlign    = "center"
+  
+  //FIXME: hackery based on measurement of specific characters 
+  charWidth = context.measureText(  Array(100+1).join('M') ).width / 100;
+  
+  this.charWidth  = charWidth;
+  this.charHeight = charHeight;
+  
+  this.width      = ( charWidth * this.text.length-1 ) * this.canvasGLRatio + borderSize*2;
+  this.height     = charHeight * this.canvasGLRatio + borderSize*2;
+  
+  
+  console.log("Measured",this.width,this.height);
+  
+  function powTwo(value, pow) {
+	  var pow = pow || 1;
+	  while( pow < value ) {
+		  pow *= 2;
+	  }
+	  return pow;
+  }
+  
+}
 
 
+LabelHelper.prototype.drawText = function()
+{
+  var canvas  = this.canvas;
+  var context = this.context;
+  var text    = this.text;
+  
+  var color = this.color;
+  
+  var fontWeight = this.fontWeight;
+  var fontStyle  = this.fontStyle;
+  var fontFace   = this.fontFace;
+  var charHeight = this.charHeight;
+  
+  var font = fontWeight +" "+ fontStyle +" " + charHeight +"px "+ fontFace;
+  font = font.trim()
+  
+  context.font = font;
+  context.textBaseline = "bottom"; 
+  context.textAlign    = "center";
+  
+  
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
+  context.fillStyle = "#000000";
+  context.fillRect(0, 0, context.canvas.width, context.canvas.height); 
+  
+  
+  /*var scalex = (canvas.width / this.width);
+  var scaley = (canvas.height / this.height);
+  var ypos = (canvas.height / (scaley  ));
+  context.scale(scalex, scaley)*/
+  
 
+  context.fillStyle = "#ffffff";
+  //context.fillText(text,0,ypos);
+  context.fillText(text, canvas.width/2, canvas.height/2);//1*this.charHeight);
 
+  
+  /*//context.lineWidth = 3;
+  context.strokeStyle = color;
+  context.strokeText(text, width/2+borderSize/2 ,0);
+  context.restore();*/
+  
+  
+  texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  texture.generateMipmaps = true;
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearFilter;
+  
+  console.log("texture", texture);
+  
+  
+  //texture.magFilter = THREE.NearestFilter;
+  //texture.minFilter = THREE.LinearMipMapLinearFilter;
+  
+  this._texture = texture;
+
+}
 
 LabelHelper.prototype.generateTextFromCanvas = function()
 {
@@ -49,6 +170,7 @@ LabelHelper.prototype.generateTextFromCanvas = function()
   var bgColor = this.bgColor;
   var borderThickness = 1;
   
+  //color= "rgba(1, 1, 1, 1)";
   //var spriteAlignment = THREE.SpriteAlignment.topLeft;
   
   //for background drawing
@@ -144,13 +266,14 @@ LabelHelper3d.prototype = Object.create( LabelHelper.prototype );
 LabelHelper3d.prototype.constructor = LabelHelper3d;
 
 LabelHelper3d.prototype.generate = function() {
+  
   var spriteMaterial = new THREE.SpriteMaterial({
     map: this._texture,
     transparent: true,
     alphaTest: this._alphaTest,
     useScreenCoordinates: false,
     scaleByViewport: false,
-    color: 0xffffff,
+    color: this.color ,
     side : THREE.DoubleSide,
     //depthTest:false,
     //depthWrite:false,
@@ -183,25 +306,38 @@ LabelHelperPlane.prototype = Object.create( LabelHelper.prototype );
 LabelHelperPlane.prototype.constructor = LabelHelperPlane;
 
 LabelHelperPlane.prototype.generate = function() {
+  
+  var width  = this.width;
+  var height = this.height;
+  
+  width = 128;
+  height = 128;
+  /*console.log("width", width,"height", height);
+
+  var dynamicTexture	= new DynamicTexture(width*10,height*10)
+	dynamicTexture.context.font	= "bold "+10+"px Arial";
+	dynamicTexture.clear();
+	dynamicTexture.drawText(this.text, undefined, height/2, 'blue')
+
+  this._texture = dynamicTexture.texture;*/
+
   var material = new GizmoMaterial({
     map: this._texture,
     transparent: true,
-    color: 0xffffff,
+    color: this.color,
     alphaTest: this._alphaTest,
     side : THREE.FrontSide,
-    /*depthTest:false,
-    depthWrite:false,
-    renderDepth : 1e20,*/
+    shading: THREE.FlatShading,
   });
   
-  var width = this.width;
-  var height = this.height;
+   /*depthTest:false,
+    depthWrite:false,
+    renderDepth : 1e20,*/
   
   var textPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(width, height), material);
-  //textPlane.renderDepth =1e20;
   
   if( this.textMesh ) this.remove( this.textMesh );
-  
+
   this.textMesh = textPlane;
   this.add( textPlane );
   
@@ -209,8 +345,6 @@ LabelHelperPlane.prototype.generate = function() {
   
   this.textPlaneBack = textPlane.clone();
   this.textPlaneBack.rotation.y = -Math.PI;
-  //this.textPlaneBack.scale = -1;
-  //this.textPlaneBack.material.side=THREE.Front;
   this.add( this.textPlaneBack );
   
   

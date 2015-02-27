@@ -38,8 +38,11 @@ SizeHelper = function(options)
   this.drawRightArrow  = options.drawRightArrow !== undefined ? options.drawRightArrow : true;
   //can be either, dynamic, inside, outside
   this.arrowsPlacement = options.arrowsPlacement!== undefined ? options.arrowsPlacement : 'dynamic';
-  this.arrowHeadSize   = 3;
-  this.arrowHeadWidth  = 1;
+  this.arrowHeadSize = options.arrowHeadSize !== undefined ? options.arrowHeadSize : 2.0;
+  this.arrowHeadWidth = options.arrowHeadWidth !== undefined ? options.arrowHeadWidth : 0.8;
+  
+  //this.arrowHeadSize   = 3;
+  //this.arrowHeadWidth  = 1;
   
   //FIXME: temp hack
   this.textBgColor     = "rgba(255, 255, 255, 0)";
