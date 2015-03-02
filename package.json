@@ -1,0 +1,22 @@
+{
+  "name": "three-js-helpers",
+  "version": "0.0.2",
+  "description": "three-js-helpers ============================",
+  "main": "BaseHelper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/usco/three-js-helpers.git"
+  },
+  "author": "Mark 'kaosat-dev' Moissette",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/usco/three-js-helpers/issues"
+  },
+  "homepage": "https://github.com/usco/three-js-helpers",
+  "devDependencies": {
+    "babelify": "^5.0.3"
+  }
+}

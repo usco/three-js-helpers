@@ -31,6 +31,16 @@ Notes:
 
 - all custom elements only work in the context of a three-js scene , see https://github.com/usco/three-js
 
+
+NODE.js/browserify:
+===================
+
+- annotations etc need to be rebuilt & browserified first : so use:
+
+  * npm install
+  * browserify annotations/src/UscoAnnotations.js -t babelify --outfile annotations/lib/bundle.js
+
+
 Licence
 =======
 MIT
