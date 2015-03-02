@@ -19,6 +19,7 @@ DiameterHelper = function(options)
   this.orientation = options.orientation !== undefined ? options.orientation : new THREE.Vector3();
   
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 8;
+  this.fontFace   = options.fontFace!== undefined ? options.fontFace : "Jura";
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";

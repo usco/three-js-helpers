@@ -45,7 +45,7 @@ SizeHelper = function(options)
   //this.arrowHeadWidth  = 1;
   
   //FIXME: temp hack
-  this.textBgColor     = "rgba(255, 255, 255, 0)";
+  this.textBgColor  = "rgba(255, 255, 255, 0)";
   //this.arrowColor = options.textColor;
   //FIXME: not sure 
   this._userSetText = false;
@@ -286,6 +286,13 @@ SizeHelper.prototype._drawArrows = function(){
   
 }
 
+/*determine positioning for the label/text:
+  Different cases:
+   - arrows pointing inwards:
+    * if label + arrows fits between ends, put label between arrows
+    * if label does not fit between ends
+  
+*/
 SizeHelper.prototype._drawLabel = function(){
   var sideLength = this.sideLength;
   var length = this.length;

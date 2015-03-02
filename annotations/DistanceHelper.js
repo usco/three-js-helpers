@@ -5,6 +5,7 @@ DistanceHelper = function(options)
   this.arrowColor = options.arrowColor !== undefined ? options.arrowColor : 0xFF0000;
 
   this.fontSize   = options.fontSize!== undefined ? options.fontSize : 8;
+  this.fontFace   = options.fontFace!== undefined ? options.fontFace : "Jura";
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#fff";
   this.labelPos   = options.labelPos!== undefined ? options.labelPos : "center";
@@ -13,10 +14,6 @@ DistanceHelper = function(options)
   this.crossSize  = options.crossSize!== undefined ? options.crossSize : 3;
   this.crossColor = options.crossColor!== undefined ? options.crossColor : "#000";
   
-  //FIXME: hack
-  this.textColor = "#ff0077";
-  this.arrowColor = this.textColor;
-  this.crossColor = this.textColor;
   
   this.arrowHeadSize   = 4;
   this.start           = undefined;

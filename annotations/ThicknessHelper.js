@@ -11,7 +11,8 @@ ThicknessHelper = function(options)
   
   this.sideLength    = options.sideLength!== undefined ? options.sideLength : 10; 
   
-  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 10;
+  this.fontSize   = options.fontSize!== undefined ? options.fontSize : 8;
+  this.fontFace   = options.fontFace!== undefined ? options.fontFace : "Jura";
   this.textColor  = options.textColor!== undefined ? options.textColor : "#000";
   this.textBgColor= options.textBgColor!== undefined ? options.textBgColor : "#ffd200";
   this.labelType  = options.labelType!== undefined ? options.labelType : "flat";
@@ -19,6 +20,7 @@ ThicknessHelper = function(options)
   //FIXME
   this.textBgColor = "#f5f5f5";//"rgba(255, 255, 255, 0)"
   this.textColor   = options.textBgColor;
+  this.textColor = "#ff0077";
   
   
   this.debug      = options.debug!== undefined ? options.debug : false;
@@ -30,18 +32,19 @@ ThicknessHelper = function(options)
   //initialise internal sub objects
   this.thicknessHelperArrows = new SizeHelper({
   textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
-  labelType:this.labelType,sideLength:0, drawLabel:false
+  arrowColor:this.textColor,
+  labelType:this.labelType,sideLength:10, fontSize:this.fontSize
   });
   this.thicknessHelperArrows.hide();
   this.add( this.thicknessHelperArrows );
   
-  this.thicknessHelperLabel = new SizeHelper({
+  /*this.thicknessHelperLabel = new SizeHelper({
   textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
   labelType:this.labelType,sideLength:this.sideLength, drawArrows:false
   });
   
   this.thicknessHelperLabel.hide();
-  this.add( this.thicknessHelperLabel );
+  this.add( this.thicknessHelperLabel );*/
   
   if( options.thickness )this.setThickness( options.thickness );
   if( options.point ) this.setPoint( options.point );
@@ -131,18 +134,18 @@ ThicknessHelper.prototype._setName = function( ){
 
 ThicknessHelper.prototype.unset = function(){
   this.thicknessHelperArrows.hide();
-  this.thicknessHelperLabel.hide();
+  //this.thicknessHelperLabel.hide();
 }
 
 //call this when everything has been set ?
 ThicknessHelper.prototype.done = function(){
-  /*this.thicknessHelperArrows.show();
+  this.thicknessHelperArrows.show();
   this.thicknessHelperArrows.setStart( this.point );
-  this.thicknessHelperArrows.setEnd( this.escapePoint );*/
+  this.thicknessHelperArrows.setEnd( this.escapePoint );
   
-  this.thicknessHelperLabel.show();
+  /*this.thicknessHelperLabel.show();
   this.thicknessHelperLabel.setStart( this.point );
-  this.thicknessHelperLabel.setEnd( this.escapePoint );
+  this.thicknessHelperLabel.setEnd( this.escapePoint );*/
 }
 
 
