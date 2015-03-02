@@ -1,4 +1,6 @@
-
+var BaseHelper = require("../BaseHelper");
+var {LabelHelperPlane, LabelHelper3d} = require("../LabelHelper");
+var {GizmoMaterial,GizmoLineMaterial} = require("../GizmoMaterial");
 /*
   Made of two main arrows, and two lines perpendicular to the main arrow, at both its ends
   If the VISUAL distance between star & end of the helper is too short to fit text + arrow:
@@ -7,7 +9,7 @@
 */
 
 //TODO: how to put items on the left instead of right, front instead of back etc
-SizeHelper = function(options)
+var SizeHelper = function(options)
 {
   BaseHelper.call( this );
   var options = options || {};
@@ -254,9 +256,13 @@ SizeHelper.prototype._drawArrows = function(){
   var leftArrowPos = this.leftArrowPos;
   var rightArrowPos= this.rightArrowPos;
   
+  
   var arrowHeadSize = this.arrowHeadSize;
   var arrowSize     = this.arrowSize; 
-    
+  
+  var rightArrowHeadSize = undefined;
+  var rightArrowHeadWidth = undefined;
+  
   var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
   var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
   if(this.drawLeftArrow){ leftArrowHeadSize = arrowHeadSize; leftArrowHeadWidth=this.arrowHeadWidth}
@@ -428,4 +434,6 @@ SizeHelper.prototype._drawDebugHelpers = function(){
   
   this.add( this.debugHelpers );
 }
+
+module.exports = SizeHelper;
 

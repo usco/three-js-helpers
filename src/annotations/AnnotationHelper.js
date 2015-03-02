@@ -1,4 +1,4 @@
-var BaseHelper = require("./base/BaseHelper");
+var BaseHelper = require("../BaseHelper");
 
 /*
 Base helper for all annotations

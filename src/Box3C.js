@@ -1,11 +1,11 @@
 
-Box3C = function(options)
+var Box3C = function(options)
 {
   THREE.Box3.call( this );
   
 } 
 Box3C.prototype = Object.create( THREE.Box3.prototype );
-Box3C.prototype.constructor = AnnotationHelper;  
+//Box3C.prototype.constructor = AnnotationHelper;  
 
 Box3C.prototype.setFromObject= function () {
 
@@ -81,4 +81,6 @@ Box3C.prototype.setFromObject= function () {
 		};
 
 	}()
+	
+module.exports = Box3C;
 

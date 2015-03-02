@@ -38,7 +38,18 @@ NODE.js/browserify:
 - annotations etc need to be rebuilt & browserified first : so use:
 
   * npm install
-  * browserify annotations/src/UscoAnnotations.js -t babelify --outfile annotations/lib/bundle.js
+  
+  Build dimensions:
+  
+      browserify -s uscoDimensions src/dimensions/usco-dimensions.js -t babelify --outfile lib/usco-dimensions.js
+      
+  for now
+      
+      browserify -s ObjectDimensionsHelper src/dimensions/usco-dimensions.js -t babelify --outfile lib/usco-dimensions.js
+
+  Build annotations
+  
+      browserify -s uscoAnnotations src/annotations/usco-annotations.js -t babelify --outfile lib/usco-annotations.js
 
 
 Licence

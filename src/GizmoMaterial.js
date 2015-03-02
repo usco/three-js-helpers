@@ -31,7 +31,7 @@ GizmoMaterial = function ( parameters ) {
 
 GizmoMaterial.prototype = Object.create( THREE.MeshBasicMaterial.prototype );
 
-GizmoLineMaterial = function ( parameters ) {
+var GizmoLineMaterial = function ( parameters ) {
 		THREE.LineBasicMaterial.call( this );
 		//this.depthTest = false;
 		//this.depthWrite = false;
@@ -56,12 +56,11 @@ GizmoLineMaterial = function ( parameters ) {
 
 					this.color.copy( this.oldColor );
 					//this.opacity = this.oldOpacity;
-
 			}
-
 		};
 };
 
 GizmoLineMaterial.prototype = Object.create( THREE.LineBasicMaterial.prototype );
 
 
+module.exports = {GizmoMaterial:GizmoMaterial, GizmoLineMaterial:GizmoLineMaterial};
