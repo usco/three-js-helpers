@@ -1,3 +1,7 @@
+var BaseHelper = require("../BaseHelper");
+var {LabelHelperPlane, LabelHelper3d} = require("../LabelHelper");
+var {GizmoMaterial,GizmoLineMaterial} = require("../GizmoMaterial");
+
 /*
 
 */
@@ -129,7 +133,7 @@ LeaderLineHelper.prototype.constructor = LeaderLineHelper;
 
 
 LeaderLineHelper.prototype.updateParams = function(){
-
-
 }
+
+module.exports = LeaderLineHelper;
 

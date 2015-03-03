@@ -1,3 +1,7 @@
+var {GizmoMaterial,GizmoLineMaterial} = require("../GizmoMaterial");
+var AnnotationHelper = require("./AnnotationHelper");
+var SizeHelper = require("../dimensions/SizeHelper");
+
 /*
   Made of one main arrow, and two lines perpendicular to the main arrow, at both its ends
   
@@ -335,4 +339,4 @@ DiameterHelper.prototype._setName = function( ){
   this.name = "Diameter: " + tmpValue;
 }
 
-
+module.exports = DiameterHelper;

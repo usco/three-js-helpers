@@ -52,6 +52,23 @@ class AnnotationHelper extends BaseHelper {
     //can this object be translated/rotated/scaled on its own ? NOPE
     this.transformable = false;
   }
+  
+  
+  
+  /*
+    get info about target object
+  */
+  getTargetBoundsData( target, intersection ){
+    /* -1 /+1 directions on all 3 axis to determine for exampel WHERE an annotation
+    should be placed (left/right, front/back, top/bottom)
+    */
+    var putSide= [0,0,0];
+    //target.
+
+    return {putSide:  putSide}; 
+  }  
+
+  
 }
 
 

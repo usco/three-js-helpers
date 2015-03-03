@@ -1,4 +1,5 @@
 var AnnotationHelper = require("./AnnotationHelper");
+var SizeHelper = require("../dimensions/SizeHelper");
 
 class DistanceHelper extends AnnotationHelper {
   constructor( options ) {
@@ -187,7 +188,8 @@ class DistanceHelper extends AnnotationHelper {
     this.name = "Distance: " + tmpValue;
   }
   
-  
 }
+
+module.exports = DistanceHelper;
 
 

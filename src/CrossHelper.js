@@ -39,3 +39,5 @@ CrossHelper = function(options)
 
 CrossHelper.prototype = Object.create( BaseHelper.prototype );
 CrossHelper.prototype.constructor = CrossHelper;  
+
+module.exports = CrossHelper;

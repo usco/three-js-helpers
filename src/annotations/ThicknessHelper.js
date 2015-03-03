@@ -1,4 +1,5 @@
 var AnnotationHelper = require("./AnnotationHelper");
+var SizeHelper = require("../dimensions/SizeHelper");
 
 class ThicknessHelper extends AnnotationHelper {
   constructor( options ) {
@@ -141,8 +142,4 @@ class ThicknessHelper extends AnnotationHelper {
   }
 }
 
-
-
-
-
-
+module.exports = ThicknessHelper;

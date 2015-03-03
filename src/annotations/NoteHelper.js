@@ -1,3 +1,7 @@
+var AnnotationHelper = require("./AnnotationHelper");
+var CrossHelper = require("../CrossHelper");
+
+
 /*
   Made of one main arrow, and two lines perpendicular to the main arrow, at both its ends
 */
@@ -53,4 +57,6 @@ NoteHelper.prototype.setPoint = function( point, object ){
 NoteHelper.prototype._setName = function( ){
   this.name = "Note: " + this.title;
 }
+
+module.exports = NoteHelper;
 
