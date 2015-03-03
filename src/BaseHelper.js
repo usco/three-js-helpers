@@ -73,10 +73,4 @@ class AnnotationHelper extends THREE.Object3D {
 }
 
 module.exports = AnnotationHelper;
-/*BaseHelper = function()
-{
-  THREE.Object3D.call( this );
-}
 
-BaseHelper.prototype = Object.create( THREE.Object3D.prototype );
-BaseHelper.prototype.constructor = BaseHelper;*/

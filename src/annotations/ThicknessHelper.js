@@ -19,19 +19,11 @@ class ThicknessHelper extends AnnotationHelper {
     
     //initialise internal sub objects
     this.thicknessHelperArrows = new SizeHelper({
-    textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
-    labelType:"frontFacing",sideLength:0, drawLabel:false
+      textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
+      labelType:"flat"
     });
     this.thicknessHelperArrows.hide();
     this.add( this.thicknessHelperArrows );
-    
-    this.thicknessHelperLabel = new SizeHelper({
-    textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
-    labelType:"frontFacing",sideLength:this.sideLength, drawArrows:false
-    });
-    
-    this.thicknessHelperLabel.hide();
-    this.add( this.thicknessHelperLabel );
     
     if( options.thickness )this.setThickness( options.thickness );
     if( options.point ) this.setPoint( options.point );
@@ -44,8 +36,8 @@ class ThicknessHelper extends AnnotationHelper {
   }
   
   setPoint( point, object ){
-  this.point  = point;
-  this.object = object;
+    this.point  = point;
+    this.object = object;
   }
 
   setNormal( normal ){
@@ -109,7 +101,6 @@ class ThicknessHelper extends AnnotationHelper {
 
   unset(){
     this.thicknessHelperArrows.hide();
-    this.thicknessHelperLabel.hide();
   }
 
   //call this when everything has been set ?
@@ -117,10 +108,6 @@ class ThicknessHelper extends AnnotationHelper {
     this.thicknessHelperArrows.show();
     this.thicknessHelperArrows.setStart( this.point );
     this.thicknessHelperArrows.setEnd( this.escapePoint );
-    
-    this.thicknessHelperLabel.show();
-    this.thicknessHelperLabel.setStart( this.point );
-    this.thicknessHelperLabel.setEnd( this.escapePoint );
   }
 
   _drawDebugHelpers(point, offsetPoint, escapePoint, normal, flippedNormal){
