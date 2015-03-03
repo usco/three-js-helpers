@@ -1,5 +1,6 @@
 var AnnotationHelper = require("./AnnotationHelper");
 var SizeHelper = require("../dimensions/SizeHelper");
+var CrossHelper = require("../CrossHelper");
 
 class DistanceHelper extends AnnotationHelper {
   constructor( options ) {
@@ -53,7 +54,7 @@ class DistanceHelper extends AnnotationHelper {
   /*start: vector3D
   object: optional : on which object is the start point
   */
-  DistanceHelper.prototype.setStart( start, object )
+  setStart( start, object )
   {
     if(!start) return;
     this.start = start;
@@ -77,7 +78,7 @@ class DistanceHelper extends AnnotationHelper {
     this.sizeArrow.setStart( this.start );
   }
 
-  DistanceHelper.prototype.setEnd end, object )
+  setEnd( end, object )
   {
     if(!end) return;
     this.end = end;
@@ -104,7 +105,7 @@ class DistanceHelper extends AnnotationHelper {
       //this.sizeArrow.label.textMesh.material.opacity = 0.1;
   }
 
-  DistanceHelper.prototype.unset )
+  unset( )
   {
     this.startCross.hide();
     this.sizeArrow.hide();
@@ -113,7 +114,7 @@ class DistanceHelper extends AnnotationHelper {
     this._startHook = null;
   }
 
-  DistanceHelper.prototype.update = function(){
+  update( ){
     return;
     //TODO: find a way to only call this when needed
     if(!this.visible) return;
@@ -182,7 +183,7 @@ class DistanceHelper extends AnnotationHelper {
     this._setName();
   }
 
-  DistanceHelper.prototype._setName( ){
+  _setName( ){
     var tmpValue = this.distance;
     if( tmpValue ) tmpValue = tmpValue.toFixed( 2 );
     this.name = "Distance: " + tmpValue;

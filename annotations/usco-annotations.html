@@ -1,9 +1,11 @@
 <link rel="import" href="lib-loader.html">
-<!--<link rel="import" href="distance-helper.html">
-<link rel="import" href="thickness-helper.html">
+<link rel="import" href="distance-helper.html">
 <link rel="import" href="diameter-helper.html">
-<link rel="import" href="angle-helper.html">
-<link rel="import" href="note-helper.html">-->
+<link rel="import" href="thickness-helper.html">
+<link rel="import" href="note-helper.html">
+
+<!--<link rel="import" href="angle-helper.html">-->
+
 <link rel="import" href="annotation-helper-group.html">
 
 <!--FIXME: handle "partWaiters" better-->
@@ -14,10 +16,10 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
     <!--<dimensions-helper-group id="dimensions" selectedObject="{{selectedObject}}" 
     selectedMeasurement="{{measureType}}" on-measure-done="{{measureDone}}"> -->
       <distance-helper  id="distHelper" selectedObject="{{selectedObject}}"> </distance-helper>
-      <!--<thickness-helper id="thickHelper" selectedObject="{{selectedObject}}"> </thickness-helper>
+      <thickness-helper id="thickHelper" selectedObject="{{selectedObject}}"> </thickness-helper>
       <diameter-helper  id="diamHelper" selectedObject="{{selectedObject}}"> </diameter-helper>
       <angle-helper     id="angleHelper" selectedObject="{{selectedObject}}"> </angle-helper>
-      <note-helper     id="noteHelper" selectedObject="{{selectedObject}}"> </note-helper>-->
+      <note-helper     id="noteHelper" selectedObject="{{selectedObject}}"> </note-helper>
     <!--</dimensions-helper-group>-->
     
   </template>

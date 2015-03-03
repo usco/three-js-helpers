@@ -223,6 +223,9 @@ SizeHelper.prototype._recomputeMidDir = function(){
     var arrowHeadSize = this.arrowHeadSize;
     var arrowSize     = this.arrowSize; 
     
+    var rightArrowHeadSize = undefined;
+    var rightArrowHeadWidth = undefined;
+    
     var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
     var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
     if(this.drawLeftArrow){ leftArrowHeadSize = arrowHeadSize; leftArrowHeadWidth=this.arrowHeadWidth}

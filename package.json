@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/usco/three-js-helpers",
   "devDependencies": {
-    "babelify": "^5.0.3"
+    "babelify": "^5.0.3",
+    "babel": "^4.6.5"
   }
 }

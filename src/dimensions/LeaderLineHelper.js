@@ -1,11 +1,12 @@
 var BaseHelper = require("../BaseHelper");
+var CrossHelper = require("../CrossHelper");
 var {LabelHelperPlane, LabelHelper3d} = require("../LabelHelper");
 var {GizmoMaterial,GizmoLineMaterial} = require("../GizmoMaterial");
 
 /*
 
 */
-LeaderLineHelper = function(options)
+var LeaderLineHelper = function(options)
 {
   BaseHelper.call( this );
   var options = options || {};

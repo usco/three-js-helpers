@@ -1,7 +1,10 @@
+var BaseHelper = require("./BaseHelper");
+var {GizmoMaterial,GizmoLineMaterial} = require("./GizmoMaterial");
+
 /*
 //TODO: make this into a mesh / geometry subclass
 */
-CircleHelper = function(options)
+var CircleHelper = function(options)
 {
   BaseHelper.call( this );
   
@@ -36,3 +39,5 @@ CircleHelper.prototype.setRadius = function( radius ){
   this.rCircle = new THREE.Line(points, this.material );
   this.add( this.rCircle );
 }  
+
+module.exports = CircleHelper;

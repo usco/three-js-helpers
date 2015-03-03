@@ -1,22 +1,16 @@
-var AnnotationHelper = require("./AnnotationHelper.js" );
+require("babel/polyfill");
 
-/*var BaseHelper = require("../BaseHelper.js" );
-var GizmoMaterial = require("../GizmoMaterial.js" );
-var AnnotationHelper = require("./AnnotationHelper.js" );
-var ArrowHelper2 = require("./ArrowHelper2.js" );
-var Box3Custom = require("./Box3-Custom.js" );
+exports.AnnotationHelper = require("./AnnotationHelper.js" );
+exports.DistanceHelper   = require("./DistanceHelper.js" );
+exports.NoteHelper       = require("./NoteHelper.js" );
+exports.DiameterHelper   = require("./DiameterHelper.js" );
+//exports.AngDimHelper     = require("./AngDimHelper.js" );
+exports.ThicknessHelper  = require("./ThicknessHelper.js" );
 
-var LabelHelper = require("../LabelHelper.js" );
-var CrossHelper = require("./CrossHelper.js" );
-var CircleHelper = require("./CircleHelper.js" );
-var ArcHelper = require("./ArcHelper.js" );
-
-var LeaderLineHelper = require("./LeaderLineHelper.js" );
-var DistanceHelper = require("./DistanceHelper.js" );
-var SizeHelper = require("./SizeHelper.js" );
-var CenterHelper = require("./CenterHelper.js" );
-var DiameterHelper = require("./DiameterHelper.js" );
-var AngDimHelper = require("./AngDimHelper.js" );
-var DimensionsHelper = require("./DimensionsHelper.js" );
-
-var ThicknessHelper = require("./ThicknessHelper.js" );*/
+//FIXME: temporary hack
+window.AnnotationHelper   = exports.AnnotationHelper;
+window.DistanceHelper     = exports.DistanceHelper;
+window.DiameterHelper     = exports.DiameterHelper;
+window.NoteHelper         = exports.NoteHelper;
+window.ThicknessHelper    = exports.ThicknessHelper;
+//window.AngDimHelper      = exports.AngDimHelper;

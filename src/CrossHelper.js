@@ -1,7 +1,10 @@
+var BaseHelper = require("./BaseHelper");
+var {GizmoMaterial,GizmoLineMaterial} = require("./GizmoMaterial");
+
 /*
  id: inner diameter : blank space at center of cross
 */
-CrossHelper = function(options)
+var CrossHelper = function(options)
 {
   BaseHelper.call( this );
   var options = options || {}

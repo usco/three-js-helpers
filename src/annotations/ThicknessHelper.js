@@ -4,14 +4,8 @@ var SizeHelper = require("../dimensions/SizeHelper");
 class ThicknessHelper extends AnnotationHelper {
   constructor( options ) {
     const DEFAULTS = {
-        normalType:  "face";//can be, face, x,y,z
-        arrowColor: 0x000000,
-        linesColor: 0x000000,
+        normalType:  "face",//can be, face, x,y,z
         sideLength: 10,
-        fontSize: 10,
-        textColor:"#000",
-        textBgColor:"#ffd200",
-        labelType:"frontFacing",
         debug:false,
         thickness:undefined,
     };
