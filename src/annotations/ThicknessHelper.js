@@ -142,10 +142,9 @@ class ThicknessHelper extends AnnotationHelper {
 
   //call this when everything has been set ?
   done(){
-    this.thicknessHelperArrows.show();
     this.thicknessHelperArrows.setStart( this.point );
     this.thicknessHelperArrows.setEnd( this.escapePoint );
-    
+    this.thicknessHelperArrows.show();
   }
 
   _drawDebugHelpers(point, offsetPoint, escapePoint, normal, flippedNormal){
