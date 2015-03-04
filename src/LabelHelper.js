@@ -24,7 +24,6 @@ class LabelHelper extends BaseHelper {
     
     Object.assign(this, options);
     
-    console.log("options", options);
     this.width  = 0;
     this.height = 0;
     
@@ -118,7 +117,7 @@ class LabelHelper extends BaseHelper {
     this.textWidth  = (textWidth*upscale)/(upscale*baseRatio);
     this.textHeight = (rHeight*upscale)/(upscale*baseRatio);
     
-    console.log("canvas",sqrWidth, sqrHeight,"Width/height",this.width,this.height,"text (glSizes)",this.textWidth,this.textHeight);
+    //console.log("canvas",sqrWidth, sqrHeight,"Width/height",this.width,this.height,"text (glSizes)",this.textWidth,this.textHeight);
   }
   
   drawText()
@@ -213,8 +212,6 @@ class LabelHelperPlane extends LabelHelper {
     super( options );    
     
     Object.assign(this, options);
-    console.log("this", this, options);
-    
     this.generate();
    }
    
@@ -222,7 +219,6 @@ class LabelHelperPlane extends LabelHelper {
     var width  = this.width;
     var height = this.height;
     //console.log("width", width,"height", height);
-    console.log("gn",this);
 
     var material = new GizmoMaterial({
       map: this._texture,

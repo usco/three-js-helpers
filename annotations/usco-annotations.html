@@ -148,6 +148,7 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
          }
       },
       annotationsChanged:function( oldAnnotations, newAnnotations ){
+        console.log("annotations changed");
         //FIXME: needed because of some strange behaviour not filling old/new params correctly
         var removedAnnotations = [];
         if(oldAnnotations){
@@ -272,7 +273,9 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
               case "thickness":
                 var annotationHelper = new ThicknessHelper({arrowColor:0x000000,
                   textBgColor:"#ffd200",
-                  thickness:annotation.value, point:annotation.position,
+                  thickness:annotation.value, 
+                  point:annotation.position,
+                  object:annotation.object,
                   normal: annotation.normal});
                   
                 annotation.object.add( annotationHelper );

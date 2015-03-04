@@ -20,10 +20,8 @@
         if(pickingDatas.length == 0) return;
         var entryInteresect = pickingDatas[0];
         
-        //var object = pickingDatas[0].object;//closest point
-        
         this.helper.unset();
-        this.helper.set( entryInteresect );//, this.selectedObject );
+        this.helper.set( entryInteresect );
         
         //set point coordinates to be local , not global
         //FIXME: are we sure about this?

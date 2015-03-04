@@ -1,5 +1,6 @@
 var AnnotationHelper = require("./AnnotationHelper");
 var SizeHelper = require("../dimensions/SizeHelper");
+var CrossHelper = require("../CrossHelper");
 
 class ThicknessHelper extends AnnotationHelper {
   constructor( options ) {
@@ -7,11 +8,13 @@ class ThicknessHelper extends AnnotationHelper {
         normalType:  "face",//can be, face, x,y,z
         sideLength: 10,
         debug:false,
+        object:undefined,
         thickness:undefined,
     };
     
     let options = Object.assign({}, DEFAULTS, options); 
     super(options);
+    Object.assign(this, options);//unsure
     
     this.object     = undefined;
     this.point      = undefined;
@@ -19,16 +22,20 @@ class ThicknessHelper extends AnnotationHelper {
     
     //initialise internal sub objects
     this.thicknessHelperArrows = new SizeHelper({
-      textColor:this.textColor, textBgColor:this.textBgColor, arrowsPlacement:"outside",
-      labelType:"flat"
+      textColor:this.textColor, 
+      textBgColor:this.textBgColor, 
+      arrowsPlacement:"outside",
+      labelType:"flat",
+      sideLength:this.sideLength
     });
     this.thicknessHelperArrows.hide();
     this.add( this.thicknessHelperArrows );
     
     if( options.thickness )this.setThickness( options.thickness );
-    if( options.point ) this.setPoint( options.point );
+    if( options.point ) this.setPoint( options.point, options.object );
     if( options.normal )this.setNormal( options.normal );
     
+    this.setAsSelectionRoot( true );
   }
   
   setThickness( thickness ){
@@ -47,7 +54,7 @@ class ThicknessHelper extends AnnotationHelper {
     this.done();    
   }
 
-  set(entryInteresect )//, selectedObject)
+  set( entryInteresect )//, selectedObject)
   {
     var normalType = this.normalType;
     var normal  = entryInteresect.face.normal.clone();
@@ -92,14 +99,44 @@ class ThicknessHelper extends AnnotationHelper {
     }
     //compute actual thickness
     this.thickness = escapePoint.clone().sub( point).length();
+    
     //set various internal attributes
     this.setPoint( point, entryInteresect.object);
     this.setNormal( normal );
     //this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
     this.done();
+    
+    
+    ////
+    try{
+      var point = this.point.clone();
+      var midPoint = this.escapePoint.clone().sub( point ).divideScalar( 2 ).add( point );
+      console.log("midPoint", midPoint,point,this.escapePoint);
+      var putSide = this.getTargetBoundsData(this.object, midPoint);
+      
+      this.thicknessHelperArrows.setFacingSide( new THREE.Vector3().fromArray( putSide ) );
+      
+      var foo = new SizeHelper({
+        textColor:this.textColor, 
+        textBgColor:this.textBgColor, 
+        arrowsPlacement:"outside",
+        labelType:"flat",
+        sideLength:this.sideLength,
+        length:20
+      });
+      //this.add( foo );
+      
+      
+    
+    }catch(error){
+      console.error(error);
+    }
+    
+    
   }
 
   unset(){
+    //this.thickness = undefined;
     this.thicknessHelperArrows.hide();
   }
 
@@ -108,6 +145,7 @@ class ThicknessHelper extends AnnotationHelper {
     this.thicknessHelperArrows.show();
     this.thicknessHelperArrows.setStart( this.point );
     this.thicknessHelperArrows.setEnd( this.escapePoint );
+    
   }
 
   _drawDebugHelpers(point, offsetPoint, escapePoint, normal, flippedNormal){
@@ -121,6 +159,45 @@ class ThicknessHelper extends AnnotationHelper {
     this.add( remotePointHelper );
     this.add( escapePointHelper );
   }
+  
+  //temporary
+  /*
+    get info about target object
+  */
+  getTargetBoundsData( targetObject, point ){
+    /* -1 /+1 directions on all 3 axis to determine for exampel WHERE an annotation
+    should be placed (left/right, front/back, top/bottom)
+    */
+    var putSide= [0,0,0];
+    if(!targetObject ) return putSide;
+    var bbox     = targetObject.boundingBox;
+    
+    let objectCenter =   new THREE.Vector3().addVectors( targetObject.boundingBox.min,
+      targetObject.boundingBox.max).divideScalar(2);
+      
+    let foo = point.clone().sub( objectCenter );
+    //console.log("objectCenter",objectCenter,"point", point,foo.normalize());
+    
+    let axes = ["x","y","z"];
+    axes.forEach( (axis, index) => {
+      let axisOffset  = point[axis] - objectCenter[axis];
+      axisOffset = Math.round(axisOffset * 100) / 100;
+      //console.log("axis",axis,axisOffset);
+      if( axisOffset>=0 ){
+        //console.log(`in FRONT along ${axis}`);
+        putSide[index] = 1;
+      }
+      else if( axisOffset<0 )
+      {
+        //console.log(`in BACK along ${axis}`);
+        putSide[index] = -1;
+      }
+    });
+    
+    console.log("putSide",putSide);
+
+    return putSide; 
+  }  
 }
 
 module.exports = ThicknessHelper;
