@@ -48,6 +48,9 @@ class LabelHelper extends BaseHelper {
   
   setText( text ){
     this.text = text;
+    
+    this.measureText();
+    this.drawText();
     this.generate();
   }
   

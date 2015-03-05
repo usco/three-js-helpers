@@ -12,6 +12,7 @@ class ThicknessHelper extends AnnotationHelper {
         thickness:undefined,
     };
     
+    this.DEFAULTS = DEFAULTS;
     let options = Object.assign({}, DEFAULTS, options); 
     super(options);
     Object.assign(this, options);//unsure
@@ -104,8 +105,7 @@ class ThicknessHelper extends AnnotationHelper {
     this.setPoint( point, entryInteresect.object);
     this.setNormal( normal );
     //this._drawDebugHelpers( point, offsetPoint, escapePoint, normal, flippedNormal);
-    this.done();
-    
+    //this.done();
     
     ////
     try{
@@ -137,6 +137,8 @@ class ThicknessHelper extends AnnotationHelper {
 
   unset(){
     //this.thickness = undefined;
+    let options = Object.assign({}, this.DEFAULTS, options); 
+    Object.assign(this, options);//unsure
     this.thicknessHelperArrows.hide();
   }
 
@@ -182,7 +184,7 @@ class ThicknessHelper extends AnnotationHelper {
       let axisOffset  = point[axis] - objectCenter[axis];
       axisOffset = Math.round(axisOffset * 100) / 100;
       //console.log("axis",axis,axisOffset);
-      if( axisOffset>=0 ){
+      if( axisOffset>0 ){
         //console.log(`in FRONT along ${axis}`);
         putSide[index] = 1;
       }
