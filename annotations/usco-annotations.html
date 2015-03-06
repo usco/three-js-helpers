@@ -27,6 +27,13 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
     Polymer("usco-annotations",{
       activeType: null,
       
+      settings:{
+        visuals:{
+          arrowColor:"#000",
+          textBgColor:"#ffd200"
+        }
+      },
+      
       showAnnotations:false,
       annotations: [],//note: annotation positions are relative to their parent
       annotationTypes:[],
@@ -85,8 +92,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
       },
       uiModeChanged:function(){
         var self = this;
-        
-        
         function changeVisuals(flag)
         {
           //console.log("changing visuals of annotations", flag);
@@ -103,41 +108,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             }
            }
          }
-            /*
-            mesh.traverse(function( node ){
-              if(flag)
-              {
-                //console.log("NODE", node);
-                if(node.material)
-                {
-                  node.material._oldOpacity = node.material.opacity;
-                  node.material._oldTransp  = node.material.transparent;
-                  
-                  node.material.opacity = 0.1;
-                  node.material.transparent = true;
-                  
-                  console.log("node to",node, "oldOp",node.material._oldOpacity,
-                  "oldTransp",node.material._oldTransp,"op", node.material.opacity,"tran",node.material.transparent);
-                }
-              
-              }
-              else
-              {
-                if( node.material && node.material._oldOpacity )
-                {
-                  //console.log("node back",node, "oldOp",node.material._oldOpacity,
-                  //"oldTransp",node.material._oldTransp,"op");  
-                
-                   node.material.opacity = node.material._oldOpacity;
-                   node.material.transparent  = node.material._oldTransp;
-                   
-                   node.material.opacity = 1;
-                }
-              }
-            });
-          }
-        }*/
-
         switch(this.uiMode){
           case "default":
             changeVisuals(false);
@@ -271,12 +241,17 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                 
               break;
               case "thickness":
-                var annotationHelper = new ThicknessHelper({arrowColor:0x000000,
-                  textBgColor:"#ffd200",
+                console.log("thickness");
+                var annotationHelper = new ThicknessHelper({
+                  //TODO mix global settings with specifics nicely
+                  arrowColor:self.settings.visual.arrowColor,
+                  textBgColor:self.settings.visual.textBgColor,
+                  
                   thickness:annotation.value, 
-                  point:annotation.position,
-                  object:annotation.object,
-                  normal: annotation.normal});
+                  entryPoint:annotation.entryPoint,
+                  exitPoint :annotation.exitPoint,
+                  object    :annotation.object
+                  });
                   
                 annotation.object.add( annotationHelper );
               break;

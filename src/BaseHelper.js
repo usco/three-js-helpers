@@ -3,7 +3,7 @@
 /*
 Abstract Base helper class
 */
-class AnnotationHelper extends THREE.Object3D {
+class BaseHelper extends THREE.Object3D {
   constructor( options ) {
     const DEFAULTS = {
       name : "",
@@ -72,5 +72,5 @@ class AnnotationHelper extends THREE.Object3D {
   }
 }
 
-module.exports = AnnotationHelper;
+module.exports = BaseHelper;
 

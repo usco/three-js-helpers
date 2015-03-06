@@ -29,8 +29,11 @@
         this.helper.position.setFromMatrixPosition( entryInteresect.object.matrixWorld );
         this.helper.object.worldToLocal( this.helper.point );
         
-        this.annotationDone({type:"thickness", value:this.helper.thickness,
-        point:this.helper.point, object:this.helper.object, normal:this.helper.normal});
+        //TODO: this is redundant with "createAnnotation" event dispatch for undo/redos
+        /*this.annotationDone({type:"thickness", value:this.helper.thickness,
+        point:this.helper.point, object:this.helper.object, normal:this.helper.normal});*/
+        this.annotationDone({type:"thickness", thickness:this.helper.thickness,
+        entryPoint:this.helper.point, exitPoint:this.helper.exitPoint, object:this.helper.object});
         
         this.helper.unset();
       }

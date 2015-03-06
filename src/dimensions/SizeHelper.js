@@ -1,5 +1,6 @@
 var BaseHelper = require("../BaseHelper");
 var LineHelper = require("../LineHelper");
+var CrossHelper= require("../CrossHelper");
 var {LabelHelperPlane, LabelHelper3d} = require("../LabelHelper");
 var {GizmoMaterial,GizmoLineMaterial} = require("../GizmoMaterial");
 /*
@@ -56,7 +57,8 @@ class SizeHelper extends BaseHelper {
       
       debug: false,
     };
-    
+  
+  this.DEFAULTS = DEFAULTS; //keep defaults
   let options = Object.assign({}, DEFAULTS, options); 
   super(options);
 
@@ -65,13 +67,16 @@ class SizeHelper extends BaseHelper {
   //FIXME: do this better
   this.axisAligned = false;
   this.findGoodSide = true;
+  this.debug        = true;
   
   this.leftArrowPos  = new THREE.Vector3();
   this.rightArrowPos = new THREE.Vector3();
   this.leftArrowDir  = new THREE.Vector3();
   this.rightArrowDir = new THREE.Vector3();
   this.flatNormal    = new THREE.Vector3(0,0,1);
-  this.labelPos      = new THREE.Vector3();
+  this.labelPosition = new THREE.Vector3();
+  this.offsetLeftArrowPos  = new THREE.Vector3();
+  this.offsetRightArrowPos = new THREE.Vector3();
     
   this._setupVisuals();
   //constants
@@ -83,13 +88,7 @@ class SizeHelper extends BaseHelper {
   this.LABELFITOK    = LABELFITOK;
   this.LABELFITSHORT = LABELFITSHORT;
   this.LABELNOFIT    = LABELNOFIT;*/
-    //arrows: move some of this to setter?
-    //this.set();
   }
-  
-   _init(){
-     this._computeBasics();
-   }
   
   /* method compute all the minimal parameters, to have a minimal viable
   display of size
@@ -163,12 +162,14 @@ class SizeHelper extends BaseHelper {
       }
     });
     cross = new THREE.Vector3().fromArray( bla );
-    //console.log("cross", cross);
+    console.log("cross", cross);
     
     this.leftArrowPos = this.mid.clone().add( cross );
     this.rightArrowPos = this.mid.clone().add( cross );
     this.flatNormal = cross.clone();
     
+    //compute all the arrow & label positioning details
+    this._computeLabelAndArrowsOffsets();
     //all the basic are computed, configure visuals
     this._updateVisuals();
   }
@@ -180,10 +181,11 @@ class SizeHelper extends BaseHelper {
       * if label + arrows fits between ends, put label between arrows
       * if label does not fit between ends
   */
-  _computeLabelAndArrows(){
+  _computeLabelAndArrowsOffsets(){
     var sideLength  = this.sideLength;
     var length      = this.length;
     var labelOrient = new THREE.Vector3(-1,0,1); 
+    var labelHeight  = 0;
     var labelLength  = 0;
     var innerLength      = 0;
     var innerLengthHalf  = 0;
@@ -204,18 +206,13 @@ class SizeHelper extends BaseHelper {
     label.position.copy( this.leftArrowPos );
     
     //calculate offset so that there is a hole between the two arrows to draw the label
-    
     if(this.drawLabel){
-      labelLength = labelLength + labelSpacingExtra * 2;
+      labelLength = label.textWidth + labelSpacingExtra * 2;
+      labelHeight = label.textHeight;
     }
     
     innerLength = labelLength + arrowHeadsLength;
     innerLengthHalf = innerLength / 2;
-    
-    //IF arrows are pointer inwards
-    //this.LABELFITOK    = LABELFITOK;
-    //this.LABELFITSHORT = LABELFITSHORT;
-    //this.LABELNOFIT    = LABELNOFIT;
     
     /*cases
       - no label : just arrows: 
@@ -229,7 +226,7 @@ class SizeHelper extends BaseHelper {
     */
     var remLength = (length - labelLength);
     var roomForBoth  = (remLength > arrowHeadsLength);//arrow + label OK
-    var roomForLabel = (remLength < arrowHeadsLength);//only label OK
+    var roomForLabel = (remLength>0 && remLength < arrowHeadsLength);//only label OK
     var noRoom       = (remLength <0 ); // no room in hell
     
     var actualPos = undefined;//we collapse all possibilities to something simple
@@ -253,77 +250,45 @@ class SizeHelper extends BaseHelper {
         this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowDist ) );
         this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowDist ) );
       }
-    }
-    
-    /*
-    if( this.arrowsPlacement == "dynamic" )
-    {
-      if(reqWith>this.length)//if the label + arrows would not fit
-      {
-        this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
-        var arrowXPos = this.length/2 + this.arrowSize;
-      
-        this.leftArrowDir = this.direction.clone().negate();
-        this.rightArrowDir = this.leftArrowDir.clone().negate();
-        
-        this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-        this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-      
-        if( labelWidth > this.length)//if even the label itself does not fit
-        {
-          this.label.position.y -= 5;
-          //this.label.position.add( this.direction.clone().multiplyScalar( 5 ) );
-        }
-      }
-      else{//if the label + arrows would fit
-        this.arrowSize -= labelHoleHalfSize;
-        this.leftArrowPos.add( this.leftArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-        this.rightArrowPos.add( this.rightArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-      }
     }else if( this.arrowsPlacement == "outside" ){
       //put the arrows outside of measure, pointing "inwards" towards center
       this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
-      var arrowXPos = this.length/2 + this.arrowSize;
+      var arrowDist = this.length/2 + this.arrowSize;
     
       this.leftArrowDir = this.direction.clone().negate();
       this.rightArrowDir = this.leftArrowDir.clone().negate();
       
-      this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-      this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
+      this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowDist ) );
+      this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowDist ) );
       
-      //console.log("labelWidth",labelWidth,"this.length",this.length);
-      if(labelWidth>this.length)
+      if(!roomForLabel)
       {
         //console.log("UH OH , this", this, "will not fit!!");
         //we want it "to the side" , aligned with the arrow, beyond the arrow head
-        var lengthOffset = this.length + labelHoleExtra+ this.arrowHeadSize+labelWidth/2;
-        //also offset to put on the line
-        this.textHeightOffset = new THREE.Vector3();
+        var lengthOffset = this.length/2 + labelSpacingExtra + arrowHeadSize + labelLength/2;
         this.labelPosition = this.leftArrowPos.clone().add( this.leftArrowDir.clone().normalize().setLength(lengthOffset) );
-        var heightOffset = this.label.textHeight;
-       
-        
-        switch(this.labelPos)
-        {
-           case "top":
-             this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( heightOffset );
-           break;
-           case "bottom":
-            this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( heightOffset ).negate();
-           break;
-        }
-        
-        this.labelPosition.add( this.textHeightOffset );
-        this.label.position.copy( this.labelPosition );
+        labelLength
       }
-      
     }else{
        this.arrowSize -= labelHoleHalfSize;
        this.leftArrowPos.add( this.leftArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
        this.rightArrowPos.add( this.rightArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-    }*/
-  
-    //now for the visuals
+    }
+    
+    //offset the label based on centered/top/bottom setting
+    switch(this.labelPos)
+    {
+       case "center":
+        this.textHeightOffset = new THREE.Vector3();
+       break;
+       case "top":
+         this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( labelHeight );
+       break;
+       case "bottom":
+        this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( labelHeight ).negate();
+       break;
+    }
+    
   }
   
   _setupVisuals(){
@@ -363,7 +328,6 @@ class SizeHelper extends BaseHelper {
     
     this.mainArrowLeft.cone.material = this.arrowConeMaterial;
     this.mainArrowRight.cone.material = this.arrowConeMaterial;
-    
     
     //Flaten in the UP direction(s) , not just z
     var arrowFlatten = this.arrowFlatten;
@@ -416,10 +380,39 @@ class SizeHelper extends BaseHelper {
           bgColor:this.textBgColor});
       break;
     }
-    this.label.position.copy( this.labelPos );
+    this.label.position.copy( this.labelPosition );
     this.add( this.label );
     
-    if( !this.drawLabel ) this.label.hide();
+    if( !this.drawLabel )
+    {
+      this.label.hide();
+    }else
+    {this.label.show();}
+    
+    
+    //debug helpers
+    this.debugHelpers = new BaseHelper();
+    
+    this.directionDebugHelper  = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(), 15, 0XFF0000);
+    this.upVectorDebugHelper   = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(), 15, 0X0000FF);
+    this.startDebugHelper      = new CrossHelper({color:0xFF0000});
+    this.midDebugHelper        = new CrossHelper({color:0x0000FF});
+    this.endDebugHelper        = new CrossHelper({color:0x00FF00});
+
+    this.debugHelpers.add( this.directionDebugHelper );
+    this.debugHelpers.add( this.upVectorDebugHelper );
+    this.debugHelpers.add( this.startDebugHelper );
+    this.debugHelpers.add( this.midDebugHelper );
+    this.debugHelpers.add( this.endDebugHelper );
+    
+    this.add( this.debugHelpers );
+    if( !this.debug )
+    {
+      this.debugHelpers.hide();
+    }else
+    {
+      this.debugHelpers.show();
+    }
   }
   
   _updateVisuals(){
@@ -444,12 +437,25 @@ class SizeHelper extends BaseHelper {
     this.mainArrowRight.setDirection( rightArrowDir );
     this.mainArrowRight.position.copy( rightArrowPos );
     
+    //Flaten arrows the UP direction(s)
+    var arrowFlatten = this.arrowFlatten;
+    var arrowFlatScale = new THREE.Vector3( arrowFlatten, arrowFlatten , arrowFlatten );
+    var arrowFlatScale = new THREE.Vector3().multiplyVectors( this.up, arrowFlatScale );
+    let axes = ["x","y","z"];
+    axes.forEach( (axis, index) => {
+      if(arrowFlatScale[axis] === 0 ) arrowFlatScale[axis] = 1;
+    });
+    this.mainArrowLeft.scale.copy( arrowFlatScale );
+    this.mainArrowRight.scale.copy( arrowFlatScale );
+    
+    
+    
     ///sidelines
     var sideLength      = this.sideLength;
     var sideLengthExtra = this.sideLengthExtra;
     
     var sideLineStart     = this.start.clone();
-    var sideLineEnd       = sideLineStart.clone().add( this.flatNormal.clone().normalize().multiplyScalar( sideLength+sideLengthExtra ) );
+    var sideLineEnd       = sideLineStart.clone().add( this.flatNormal.clone().setLength( sideLength+sideLengthExtra ) );
     var leftToRightOffset = this.end.clone().sub( this.start );
     
     this.leftSideLine.setStart( sideLineStart );
@@ -460,36 +466,79 @@ class SizeHelper extends BaseHelper {
     this.rightSideLine.position.add( leftToRightOffset );
     
     ///label
-    if(!this.drawLabel) this.label.hide();
+    if( !this.drawLabel ){
+      this.label.hide();
+    }else{ this.label.show();}
     this.label.setText(this.text);    
-    this.label.position.copy( this.labelPos );
+    this.label.position.copy( this.labelPosition.clone().add( this.textHeightOffset ) );
     
     //make the label face the correct way
     var labelDefaultOrientation = new THREE.Vector3(-1,0,1); 
     var quaternion = new THREE.Quaternion();
     quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone() );
-    this.label.rotation.setFromQuaternion( quaternion );
-    this.label.rotation.z += Math.PI;
+    //this.label.rotation.setFromQuaternion( quaternion );
+    //this.label.rotation.z += Math.PI;
+    
+    //from http://stackoverflow.com/questions/15139649/three-js-two-points-one-cylinder-align-issue
+    var orientation = new THREE.Matrix4();//a new orientation matrix to offset pivot
+    var offsetRotation = new THREE.Matrix4();//a matrix to fix pivot rotation
+    var offsetPosition = new THREE.Matrix4();//a matrix to fix pivot position
+    var up = new THREE.Vector3(0,1,0);//this.up;
+    var HALF_PI = +Math.PI * .5;
+    orientation.lookAt(this.start,this.end,up);//look at destination
+    offsetRotation.makeRotationX(HALF_PI);//rotate 90 degs on X
+    orientation.multiply(offsetRotation);//combine orientation with rotation transformations
+    //this.label.applyMatrix(orientation);
+    
+    //debug helpers
+    this.directionDebugHelper.setDirection( this.direction );
+    this.upVectorDebugHelper.setDirection( this.up );
+    this.startDebugHelper.position.copy( this.start );
+    this.midDebugHelper.position.copy( this.mid );
+    this.endDebugHelper.position.copy( this.end );
+    
+    if( !this.debug )
+    {
+      this.debugHelpers.hide();
+    }else
+    {
+      this.debugHelpers.show();
+    }
   }
 
   set(){
-    //for debugging only
-    /*if(this.debug) this._drawDebugHelpers();
-    this._drawLabel();
-    this._drawArrows();
-    this._drawSideLines();*/
   }
 
   //setters
+  
+  /* set all parameters from options */
+  setFromParams( options ){
+    let options = Object.assign({}, this.DEFAULTS, options); 
+
+    Object.assign(this, options);
+    
+    this.leftArrowPos  = new THREE.Vector3();
+    this.rightArrowPos = new THREE.Vector3();
+    this.leftArrowDir  = new THREE.Vector3();
+    this.rightArrowDir = new THREE.Vector3();
+    this.flatNormal    = new THREE.Vector3(0,0,1);
+    this.labelPosition = new THREE.Vector3();
+    this.offsetLeftArrowPos  = new THREE.Vector3();
+    this.offsetRightArrowPos = new THREE.Vector3();
+  
+    this._computeBasics();
+  }
+  
   setUp( up ){
-    //this.up = up !== undefined ? up : new THREE.Vector3(0,0,1);
-    //this._recomputeMidDir();
+    this.up = up !== undefined ? up : new THREE.Vector3(0,0,1);
+    
+    this._computeBasics();
   }
 
   setDirection( direction ){
-     /*this.direction = direction || new THREE.Vector3(1,0,0);
+     this.direction = direction || new THREE.Vector3(1,0,0);
      
-     this._recomputeMidDir();*/
+     this._computeBasics();
   }
 
   setLength( length ){
@@ -502,15 +551,15 @@ class SizeHelper extends BaseHelper {
   }
 
   setSideLength( sideLength ){
-    /*this.sideLength = sideLength !== undefined ? sideLength : 0;
+    this.sideLength = sideLength !== undefined ? sideLength : 0;
     
-    this._recomputeMidDir();*/
+    this._computeBasics();
   } 
 
   setText( text ){
-    /*this.text = text !== undefined ? text : "";
-    //console.log("setting text to", this.text);
-    this._recomputeMidDir();*/
+    this.text = text !== undefined ? text : "";
+    
+    this._computeBasics();
   } 
 
   setStart( start ){
@@ -526,7 +575,6 @@ class SizeHelper extends BaseHelper {
   }
     
   setEnd( end ){
-    
     this.end = end || new THREE.Vector3();
     
     this._computeBasics();
@@ -539,258 +587,11 @@ class SizeHelper extends BaseHelper {
   } 
 
   setFacingSide( facingSide ){
-    
     this.facingSide = facingSide || new THREE.Vector3();
-    //this._recomputeMidDir();
+
     this._computeBasics();
   }
-
-  //helpers
-  _recomputeMidDir(){
-
-      this.mid   = this.direction.clone().multiplyScalar( this.length/2 ).add( this.start );
-      
-      if(this.lengthAsLabel) {
-        this.text = this.textPrefix + this.length.toFixed(2);
-      }
-      
-      this.arrowSize = this.length/2;//size of arrows 
-      
-      this.leftArrowDir = this.direction.clone();
-      this.rightArrowDir = this.leftArrowDir.clone().negate();
-
-      //HACK, for up vector issues prevention
-      if( ( (Math.abs( this.direction.z) - 1) <= 0.0001) && this.direction.x == 0 && this.direction.y ==0 )
-      {
-        this.up = new THREE.Vector3( 1,0, 0 );
-      }
-
-      var cross = this.direction.clone().cross( this.up );
-      cross.normalize().multiplyScalar(this.sideLength);
-      //console.log("mid", this.mid,"cross", cross);
-      
-      if(this.sideLineSide == "back")
-      {
-        cross.negate();
-      }
-      
-      console.log("cross", cross.x,cross.y,cross.z);
-      //FIXME: experiment
-      cross.x *= this.facingSide.x;
-      cross.y *= this.facingSide.y;
-      cross.z *= this.facingSide.z;
-      
-      console.log("cross", cross.x,cross.y,cross.z);
-
-      this.leftArrowPos = this.mid.clone().add( cross );
-      this.rightArrowPos = this.mid.clone().add( cross );
-      this.flatNormal = cross.clone(); 
-      
-      //update label
-      this.remove( this.label );
-      this._drawLabel();
-      
-      //update arrows
-      var arrowHeadSize = this.arrowHeadSize;
-      var arrowSize     = this.arrowSize; 
-      
-      var rightArrowHeadSize = undefined;
-      var rightArrowHeadWidth = undefined;
-      
-      var leftArrowHeadSize  = rightArrowHeadSize = 0.00000000001;
-      var leftArrowHeadWidth = rightArrowHeadWidth = 0.00000000001;
-      if(this.drawLeftArrow){ leftArrowHeadSize = arrowHeadSize; leftArrowHeadWidth=this.arrowHeadWidth}
-      if(this.drawRightArrow){ rightArrowHeadSize = arrowHeadSize; rightArrowHeadWidth= this.arrowHeadWidth}
-      
-      this.mainArrowLeft.position.copy( this.leftArrowPos );
-      this.mainArrowLeft.setDirection( this.leftArrowDir );
-      this.mainArrowLeft.setLength( arrowSize, leftArrowHeadSize, leftArrowHeadWidth );
-        
-      this.mainArrowRight.position.copy( this.rightArrowPos );
-      this.mainArrowRight.setDirection( this.rightArrowDir );
-      this.mainArrowRight.setLength( arrowSize, rightArrowHeadSize, rightArrowHeadWidth );
-      
-      this.mainArrowRight.visible = this.drawArrows;
-      this.mainArrowLeft.visible = this.drawArrows;
-      
-      //update side lines
-      //TODO: make truely dynamic
-      this.remove( this.rightSideLine );
-      this.remove( this.leftSideLine );
-      this._drawSideLines();
-      
-      //this.rightSideLine.
-      //this.leftSideLine
-      //for debug
-      this.dirDebugArrow.setLength( this.length );
-      this.dirDebugArrow.setDirection( this.direction );
-      this.dirDebugArrow.position.copy( this.mid );
-  }
-
   
-  //drawing utilities
-
-  /*determine positioning for the label/text:
-    Different cases:
-     - arrows pointing inwards:
-      * if label + arrows fits between ends, put label between arrows
-      * if label does not fit between ends
-    
-    TODO: this should be split up into two seperate methods : one for measurement
-    and one for the display 
-  */
-  _drawLabel(){
-    var sideLength = this.sideLength;
-    var length = this.length;
-
-    //draw dimention / text
-    //this first one is used to get some labeling metrics, and is
-    //not always displayed
-    this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize,color:this.textColor,bgColor:this.textBgColor});
-    this.label.position.copy( this.leftArrowPos );
-    
-    //this.label.setRotationFromAxisAngle(this.direction.clone().normalize(), angle);
-    //console.log("dir,angl",this.direction, angle, this.label.up);
-    
-    var labelDefaultOrientation = new THREE.Vector3(-1,0,1); 
-    
-    var quaternion = new THREE.Quaternion();
-    quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone() );
-    this.label.rotation.setFromQuaternion( quaternion );
-    this.label.rotation.z += Math.PI;
-    
-    var labelWidth = this.label.textWidth;
-    
-    switch(this.labelType)
-    {
-      case "flat":
-        this.label = new LabelHelperPlane({text:this.text,fontSize:this.fontSize, color:this.textColor, background:(this.textBgColor!=null),bgColor:this.textBgColor});
-      break;
-      case "frontFacing":
-        this.label = new LabelHelper3d({text:this.text,fontSize:this.fontSize, color:this.textColor, bgColor:this.textBgColor});
-      break;
-    }
-    this.label.position.copy( this.leftArrowPos );
-
-
-    //TODO: only needed when drawing label
-    //calculate offset so that there is a hole between the two arrows to draw the label
-    var labelHoleExtra    = 0.5;
-    var reqWith = labelWidth + this.arrowHeadSize*2;
-    if(this.drawLabel) reqWith = reqWith + labelHoleExtra*2;
-    //this.labelLength = labelWidth;    
-    var labelHoleHalfSize = reqWith / 2;
-    
-    //IF arrows are pointer inwards
-    
-    //this.LABELFITOK    = LABELFITOK;
-    //this.LABELFITSHORT = LABELFITSHORT;
-    //this.LABELNOFIT    = LABELNOFIT;
-    
-    if(this.drawLabel) this.add( this.label );
-    
-    if( this.arrowsPlacement == "dynamic" )
-    {
-      if(reqWith>this.length)//if the label + arrows would not fit
-      {
-        this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
-        var arrowXPos = this.length/2 + this.arrowSize;
-      
-        this.leftArrowDir = this.direction.clone().negate();
-        this.rightArrowDir = this.leftArrowDir.clone().negate();
-        
-        this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-        this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-      
-        if( labelWidth > this.length)//if even the label itself does not fit
-        {
-          this.label.position.y -= 5;
-          //this.label.position.add( this.direction.clone().multiplyScalar( 5 ) );
-        }
-      }
-      else{//if the label + arrows would fit
-        this.arrowSize -= labelHoleHalfSize;
-        this.leftArrowPos.add( this.leftArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-        this.rightArrowPos.add( this.rightArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-      }
-    }else if( this.arrowsPlacement == "outside" ){
-      //put the arrows outside of measure, pointing "inwards" towards center
-      this.arrowSize = Math.max(length/2,6);//we want arrows to be more than just arrowhead in all the cases
-      var arrowXPos = this.length/2 + this.arrowSize;
-    
-      this.leftArrowDir = this.direction.clone().negate();
-      this.rightArrowDir = this.leftArrowDir.clone().negate();
-      
-      this.leftArrowPos.sub( this.leftArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-      this.rightArrowPos.sub( this.rightArrowDir.clone().normalize().multiplyScalar( arrowXPos ) );
-      
-      //console.log("labelWidth",labelWidth,"this.length",this.length);
-      if(labelWidth>this.length)
-      {
-        //console.log("UH OH , this", this, "will not fit!!");
-        //we want it "to the side" , aligned with the arrow, beyond the arrow head
-        var lengthOffset = this.length + labelHoleExtra+ this.arrowHeadSize+labelWidth/2;
-        //also offset to put on the line
-        this.textHeightOffset = new THREE.Vector3();
-        this.labelPosition = this.leftArrowPos.clone().add( this.leftArrowDir.clone().normalize().setLength(lengthOffset) );
-        var heightOffset = this.label.textHeight;
-       
-        
-        switch(this.labelPos)
-        {
-           case "top":
-             this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( heightOffset );
-           break;
-           case "bottom":
-            this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( heightOffset ).negate();
-           break;
-        }
-        
-        this.labelPosition.add( this.textHeightOffset );
-        this.label.position.copy( this.labelPosition );
-      }
-      
-    }else{
-       this.arrowSize -= labelHoleHalfSize;
-       this.leftArrowPos.add( this.leftArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-       this.rightArrowPos.add( this.rightArrowDir.clone().normalize().setLength( labelHoleHalfSize ) );
-    }
-  }
-
-  _drawSideLines(){
-      var sideLength      = this.sideLength;
-      var sideLengthExtra = this.sideLengthExtra;
-      
-      var sideLineGeometry = new THREE.Geometry();
-      var sideLineStart  = this.start.clone();
-      var sideLineEnd    = sideLineStart.clone().add( this.flatNormal.clone().normalize().multiplyScalar( sideLength+sideLengthExtra ) );
-      var leftToRightOffset = this.end.clone().sub( this.start );
-      
-      this.leftSideLine  = new LineHelper( {start:sideLineStart, end:sideLineEnd } ); 
-      this.rightSideLine = new LineHelper( {start:sideLineStart, end:sideLineEnd } );
-      this.rightSideLine.position.add( leftToRightOffset );
-      
-      this.add( this.rightSideLine );
-      this.add( this.leftSideLine );
-  }
-
-  _drawDebugHelpers(){
-    if(this.debugHelpers) this.remove( this.debugHelpers );
-
-    this.debugHelpers = new THREE.Object3D();
-    var directionHelper  = new THREE.ArrowHelper(this.direction.clone().normalize(), this.start, 15, 0XFF0000);
-    var startHelper      = new CrossHelper({position:this.start,color:0xFF0000});
-    var midHelper        = new CrossHelper({position:this.mid,color:0x0000FF});
-    var endHelper        = new CrossHelper({position:this.end,color:0x00FF00});
-
-    this.debugHelpers.add( directionHelper );
-    this.debugHelpers.add( startHelper );
-    this.debugHelpers.add( midHelper );
-    this.debugHelpers.add( endHelper );
-    
-    this.add( this.debugHelpers );
-  }
-
 }
 
 module.exports = SizeHelper;
