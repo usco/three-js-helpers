@@ -7,9 +7,12 @@ class BaseHelper extends THREE.Object3D {
   constructor( options ) {
     const DEFAULTS = {
       name : "",
+      debug:false
     }
+    let options = Object.assign({}, DEFAULTS, options); 
+    super(options);
     
-    super();
+    Object.assign(this, options);
   }
   
   setAsSelectionRoot( flag ){

@@ -29,7 +29,7 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
       
       settings:{
         visuals:{
-          arrowColor:"#000",
+          arrowColor:"#F00",
           textBgColor:"#ffd200"
         }
       },
@@ -241,11 +241,10 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                 
               break;
               case "thickness":
-                console.log("thickness");
                 var annotationHelper = new ThicknessHelper({
                   //TODO mix global settings with specifics nicely
-                  arrowColor:self.settings.visual.arrowColor,
-                  textBgColor:self.settings.visual.textBgColor,
+                  arrowColor:self.settings.visuals.arrowColor,
+                  textBgColor:self.settings.visuals.textBgColor,
                   
                   thickness:annotation.value, 
                   entryPoint:annotation.entryPoint,

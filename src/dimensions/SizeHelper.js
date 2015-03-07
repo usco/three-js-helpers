@@ -41,6 +41,8 @@ class SizeHelper extends BaseHelper {
       labelSpacingExtra : 0.5,
       fontSize: 10,
       fontFace: "Jura",
+      fontWeight: "bold",
+      fontStyle: "",
       textColor: "#000",
       textBgColor: "rgba(255, 255, 255, 0)",
       lengthAsLabel: true, //TODO: "length is too specific change that"
@@ -55,7 +57,6 @@ class SizeHelper extends BaseHelper {
       facingMode: "static",//can be static or dynamic
       length : 0,
       
-      debug: false,
     };
   
   this.DEFAULTS = DEFAULTS; //keep defaults
@@ -148,7 +149,7 @@ class SizeHelper extends BaseHelper {
     
     var cross = this.direction.clone().cross( this.up );
     cross.normalize().multiplyScalar( this.sideLength );
-    //console.log("mid", this.mid,"cross", cross);
+    console.log("mid", this.mid,"cross", cross);
     
     var bla = [0,0,0];
     let axes = ["x","y","z"];
@@ -168,6 +169,10 @@ class SizeHelper extends BaseHelper {
     this.rightArrowPos = this.mid.clone().add( cross );
     this.flatNormal = cross.clone();
     
+    this.offsetMid   = this.mid.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
+    this.offsetStart = this.start.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
+    this.offsetEnd   = this.end.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
+    
     //compute all the arrow & label positioning details
     this._computeLabelAndArrowsOffsets();
     //all the basic are computed, configure visuals
@@ -184,6 +189,7 @@ class SizeHelper extends BaseHelper {
   _computeLabelAndArrowsOffsets(){
     var sideLength  = this.sideLength;
     var length      = this.length;
+    var labelPos    = this.labelPos;
     var labelOrient = new THREE.Vector3(-1,0,1); 
     var labelHeight  = 0;
     var labelLength  = 0;
@@ -193,6 +199,10 @@ class SizeHelper extends BaseHelper {
     var arrowHeadSize     = this.arrowHeadSize;
     var arrowHeadsLength  = this.arrowHeadSize *2;
     var arrowSize         = this.arrowSize;
+    
+    var offsetMid   = this.offsetMid;
+    var offsetStart = this.offsetStart;
+    var offsetEnd   = this.offsetEnd;
 
     //generate invisible label/ text
     //this first one is used to get some labeling metrics, and is
@@ -265,9 +275,9 @@ class SizeHelper extends BaseHelper {
       {
         //console.log("UH OH , this", this, "will not fit!!");
         //we want it "to the side" , aligned with the arrow, beyond the arrow head
-        var lengthOffset = this.length/2 + labelSpacingExtra + arrowHeadSize + labelLength/2;
-        this.labelPosition = this.leftArrowPos.clone().add( this.leftArrowDir.clone().normalize().setLength(lengthOffset) );
-        labelLength
+        var lengthOffset = this.length/2 + labelSpacingExtra + arrowHeadSize + labelLength;
+        this.labelPosition = this.leftArrowPos.clone().add( this.leftArrowDir.clone().setLength(lengthOffset) );
+        labelPos = "top";
       }
     }else{
        this.arrowSize -= labelHoleHalfSize;
@@ -276,13 +286,13 @@ class SizeHelper extends BaseHelper {
     }
     
     //offset the label based on centered/top/bottom setting
-    switch(this.labelPos)
+    switch(labelPos)
     {
        case "center":
         this.textHeightOffset = new THREE.Vector3();
        break;
        case "top":
-         this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( labelHeight );
+         this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( labelHeight/2 );
        break;
        case "bottom":
         this.textHeightOffset = new THREE.Vector3( ).crossVectors( this.up, this.direction ).setLength( labelHeight ).negate();
@@ -367,6 +377,8 @@ class SizeHelper extends BaseHelper {
           text:this.text,
           fontSize:this.fontSize, 
           fontFace:this.fontFace,
+          fontWeight: this.fontWeight,
+          fontStyle: this.fontStyle,
           color:this.textColor, 
           background:(this.textBgColor!=null),
           bgColor:this.textBgColor});
@@ -376,6 +388,8 @@ class SizeHelper extends BaseHelper {
           text:this.text,
           fontSize:this.fontSize,
           fontFace:this.fontFace,
+          fontWeight: this.fontWeight,
+          fontStyle: this.fontStyle,
           color:this.textColor, 
           bgColor:this.textBgColor});
       break;
@@ -448,22 +462,24 @@ class SizeHelper extends BaseHelper {
     this.mainArrowLeft.scale.copy( arrowFlatScale );
     this.mainArrowRight.scale.copy( arrowFlatScale );
     
-    
-    
     ///sidelines
     var sideLength      = this.sideLength;
     var sideLengthExtra = this.sideLengthExtra;
     
-    var sideLineStart     = this.start.clone();
-    var sideLineEnd       = sideLineStart.clone().add( this.flatNormal.clone().setLength( sideLength+sideLengthExtra ) );
-    var leftToRightOffset = this.end.clone().sub( this.start );
+    var sideLineV         = this.flatNormal.clone().setLength( sideLength+sideLengthExtra );
     
-    this.leftSideLine.setStart( sideLineStart );
-    this.leftSideLine.setEnd( sideLineEnd );
+    var lSideLineStart     = this.start.clone();
+    var lSideLineEnd       = lSideLineStart.clone().add( sideLineV );
     
-    this.rightSideLine.setStart( sideLineStart );
-    this.rightSideLine.setEnd( sideLineEnd );
-    this.rightSideLine.position.add( leftToRightOffset );
+    var rSideLineStart    = this.end.clone();
+    var rSideLineEnd      = rSideLineStart.clone().add( sideLineV );
+    //this.end.clone().sub( this.start );
+    
+    this.leftSideLine.setStart( lSideLineStart );
+    this.leftSideLine.setEnd( lSideLineEnd );
+    
+    this.rightSideLine.setStart( rSideLineStart );
+    this.rightSideLine.setEnd( rSideLineEnd );
     
     ///label
     if( !this.drawLabel ){
@@ -473,22 +489,63 @@ class SizeHelper extends BaseHelper {
     this.label.position.copy( this.labelPosition.clone().add( this.textHeightOffset ) );
     
     //make the label face the correct way
-    var labelDefaultOrientation = new THREE.Vector3(-1,0,1); 
-    var quaternion = new THREE.Quaternion();
-    quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone() );
+    //var labelDefaultOrientation = new THREE.Vector3(-1,0,1); 
+    //var quaternion = new THREE.Quaternion();
+    //quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone() );
     //this.label.rotation.setFromQuaternion( quaternion );
     //this.label.rotation.z += Math.PI;
     
     //from http://stackoverflow.com/questions/15139649/three-js-two-points-one-cylinder-align-issue
+    var oldPos = this.label.position.clone();
+    var sideLength      = this.sideLength;
+    var sideLineV       = this.flatNormal.clone().setLength( sideLength );
+    var lSideLineStart     = this.start.clone();
+    var lSideLineEnd       = lSideLineStart.clone().add( sideLineV );
+    var rSideLineStart    = this.end.clone();
+    var rSideLineEnd      = rSideLineStart.clone().add( sideLineV );
+    
     var orientation = new THREE.Matrix4();//a new orientation matrix to offset pivot
     var offsetRotation = new THREE.Matrix4();//a matrix to fix pivot rotation
     var offsetPosition = new THREE.Matrix4();//a matrix to fix pivot position
-    var up = new THREE.Vector3(0,1,0);//this.up;
+    var up = this.up;//new THREE.Vector3(0,1,0);//this.up;
     var HALF_PI = +Math.PI * .5;
-    orientation.lookAt(this.start,this.end,up);//look at destination
+    orientation.lookAt( lSideLineStart, lSideLineEnd, up );//look at destination
     offsetRotation.makeRotationX(HALF_PI);//rotate 90 degs on X
     orientation.multiply(offsetRotation);//combine orientation with rotation transformations
-    //this.label.applyMatrix(orientation);
+
+        
+    var newOrient = new THREE.Euler().setFromRotationMatrix( orientation );
+    
+    function isEulerAlmostEqual( euler, otherEuler, precision=0.00001 ){
+      /*return (
+      ( Math.abs( euler._x - otherEuler._x) < precision ) && 
+      ( Math.abs( euler._y - otherEuler._y) < precision ) && 
+      ( Math.abs( euler._z - otherEuler._z) < precision ) && 
+      ( euler._order === otherEuler._order ) )
+      ||
+      (
+       );*/
+       return ( euler._x === otherEuler._x ) && ( euler._y === -otherEuler._y ) && ( euler._order === otherEuler._order ) ;
+    }
+    //if( prev.equals( this.label.rotation ) )//issues with precision
+    if( isEulerAlmostEqual( newOrient, this.label.rotation ) )
+    {
+      console.log("already there bud");
+    }
+    else
+    {
+       this.label.applyMatrix(orientation);
+       this.label.position.copy( oldPos );
+    }
+    
+    //FIXME: HACK
+    if(this.facingSide.x == -1){
+      console.log("ughh");
+      //offsetRotation.makeRotationZ( Math.PI );
+      //this.label.rotateOnAxis( new THREE.Vector3(0,0,1), Math.PI );
+    }
+    
+    
     
     //debug helpers
     this.directionDebugHelper.setDirection( this.direction );
@@ -513,18 +570,20 @@ class SizeHelper extends BaseHelper {
   
   /* set all parameters from options */
   setFromParams( options ){
-    let options = Object.assign({}, this.DEFAULTS, options); 
-
-    Object.assign(this, options);
+    this.start= undefined;
+    this.end=undefined;    
+    this.up=  new THREE.Vector3(0,0,1);
+    this.direction =undefined;//new THREE.Vector3(1,0,0),
+    this.facingSide= new THREE.Vector3(0,1,0);//all placement computations are done relative to this one
+  
+    this.labelOriented = false;
     
-    this.leftArrowPos  = new THREE.Vector3();
-    this.rightArrowPos = new THREE.Vector3();
-    this.leftArrowDir  = new THREE.Vector3();
-    this.rightArrowDir = new THREE.Vector3();
-    this.flatNormal    = new THREE.Vector3(0,0,1);
-    this.labelPosition = new THREE.Vector3();
-    this.offsetLeftArrowPos  = new THREE.Vector3();
-    this.offsetRightArrowPos = new THREE.Vector3();
+    this.label.position.set(0,0,0);
+    this.label.scale.set(1,1,1);
+    this.label.rotation.set(0,0,0);
+    this.label.updateMatrix();
+  
+    Object.assign(this, options);
   
     this._computeBasics();
   }
