@@ -38,7 +38,7 @@ class SizeHelper extends BaseHelper {
       drawLabel: true,
       labelPos:"center",
       labelType: "flat",//frontFacing or flat
-      labelSpacingExtra : 0.5,
+      labelSpacingExtra : 0.1,
       fontSize: 10,
       fontFace: "Jura",
       fontWeight: "bold",
@@ -56,7 +56,6 @@ class SizeHelper extends BaseHelper {
       facingSide: new THREE.Vector3(0,1,0),//all placement computations are done relative to this one
       facingMode: "static",//can be static or dynamic
       length : 0,
-      
     };
   
   this.DEFAULTS = DEFAULTS; //keep defaults
@@ -68,7 +67,6 @@ class SizeHelper extends BaseHelper {
   //FIXME: do this better
   this.axisAligned = false;
   this.findGoodSide = true;
-  this.debug        = true;
   
   this.leftArrowPos  = new THREE.Vector3();
   this.rightArrowPos = new THREE.Vector3();
@@ -80,6 +78,7 @@ class SizeHelper extends BaseHelper {
   this.offsetRightArrowPos = new THREE.Vector3();
     
   this._setupVisuals();
+  this._computeBasics();
   //constants
   //FIXME: horrible
   /*const LABELFITOK    = 0;
@@ -169,9 +168,9 @@ class SizeHelper extends BaseHelper {
     this.rightArrowPos = this.mid.clone().add( cross );
     this.flatNormal = cross.clone();
     
-    this.offsetMid   = this.mid.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
-    this.offsetStart = this.start.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
-    this.offsetEnd   = this.end.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
+    this.offsetMid   = this.mid.clone().add( cross.clone().setLength( this.sideLength ) );
+    this.offsetStart = this.start.clone().add( cross.clone().setLength( this.sideLength ) );
+    this.offsetEnd   = this.end.clone().add( cross.clone().setLength( this.sideLength ) );
     
     //compute all the arrow & label positioning details
     this._computeLabelAndArrowsOffsets();
@@ -210,6 +209,7 @@ class SizeHelper extends BaseHelper {
     var label = new LabelHelperPlane({
       text:this.text,
       fontSize:this.fontSize,
+      fontWeight: this.fontWeight,
       fontFace:this.fontFace,
       color:this.textColor,
       bgColor:this.textBgColor});
@@ -273,10 +273,14 @@ class SizeHelper extends BaseHelper {
       
       if(!roomForLabel)
       {
+        //this.offsetMid   = this.mid.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
+        //this.offsetStart = this.start.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
+        //this.offsetEnd   = this.end.clone().add( cross.clone().multiplyScalar( this.sideLength ) );
         //console.log("UH OH , this", this, "will not fit!!");
         //we want it "to the side" , aligned with the arrow, beyond the arrow head
-        var lengthOffset = this.length/2 + labelSpacingExtra + arrowHeadSize + labelLength;
-        this.labelPosition = this.leftArrowPos.clone().add( this.leftArrowDir.clone().setLength(lengthOffset) );
+        //var lengthOffset = this.length/2 + labelSpacingExtra + arrowHeadSize + labelLength;
+        var lengthOffset   = label.textWidth/4 + arrowHeadSize;
+        this.labelPosition = offsetStart.clone().add( this.leftArrowDir.clone().setLength(lengthOffset) );
         labelPos = "top";
       }
     }else{
@@ -350,9 +354,6 @@ class SizeHelper extends BaseHelper {
     this.mainArrowLeft.scale.copy( arrowFlatScale );
     this.mainArrowRight.scale.copy( arrowFlatScale );
     
-    //for debuging
-    //this.dirDebugArrow = new THREE.ArrowHelper(this.direction, this.mid, 20, "#F00", 3, 1);
-    
     this.add( this.mainArrowLeft );
     this.add( this.mainArrowRight );
     //this.add( this.dirDebugArrow );
@@ -403,7 +404,6 @@ class SizeHelper extends BaseHelper {
     }else
     {this.label.show();}
     
-    
     //debug helpers
     this.debugHelpers = new BaseHelper();
     
@@ -412,15 +412,22 @@ class SizeHelper extends BaseHelper {
     this.startDebugHelper      = new CrossHelper({color:0xFF0000});
     this.midDebugHelper        = new CrossHelper({color:0x0000FF});
     this.endDebugHelper        = new CrossHelper({color:0x00FF00});
+    
+    this.offsetStartDebugHelper      = new CrossHelper({color:0xFF0000});
+    this.offsetMidDebugHelper        = new CrossHelper({color:0x0000FF});
+    this.offsetEndDebugHelper        = new CrossHelper({color:0x00FF00});
 
     this.debugHelpers.add( this.directionDebugHelper );
     this.debugHelpers.add( this.upVectorDebugHelper );
     this.debugHelpers.add( this.startDebugHelper );
     this.debugHelpers.add( this.midDebugHelper );
     this.debugHelpers.add( this.endDebugHelper );
+    this.debugHelpers.add( this.offsetStartDebugHelper );
+    this.debugHelpers.add( this.offsetMidDebugHelper );
+    this.debugHelpers.add( this.offsetEndDebugHelper );
     
     this.add( this.debugHelpers );
-    if( !this.debug )
+    if( ! this.debug )
     {
       this.debugHelpers.hide();
     }else
@@ -492,8 +499,6 @@ class SizeHelper extends BaseHelper {
     //var labelDefaultOrientation = new THREE.Vector3(-1,0,1); 
     //var quaternion = new THREE.Quaternion();
     //quaternion.setFromUnitVectors ( labelDefaultOrientation, this.direction.clone() );
-    //this.label.rotation.setFromQuaternion( quaternion );
-    //this.label.rotation.z += Math.PI;
     
     //from http://stackoverflow.com/questions/15139649/three-js-two-points-one-cylinder-align-issue
     var oldPos = this.label.position.clone();
@@ -545,8 +550,6 @@ class SizeHelper extends BaseHelper {
       //this.label.rotateOnAxis( new THREE.Vector3(0,0,1), Math.PI );
     }
     
-    
-    
     //debug helpers
     this.directionDebugHelper.setDirection( this.direction );
     this.upVectorDebugHelper.setDirection( this.up );
@@ -554,20 +557,24 @@ class SizeHelper extends BaseHelper {
     this.midDebugHelper.position.copy( this.mid );
     this.endDebugHelper.position.copy( this.end );
     
-    if( !this.debug )
+    this.offsetStartDebugHelper.position.copy( this.offsetStart );
+    this.offsetMidDebugHelper.position.copy( this.offsetMid );
+    this.offsetEndDebugHelper.position.copy( this.offsetEnd );
+    
+    if( ! this.debug )
     {
-      this.debugHelpers.hide();
+      this.debugHelpers.hide();//not working ??
     }else
     {
       this.debugHelpers.show();
     }
-  }
-
-  set(){
+    
+    //FIXME: something weird is going on, we have to remove the debug helpers, cannot
+    //hide them ?? 
+    //this.remove( this.debugHelpers );
   }
 
   //setters
-  
   /* set all parameters from options */
   setFromParams( options ){
     this.start= undefined;
@@ -622,27 +629,15 @@ class SizeHelper extends BaseHelper {
   } 
 
   setStart( start ){
-    
     this.start = start || new THREE.Vector3();
     
     this._computeBasics();
-    /*var tmpV = this.end.clone().sub( this.start ) ;
-    this.length = tmpV.length();
-    this.direction = tmpV.normalize();
-    
-    this._recomputeMidDir();*/
   }
     
   setEnd( end ){
     this.end = end || new THREE.Vector3();
     
     this._computeBasics();
-    
-    /*var tmpV = this.end.clone().sub( this.start ) ;
-    this.length = tmpV.length();
-    this.direction = tmpV.normalize();
-    
-    this._recomputeMidDir();*/
   } 
 
   setFacingSide( facingSide ){

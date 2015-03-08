@@ -30,6 +30,11 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
       settings:{
         visuals:{
           arrowColor:"#F00",
+          fontSize: 8,
+          fontFace: "Jura",
+          fontWeight: "bold",
+          fontStyle: "",
+          textColor: "#f96a5e",
           textBgColor:"#ffd200"
         }
       },
@@ -170,7 +175,7 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
           
           for (var key in annotationData)
           {
-            if(["position","normal","orientation","center","start","mid","end"].indexOf( key ) > -1 )
+            if(["position","normal","orientation","center","start","mid","end","entryPoint","exitPoint"].indexOf( key ) > -1 )
             {
               annotation[key] = new THREE.Vector3().fromArray( annotationData[key] );
             }
@@ -241,12 +246,17 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                 
               break;
               case "thickness":
+                console.log("adding thickness ");
                 var annotationHelper = new ThicknessHelper({
                   //TODO mix global settings with specifics nicely
                   arrowColor:self.settings.visuals.arrowColor,
+                  textColor: self.settings.visuals.textColor,
                   textBgColor:self.settings.visuals.textBgColor,
+                  fontSize: self.settings.visuals.fontSize,
+                  fontFace: self.settings.visuals.fontFace,
+                  fontWeight: self.settings.visuals.fontWeight,
                   
-                  thickness:annotation.value, 
+                  thickness: annotation.thickness, 
                   entryPoint:annotation.entryPoint,
                   exitPoint :annotation.exitPoint,
                   object    :annotation.object

@@ -11,7 +11,7 @@ var CrossHelper = function(options)
   //var position = options.position || new THREE.Vector3();
   //var direction = this.direction = options.direction || new THREE.Vector3();
 
-  var size  = options.size!== undefined ? options.size : 10;
+  var size  = options.size!== undefined ? options.size : 5;
   this.color = options.color!== undefined ? options.color : "#0F0";
 
   var opacity = this.opacity = options.opacity || 0.8;

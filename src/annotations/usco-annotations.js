@@ -14,3 +14,6 @@ window.DiameterHelper     = exports.DiameterHelper;
 window.NoteHelper         = exports.NoteHelper;
 window.ThicknessHelper    = exports.ThicknessHelper;
 //window.AngDimHelper      = exports.AngDimHelper;
+
+var {LabelHelperPlane, LabelHelper3d} = require("../LabelHelper");
+window.LabelHelperPlane = exports.LabelHelperPlane  = LabelHelperPlane;

@@ -23,8 +23,78 @@ class ThicknessHelper extends AnnotationHelper {
     
     //initialise visuals
     this._setupVisuals();
+    this._computeBasics();
     
     this.setAsSelectionRoot( true );
+  }
+  
+  _computeBasics(){
+    var entryPoint = this.entryPoint;
+    var exitPoint = this.exitPoint;
+    var object    = this.object;
+    
+    if( ! entryPoint || ! exitPoint || ! object ) return;
+    
+    let endToStart = exitPoint.clone().sub( entryPoint )
+    this.thickness = endToStart.length();
+    
+    try{
+      var midPoint = endToStart.divideScalar( 2 ).add( entryPoint );
+      var putSide = this.getTargetBoundsData(object, midPoint);
+    }catch(error){
+      console.error(error);
+    }
+    
+    this.thicknessHelperArrows.setFromParams( {
+      start:entryPoint,
+      end:exitPoint,
+      facingSide:putSide,
+    });
+    this.thicknessHelperArrows.show();
+  }
+   
+   /*configure all the basic visuals of this helper*/
+  _setupVisuals(){
+    this.thicknessHelperArrows = new SizeHelper({
+      textColor:this.textColor, 
+      textBgColor:this.textBgColor, 
+      fontSize:this.fontSize,
+      fontFace:this.fontFace,
+      arrowsPlacement:"outside",
+      labelType:"flat",
+      sideLength:this.sideLength
+    });
+    this.thicknessHelperArrows.hide();
+    this.add( this.thicknessHelperArrows );
+  
+    //debug helpers
+    this.faceNormalHelper  = new THREE.ArrowHelper( new THREE.Vector3(), new THREE.Vector3(), 15, 0XFF0000 );
+    this.faceNormalHelper2 = new THREE.ArrowHelper( new THREE.Vector3(), new THREE.Vector3(), 15, 0X00FF00 );
+    this.entryPointHelper = new CrossHelper({color:0xFF0000});
+    this.exitPointHelper = new CrossHelper({color:0x00FF00});
+    
+    this.debugHelpers = new BaseHelper();
+    this.debugHelpers.add( this.faceNormalHelper );
+    this.debugHelpers.add( this.faceNormalHelper2 );
+    this.debugHelpers.add( this.entryPointHelper );
+    this.debugHelpers.add( this.exitPointHelper );
+    
+    //this.add( this.debugHelpers );
+    
+    if( !this.debug ){
+      this.debugHelpers.hide();
+    }
+  }
+  
+  _updateVisuals(){
+    this.faceNormalHelper.setStart( this.entryPoint );
+    this.faceNormalHelper.setDirection( this.exitPoint.clone().sub( this.entryPoint ) );
+    
+    this.faceNormalHelper2.setStart( this.exitPoint );
+    this.faceNormalHelper2.setDirection( this.entryPoint.clone().sub( this.exitPoint ) );
+    
+    this.entryPointHelper.position.copy( this.entryPoint );
+    this.exitPointHelper.position.copy( this.exitPoint );
   }
   
   setThickness( thickness ){
@@ -83,6 +153,12 @@ class ThicknessHelper extends AnnotationHelper {
         minDist = curLn;
       }
     }
+    //FIXME: todo or not ??
+    this.position.setFromMatrixPosition( object.matrixWorld );
+    object.worldToLocal( entryPoint );
+    object.worldToLocal( exitPoint );
+    
+    
     //compute actual thickness
     let endToStart = exitPoint.clone().sub( entryPoint )
     this.thickness = endToStart.length();
@@ -94,14 +170,10 @@ class ThicknessHelper extends AnnotationHelper {
       var midPoint = endToStart.divideScalar( 2 ).add( entryPoint );
       console.log("midPoint",entryPoint, midPoint, exitPoint);
       var putSide = this.getTargetBoundsData(object, midPoint);
-      //this.thicknessHelperArrows.setFacingSide( new THREE.Vector3().fromArray( putSide ) );
     
     }catch(error){
       console.error(error);
     }
-    //this.thicknessHelperArrows.setStart( entryPoint );
-    //this.thicknessHelperArrows.setEnd( exitPoint );
-    //this.thicknessHelperArrows.setFacingSide( putSide );
     this.thicknessHelperArrows.setFromParams( {
       start:entryPoint,
       end:exitPoint,
@@ -112,21 +184,12 @@ class ThicknessHelper extends AnnotationHelper {
 
   unset(){
     //this.thickness = undefined;
+    this.position.set(0, 0, 0);
     let options = Object.assign({}, this.DEFAULTS, options); 
     Object.assign(this, options);//unsure
     this.thicknessHelperArrows.hide();
   }
-
-  //call this when everything has been set ?
-  done(){
-    //this.thicknessHelperArrows.setStart( this.entryPoint );
-    //this.thicknessHelperArrows.setEnd( this.exitPoint );
-    this.thicknessHelperArrows.show();
-  }
   
-  /* call this to set all params all at once*/
-  setFromParams( params ){
-  }
 
   //temporary
   /*
@@ -164,53 +227,11 @@ class ThicknessHelper extends AnnotationHelper {
     return putSide; 
   }  
   
-  _setupVisuals(){
-    this.thicknessHelperArrows = new SizeHelper({
-      textColor:this.textColor, 
-      textBgColor:this.textBgColor, 
-      fontSize:this.fontSize,
-      fontFace:this.fontFace,
-      arrowsPlacement:"outside",
-      labelType:"flat",
-      sideLength:this.sideLength
-    });
-    this.thicknessHelperArrows.hide();
-    this.add( this.thicknessHelperArrows );
-  
-    //debug helpers
-    this.faceNormalHelper  = new THREE.ArrowHelper( new THREE.Vector3(), new THREE.Vector3(), 15, 0XFF0000 );
-    this.faceNormalHelper2 = new THREE.ArrowHelper( new THREE.Vector3(), new THREE.Vector3(), 15, 0X00FF00 );
-    this.entryPointHelper = new CrossHelper({color:0xFF0000});
-    this.exitPointHelper = new CrossHelper({color:0xFF0000});
-    
-    
-    this.debugHelpers = new BaseHelper();
-    
-    this.debugHelpers.add( this.faceNormalHelper );
-    this.debugHelpers.add( this.faceNormalHelper2 );
-    this.debugHelpers.add( this.entryPointHelper );
-    this.debugHelpers.add( this.exitPointHelper );
-    
-    this.add( this.debugHelpers );
-    
-    if( !this.debug ){
-      this.debugHelpers.hide();
-    }
-  }
-  
-  _updateVisuals(){
-    this.faceNormalHelper.setStart( this.entryPoint );
-    this.faceNormalHelper.setDirection( this.exitPoint.clone().sub( this.entryPoint ) );
-    
-    this.faceNormalHelper2.setStart( this.exitPoint );
-    this.faceNormalHelper2.setDirection( this.entryPoint.clone().sub( this.exitPoint ) );
-    
-    this.entryPointHelper.position.copy( this.entryPoint );
-    this.exitPointHelper.position.copy( this.exitPoint );
-  }
-  
-  toJson(){
-  
+  /*returns data in coordinates local to the target object*/
+  getObjectLocalData(){
+    this.helper.position.setFromMatrixPosition( this.helper.object.matrixWorld );
+    this.helper.object.worldToLocal( this.helper.entryPoint );
+    this.helper.object.worldToLocal( this.helper.exitPoint );
   }
 }
 
