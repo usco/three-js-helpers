@@ -35,7 +35,7 @@ class ThicknessHelper extends AnnotationHelper {
     
     if( ! entryPoint || ! exitPoint || ! object ) return;
     
-    let endToStart = exitPoint.clone().sub( entryPoint )
+    var endToStart = exitPoint.clone().sub( entryPoint )
     this.thickness = endToStart.length();
     
     try{
@@ -60,8 +60,9 @@ class ThicknessHelper extends AnnotationHelper {
       textBgColor:this.textBgColor, 
       fontSize:this.fontSize,
       fontFace:this.fontFace,
-      arrowsPlacement:"outside",
       labelType:"flat",
+      arrowsPlacement:"outside",
+      arrowColor: this.arrowColor,
       sideLength:this.sideLength
     });
     this.thicknessHelperArrows.hide();
@@ -188,50 +189,6 @@ class ThicknessHelper extends AnnotationHelper {
     let options = Object.assign({}, this.DEFAULTS, options); 
     Object.assign(this, options);//unsure
     this.thicknessHelperArrows.hide();
-  }
-  
-
-  //temporary
-  /*
-    get info about target object
-  */
-  getTargetBoundsData( targetObject, point ){
-    /* -1 /+1 directions on all 3 axis to determine for exampel WHERE an annotation
-    should be placed (left/right, front/back, top/bottom)
-    */
-    var putSide= [0,0,0];
-    if(!targetObject ) return putSide;
-    var bbox     = targetObject.boundingBox;
-    
-    let objectCenter =   new THREE.Vector3().addVectors( targetObject.boundingBox.min,
-      targetObject.boundingBox.max).divideScalar(2);
-      
-    //let realCenter = point.clone().sub( objectCenter );
-    //console.log("objectCenter",objectCenter,"point", point,foo.normalize());
-    
-    let axes = ["x","y","z"];
-    axes.forEach( (axis, index) => {
-      let axisOffset  = point[axis] - objectCenter[axis];
-      axisOffset = Math.round(axisOffset * 100) / 100;
-      if( axisOffset>0 ){
-        putSide[index] = 1;
-      }
-      else if( axisOffset<0 )
-      {
-        putSide[index] = -1;
-      }
-    });
-    
-    console.log("putSide",putSide);
-    putSide = new THREE.Vector3().fromArray( putSide );
-    return putSide; 
-  }  
-  
-  /*returns data in coordinates local to the target object*/
-  getObjectLocalData(){
-    this.helper.position.setFromMatrixPosition( this.helper.object.matrixWorld );
-    this.helper.object.worldToLocal( this.helper.entryPoint );
-    this.helper.object.worldToLocal( this.helper.exitPoint );
   }
 }
 

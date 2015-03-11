@@ -29,13 +29,13 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
       
       settings:{
         visuals:{
-          arrowColor:"#F00",
+          arrowColor:"#F0F",
           fontSize: 8,
           fontFace: "Jura",
           fontWeight: "bold",
           fontStyle: "",
-          textColor: "#f96a5e",
-          textBgColor:"#ffd200"
+          textColor: "#F0F",
+          textBgColor:undefined
         }
       },
       
@@ -224,9 +224,18 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
             switch(annotation.type)
             {
               case "distance":
-                var annotationHelper = new DistanceHelper({arrowColor:0x000000,
-                  textBgColor:"#ffd200",
-                  start:annotation.start, end:annotation.end,
+                              console.log("distance");
+                var annotationHelper = new DistanceHelper({
+                  //TODO mix global settings with specifics nicely
+                  arrowColor:self.settings.visuals.arrowColor,
+                  textColor: self.settings.visuals.textColor,
+                  textBgColor:self.settings.visuals.textBgColor,
+                  fontSize: self.settings.visuals.fontSize,
+                  fontFace: self.settings.visuals.fontFace,
+                  fontWeight: self.settings.visuals.fontWeight,
+                  
+                  start:annotation.start, 
+                  end:annotation.end,
                   startObject:annotation.startObject,
                   endObject:annotation.endObject
                   });
@@ -246,7 +255,6 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                 
               break;
               case "thickness":
-                console.log("adding thickness ");
                 var annotationHelper = new ThicknessHelper({
                   //TODO mix global settings with specifics nicely
                   arrowColor:self.settings.visuals.arrowColor,
@@ -266,17 +274,35 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
               break;
               
               case "diameter":
-                var annotationHelper = new DiameterHelper({arrowColor:0x000000,
-                  textBgColor:"#ffd200",
-                  diameter:annotation.value, orientation:annotation.orientation,
-                  center:annotation.center,tolerance:annotation.tolerance});
+                var annotationHelper = new DiameterHelper({
+                  //TODO mix global settings with specifics nicely
+                  arrowColor:self.settings.visuals.arrowColor,
+                  textColor: self.settings.visuals.textColor,
+                  textBgColor:self.settings.visuals.textBgColor,
+                  fontSize: self.settings.visuals.fontSize,
+                  fontFace: self.settings.visuals.fontFace,
+                  fontWeight: self.settings.visuals.fontWeight,
+                  
+                  diameter:annotation.value, 
+                  orientation:annotation.orientation,
+                  center:annotation.center,
+                  tolerance:annotation.tolerance});
                   
                 annotation.object.add( annotationHelper );
               break;
               case "angle":
-                var annotationHelper = new AngularDimHelper({arrowColor:0x000000,
-                  textBgColor:"#ffd200",
-                  start:annotation.start, mid: annotation.mid, end:annotation.end,
+                var annotationHelper = new AngularDimHelper({
+                  //TODO mix global settings with specifics nicely
+                  arrowColor:self.settings.visuals.arrowColor,
+                  textColor: self.settings.visuals.textColor,
+                  textBgColor:self.settings.visuals.textBgColor,
+                  fontSize: self.settings.visuals.fontSize,
+                  fontFace: self.settings.visuals.fontFace,
+                  fontWeight: self.settings.visuals.fontWeight,
+                  
+                  start:annotation.start, 
+                  mid: annotation.mid, 
+                  end:annotation.end,
                   startObject:annotation.startObject,
                   midObject:annotation.midObject,
                   endObject:annotation.endObject});
@@ -284,9 +310,17 @@ on-annotation-done="{{annotationDoneHandler}}" on-delete-entity="{{deleteEntityH
                 annotation.startObject.add( annotationHelper );
               break;
               case "note":
-                var annotationHelper = new NoteHelper({arrowColor:0x000000,
-                  textBgColor:"#ffd200",
-                  point:annotation.position, object:annotation.object})
+                var annotationHelper = new NoteHelper({
+                  //TODO mix global settings with specifics nicely
+                  arrowColor:self.settings.visuals.arrowColor,
+                  textColor: self.settings.visuals.textColor,
+                  textBgColor:self.settings.visuals.textBgColor,
+                  fontSize: self.settings.visuals.fontSize,
+                  fontFace: self.settings.visuals.fontFace,
+                  fontWeight: self.settings.visuals.fontWeight,
+                  
+                  point:annotation.position, 
+                  object:annotation.object})
                
                 annotation.object.add( annotationHelper );
             }

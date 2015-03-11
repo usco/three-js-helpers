@@ -364,8 +364,8 @@ class SizeHelper extends BaseHelper {
     //this.dirDebugArrow.depthWrite  = this.dirDebugArrow.depthTest = false;
     
     ////////sidelines
-    this.leftSideLine  = new LineHelper( ); 
-    this.rightSideLine = new LineHelper( );
+    this.leftSideLine  = new LineHelper( {color:this.arrowColor} ); 
+    this.rightSideLine = new LineHelper( {color:this.arrowColor} );
     
     this.add( this.rightSideLine );
     this.add( this.leftSideLine );
@@ -571,7 +571,7 @@ class SizeHelper extends BaseHelper {
     
     //FIXME: something weird is going on, we have to remove the debug helpers, cannot
     //hide them ?? 
-    //this.remove( this.debugHelpers );
+    this.remove( this.debugHelpers );
   }
 
   //setters

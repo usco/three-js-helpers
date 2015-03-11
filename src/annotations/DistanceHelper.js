@@ -7,48 +7,156 @@ class DistanceHelper extends AnnotationHelper {
   
     const DEFAULTS = {
       crossSize: 3,
-      crossColor: "#000"
+      crossColor: "#000",
+      
+      distance:undefined,
+      start:undefined,
+      startObject:undefined,
+      end: undefined,
+      endObject: undefined
     }
     
     let options = Object.assign({}, DEFAULTS, options); 
     
     super( options );    
-    
     Object.assign(this, options);
   
-    //this.arrowHeadSize   = 4;
-    this.start           = undefined;
-    this.startObject     =  options.startObject!== undefined ? options.startObject : undefined;
-    this.end             = undefined;
-    this.endObject       = options.endObject!== undefined ? options.endObject : undefined;
-    
-    this.distance        = undefined;
-    
     //initialise internal sub objects
+    this._setupVisuals();
+    this._computeBasics();
+   
+    this.updatable = false;
+    this.setAsSelectionRoot( true );
+    //FIXME: do this in a more coherent way
+    this._setName();
+  }
+  
+  
+  //getters & setters
+  /*get start () {
+    return this._start;
+  }
+  set start (val) {
+    console.log("setting start",val);
+    var start = this._start = val;
+    this._computeStartHooks();
+    
+    if(!this.startCross ) return;
+    this.startCross.position.copy( this.start );
+    this.startCross.show();
+  }
+  
+  get startObject () {
+    return this._startObject;
+  }
+  set startObject (val) {
+    console.log("setting start object",val);
+    var startObject = this._startObject = val;
+    this._computeStartHooks();
+  }
+  
+  get end() {
+    return this._end;
+  }
+  set end(val) {
+    console.log("setting end",val);
+    var start = this._end = val;
+    this._computeEndHooks();
+  }
+  
+  get endObject () {
+    return this._endObject;
+  }
+  set endObject (val) {
+    console.log("setting end object",val);
+    var endObject = this._endObject = val;
+    this._computeEndHooks();
+  }
+
+  _computeStartHooks(){
+  
+    if(!this.start || !this.startObject) return;
+    this.curStartObjectPos = this.startObject.position.clone();
+    
+    this._startOffset = this.start.clone().sub( this.curStartObjectPos );
+    if(!this._startHook){
+      this._startHook = new THREE.Object3D();
+      this._startHook.position.copy( this.start.clone().sub( this.startObject.position ) );//object.worldToLocal(this.start) );
+      this.startObject.add( this._startHook );
+    }
+  }
+  
+  _computeEndHooks(){
+    if(!this.end || !this.endObject) return;
+    
+    //FIXME: experimental
+    this.curEndObjectPos = this.endObject.position.clone();
+
+    this._endOffset = this.end.clone().sub( this.curEndObjectPos );
+    
+    if(!this._endHook){
+      this._endHook = new THREE.Object3D();
+      this._endHook.position.copy( this.end.clone().sub( this.endObject.position ) );//object.worldToLocal(this.end) );
+      this.endObject.add( this._endHook );
+    }
+    
+    this._computeBasics();
+  }*/
+  
+  _computeBasics(){
+    var start          = this.start;
+    var end            = this.end;
+    var startObject    = this.startObject;
+    var endObject      = this.endObject;
+    
+    if( ! start || ! end || ! startObject || ! endObject ) return;
+    
+    var endToStart = end.clone().sub( start )
+    this.distance = endToStart.length();
+    
+    try{
+      var midPoint = endToStart.divideScalar( 2 ).add( start );
+      this._putSide = this.getTargetBoundsData(startObject, midPoint);
+    }catch(error){
+      console.error(error);
+    }
+    
+    //all done, now update the visuals
+    this._updateVisuals();
+    
+    this.sizeArrow.show();
+    this.startCross.show();
+  }
+  
+  /*configure all the basic visuals of this helper*/
+  _setupVisuals(){
     this.startCross = new CrossHelper({size:this.crossSize,color:this.crossColor});
     this.startCross.hide();
     this.add( this.startCross );
       
-    //FIXME: side of sideLineSide needs to be dynamic
-    
     this.sizeArrow = new SizeHelper( { 
-      fontSize: this.fontSize,
-      arrowColor:this.arrowColor, 
-      sideLineColor:this.textColor,
-      textBgColor:this.textBgColor,textColor:this.textColor, labelType:
-      this.labelType,sideLength:6,sideLineSide:"back"} );
+      textColor:this.textColor, 
+      textBgColor:this.textBgColor, 
+      fontSize:this.fontSize,
+      fontFace:this.fontFace,
+      labelType:this.labelType,
+      arrowColor: this.arrowColor,
+      sideLength:this.sideLength,//6
+      sideLineColor:this.arrowColor,
+      sideLineSide:"back"} );
       
     this.sizeArrow.hide();
     this.add( this.sizeArrow );
+  }
+  
+  _updateVisuals(){
+    this.sizeArrow.setFromParams( {
+      start:this.start,
+      end:this.end,
+      facingSide:this._putSide,
+    });
     
-    if( options.start ) this.setStart( options.start, this.startObject );
-    if( options.end )   this.setEnd( options.end, this.endObject );
-   
-    this.updatable = false;
-    
-    this.setAsSelectionRoot( true );
-    //FIXME: do this in a more coherent way
-    this._setName();
+    this.startCross.position.copy( this.start );
   }
   
   /*start: vector3D
@@ -72,9 +180,7 @@ class DistanceHelper extends AnnotationHelper {
       object.add( this._startHook );
     }
     
-    this.startCross.show();
     this.startCross.position.copy( this.start );
-    
     this.sizeArrow.setStart( this.start );
   }
 
@@ -101,8 +207,6 @@ class DistanceHelper extends AnnotationHelper {
     
     this.sizeArrow.setEnd( this.end);
     this.sizeArrow.show();
-    
-      //this.sizeArrow.label.textMesh.material.opacity = 0.1;
   }
 
   unset( )
@@ -114,6 +218,9 @@ class DistanceHelper extends AnnotationHelper {
     this._startHook = null;
   }
 
+
+  /*brute force update method, to update the star & end positions
+  when the objects they are attached to change (position, rotation,scale)*/
   update( ){
     return;
     //TODO: find a way to only call this when needed
@@ -125,57 +232,6 @@ class DistanceHelper extends AnnotationHelper {
     this.startObject.updateMatrixWorld();
     this.endObject.updateMatrix();
     this.endObject.updateMatrixWorld();
-    
-    /*if( ! this.startObject.position.equals( this.curStartObjectPos ) )
-    {
-      var offset = this.startObject.position.clone().sub( this.curStartObjectPos );
-      console.log("STARTchange",offset);
-      //this.curStartObjectPos.copy( this.startObject.position );
-      //this.startCross.position.add( offset );
-      //this.start.add( offset );
-      //if(!this.start) return;
-      //this.setStart(this.start.clone().add( offset ), this.startObject );
-      
-      //this.set({start:this.start, end:this.end});
-      if(this.startObject === this.endObject)
-      {
-        this.setEnd(this.end.clone().add( offset ), this.endObject );
-        //this.end.add(offset);
-      }
-      
-      changed = true;
-    }*/
-    /*if( ! this.endObject.position.equals( this.curEndObjectPos ) &&  this.startObject !== this.endObject)
-    {
-
-      var offset = this.endObject.position.clone().sub( this.curEndObjectPos );
-      this.curEndObjectPos =  this.endObject.position.clone();//.copy( this.endObject.position );
-      this.end.copy( this.end.add( offset ) );
-      
-      console.log("ENDchange",offset,offset.length() );
-      //this.setEnd(this.end.clone().add( offset ) , this.endObject );
-      changed = true;
-    }
-    if(changed){
-       //console.log("change");
-       this.distance = this.end.clone().sub(this.start).length();
-       //this.unset();
-       //this.set({start:this.start, end:this.end});
-       this.sizeArrow.setStart( this.start );
-       this.sizeArrow.setEnd( this.end);
-    }*/
-    
-    
-    //this.sizeArrow.setStart( this.startObject.position.clone().add( this._startOffset) );
-    //this.sizeArrow.setEnd( this.endObject.position.clone().add( this._endOffset) );
-    
-    //this.setStart( this.startObject.position.clone().add( this._startOffset) );
-    //this.setEnd( this.endObject.position.clone().add( this._endOffset) );
-    //this.setStart( this._startHook.position );
-    //this.setEnd( this._endHook.position );
-    
-    //this.sizeArrow.setStart( this.startObject.localToWorld( this._startHook.position.clone() ));
-    //this.sizeArrow.setEnd( this.endObject.localToWorld( this._endHook.position.clone()) );
     
     this.setStart( this.startObject.localToWorld( this._startHook.position.clone() ) );
     this.setEnd( this.endObject.localToWorld( this._endHook.position.clone()) );

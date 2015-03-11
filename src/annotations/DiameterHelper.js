@@ -99,6 +99,7 @@ class DiameterHelper extends AnnotationHelper {
       arrowColor:this.textColor,
       linesColor:this.textColor
       });
+    console.log("hiding");
     this.leaderLine.hide();
     this.add( this.leaderLine );
   

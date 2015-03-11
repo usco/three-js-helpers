@@ -12,6 +12,7 @@
       mode:"3point", //can be 3point, ,2point: (center, radius)     
       ready:function(){
         this.helper = new DiameterHelper({textBgColor:"#ffd200", centerColor:"#ffd200"});
+        this.helper.unset();
       },
       onPicked:function(e){
         console.log("picked", this.localName);

@@ -1,6 +1,6 @@
+var AnnotationHelper = require("./AnnotationHelper");
 
-
-AngularDimHelper = function(options)
+var AngularDimHelper = function(options)
 {
   AnnotationHelper.call( this );
   var options = options || {};
@@ -389,6 +389,5 @@ AngularDimHelper.prototype._setName = function( ){
   if( tmpValue ) tmpValue = (tmpValue*180/Math.PI).toFixed( 2 );
   this.name = "Angle: " + tmpValue;
 }
-
   
-
+module.exports = AngularDimHelper;

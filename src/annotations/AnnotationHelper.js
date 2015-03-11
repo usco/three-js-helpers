@@ -53,19 +53,39 @@ class AnnotationHelper extends BaseHelper {
     this.transformable = false;
   }
   
-  
-  
   /*
     get info about target object
   */
-  getTargetBoundsData( target, intersection ){
+  getTargetBoundsData( targetObject, point ){
     /* -1 /+1 directions on all 3 axis to determine for exampel WHERE an annotation
     should be placed (left/right, front/back, top/bottom)
     */
     var putSide= [0,0,0];
-    //target.
-
-    return {putSide:  putSide}; 
+    if(!targetObject ) return putSide;
+    var bbox     = targetObject.boundingBox;
+    
+    let objectCenter =   new THREE.Vector3().addVectors( targetObject.boundingBox.min,
+      targetObject.boundingBox.max).divideScalar(2);
+      
+    //let realCenter = point.clone().sub( objectCenter );
+    //console.log("objectCenter",objectCenter,"point", point,foo.normalize());
+    
+    let axes = ["x","y","z"];
+    axes.forEach( (axis, index) => {
+      let axisOffset  = point[axis] - objectCenter[axis];
+      axisOffset = Math.round(axisOffset * 100) / 100;
+      if( axisOffset>0 ){
+        putSide[index] = 1;
+      }
+      else if( axisOffset<0 )
+      {
+        putSide[index] = -1;
+      }
+    });
+    
+    console.log("putSide",putSide);
+    putSide = new THREE.Vector3().fromArray( putSide );
+    return putSide; 
   }  
 
   

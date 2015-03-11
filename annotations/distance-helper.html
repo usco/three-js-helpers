@@ -29,7 +29,28 @@
         //this.helper.position.setFromMatrixPosition( entryInteresect.object.matrixWorld );
         //object.worldToLocal( point );
       
-        if(! this.helper.start){
+        /*if(! this.helper.start){
+          this.helper.unset();
+          this.helper.startObject = object;
+          this.helper.start = point;
+          return;
+        }else
+        {
+          this.helper.endObject = object;
+          this.helper.end       = point;
+          
+          this.distance = this.helper.distance;
+          
+          console.log("blah");
+          this.annotationDone({type:"distance", value:this.helper.distance,
+            start:this.helper.start, end:this.helper.end, 
+            startObject: this.helper.startObject, endObject: this.helper.endObject});
+            
+          this.helper.start = undefined;
+          this.helper.end   = undefined;
+        }*/
+      
+        /*if(! this.helper.start){
           this.helper.unset();
           this.helper.setStart( point, object );
           return;
@@ -43,7 +64,7 @@
             startObject: this.helper.startObject, endObject: this.helper.endObject});
             
           this.helper.start = undefined;
-        }
+        }*/
       }
      });
   </script>
