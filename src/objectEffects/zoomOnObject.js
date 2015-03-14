@@ -94,4 +94,4 @@ ZoomInOnObject.prototype.undo = function()
 }
 
 
-export ZoomInOnObject;
+//export ZoomInOnObject;
