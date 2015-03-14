@@ -92,3 +92,6 @@ ZoomInOnObject.prototype.undo = function()
     } )
     .start();
 }
+
+
+export ZoomInOnObject;

@@ -1,0 +1,7 @@
+
+class ObjectEffect{
+
+}
+
+
+export ObjectEffect;
