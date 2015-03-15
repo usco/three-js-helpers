@@ -59,13 +59,20 @@ NODE.js/browserify:
   
       browserify -s LabeledAxes src/LabeledAxes.js -t babelify --outfile lib/LabeledAxss.js
       
-  LabeledGrid/ grid helper
+  LabeledGrid/CircularLabeledGrid grid helpers
     
       browserify -s LabeledGrid src/grids/LabeledGrid.js -t babelify --outfile lib/LabeledGrid.js
       
       browserify -s CircularLabeledGrid src/grids/CircularLabeledGrid.js -t babelify --outfile lib/CircularLabeledGrid.js
       
-      
+  
+  Shadow/Mirror/Image plane
+  
+     browserify -s ShadowPlane src/planes/ShadowPlane.js -t babelify --outfile lib/ShadowPlane.js
+     
+     browserify -s ImagePlane src/planes/ImagePlane.js -t babelify --outfile lib/ImagePlane.js
+     
+     browserify -s MirrorPlane src/planes/MirrorPlane.js -t babelify --outfile lib/MirrorPlane.js
 
 
 Licence

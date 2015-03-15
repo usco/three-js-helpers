@@ -51,7 +51,7 @@ THREE.ShaderLib['mirror'] = {
 
 };
 
-THREE.Mirror = function ( renderer, camera, options ) {
+var THREE_Mirror = function ( renderer, camera, options ) {
 
 	THREE.Object3D.call( this );
 
@@ -141,9 +141,9 @@ THREE.Mirror = function ( renderer, camera, options ) {
 
 };
 
-THREE.Mirror.prototype = Object.create( THREE.Object3D.prototype );
+THREE_Mirror.prototype = Object.create( THREE.Object3D.prototype );
 
-THREE.Mirror.prototype.renderWithMirror = function ( otherMirror ) {
+THREE_Mirror.prototype.renderWithMirror = function ( otherMirror ) {
 
 	// update the mirror matrix to mirror the current view
 	this.updateTextureMatrix();
@@ -169,7 +169,7 @@ THREE.Mirror.prototype.renderWithMirror = function ( otherMirror ) {
 	otherMirror.updateTextureMatrix();
 };
 
-THREE.Mirror.prototype.updateTextureMatrix = function () {
+THREE_Mirror.prototype.updateTextureMatrix = function () {
 
 	var sign = Math.sign;
 
@@ -245,7 +245,7 @@ THREE.Mirror.prototype.updateTextureMatrix = function () {
 
 };
 
-THREE.Mirror.prototype.render = function () {
+THREE_Mirror.prototype.render = function () {
 
 	if ( this.matrixNeedsUpdate ) this.updateTextureMatrix();
 
@@ -268,7 +268,7 @@ THREE.Mirror.prototype.render = function () {
 
 };
 
-THREE.Mirror.prototype.renderTemp = function () {
+THREE_Mirror.prototype.renderTemp = function () {
 
 	if ( this.matrixNeedsUpdate ) this.updateTextureMatrix();
 
@@ -290,3 +290,5 @@ THREE.Mirror.prototype.renderTemp = function () {
 	}
 
 };
+
+export { THREE_Mirror };
