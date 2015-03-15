@@ -1,7 +1,11 @@
+/*TODO:
+ - refactor
+ - use label helper
+*/
 
-GridHelper = function ( width, length, step , upVector, color, opacity, text, textColor, textPosition) {
-	
-      defaults = {
+class LabeledGrid extends THREE.Object3D{
+  constructor( width, length, step , upVector, color, opacity, text, textColor, textPosition) {
+      const DEFAULTS = {
         width: 200,
         length:200,
         step: 100,
@@ -12,7 +16,7 @@ GridHelper = function ( width, length, step , upVector, color, opacity, text, te
         textLocation: "f",
         rootAssembly: null
       };
-      THREE.Object3D.call( this );
+      super( );
       
       this.width        = width || 200;
       this.length       = length || 200;
@@ -37,11 +41,9 @@ GridHelper = function ( width, length, step , upVector, color, opacity, text, te
       var upVector = this.upVector;
       this.up = upVector;
       this.lookAt(upVector);
-};
-
-GridHelper.prototype = Object.create( THREE.Object3D.prototype );
-
-GridHelper.prototype._drawGrid = function() {
+  }
+  
+  _drawGrid() {
       var gridGeometry, gridMaterial, mainGridZ, planeFragmentShader, planeGeometry, planeMaterial, subGridGeometry, subGridMaterial, subGridZ;
       
       //offset to avoid z fighting
@@ -180,75 +182,73 @@ GridHelper.prototype._drawGrid = function() {
       this.add( this.margin );
       
       this._drawNumbering();
-};
-
-
-GridHelper.prototype.toggle = function(toggle) {
-	//apply visibility settings to all children 
-      this.traverse( function( child ) {
-      	child.visible = toggle;
-      });
-};
-
-GridHelper.prototype.setOpacity = function(opacity) {
-      this.opacity = opacity;
-      this.mainGrid.material.opacity = opacity;
-      this.subGrid.material.opacity = opacity/2;
-      this.margin.material.opacity = opacity*2;
-};
-
-GridHelper.prototype.setColor = function(color) {
-      this.color = color;
-      this.mainGrid.material.color = new THREE.Color().setHex(this.color);
-      this.subGrid.material.color = new THREE.Color().setHex(this.color);
-      this.margin.material.color = new THREE.Color().setHex(this.color);
-};
-
-
-GridHelper.prototype.toggleText = function(toggle) {
-  this.text = toggle;
-  var labels = this.labels.children;
-  for (var i = 0; i < this.labels.children.length; i++) {
-    var label = labels[i];
-    label.visible = toggle;
   }
-};
 
-GridHelper.prototype.setTextColor = function(color) {
-  this.textColor = color;
-  this._drawNumbering();
-};
-
-GridHelper.prototype.setTextLocation = function(location) {
-  this.textLocation = location;
-  return this._drawNumbering();
-};
-
-GridHelper.prototype.setUp = function(upVector) {
-  this.upVector = upVector;
-  this.up = upVector;
-  this.lookAt(upVector);
-};
-
-GridHelper.prototype.resize = function( width, length ) {
-  if (width && length ) {
-    var width = Math.max(width,10);
-    this.width = width;
-    
-    var length = Math.max(length,10);
-    this.length = length;
-    
-    this.step = Math.max(this.step,5);
-    
-    this.remove(this.mainGrid);
-    this.remove(this.subGrid);
-    this.remove( this.margin );
-    //this.remove(this.plane);
-    return this._drawGrid();
+  toggle(toggle) {
+	  //apply visibility settings to all children 
+        this.traverse( function( child ) {
+        	child.visible = toggle;
+        });
   }
-};
 
-GridHelper.prototype._drawNumbering = function() {
+  setOpacity(opacity) {
+        this.opacity = opacity;
+        this.mainGrid.material.opacity = opacity;
+        this.subGrid.material.opacity = opacity/2;
+        this.margin.material.opacity = opacity*2;
+  }
+
+  setColor(color) {
+        this.color = color;
+        this.mainGrid.material.color = new THREE.Color().setHex(this.color);
+        this.subGrid.material.color = new THREE.Color().setHex(this.color);
+        this.margin.material.color = new THREE.Color().setHex(this.color);
+  }
+
+  toggleText(toggle) {
+    this.text = toggle;
+    var labels = this.labels.children;
+    for (var i = 0; i < this.labels.children.length; i++) {
+      var label = labels[i];
+      label.visible = toggle;
+    }
+  }
+
+  setTextColor(color) {
+    this.textColor = color;
+    this._drawNumbering();
+  }
+
+  setTextLocation(location) {
+    this.textLocation = location;
+    return this._drawNumbering();
+  }
+
+  setUp(upVector) {
+    this.upVector = upVector;
+    this.up = upVector;
+    this.lookAt(upVector);
+  }
+
+  resize( width, length ) {
+    if (width && length ) {
+      var width = Math.max(width,10);
+      this.width = width;
+      
+      var length = Math.max(length,10);
+      this.length = length;
+      
+      this.step = Math.max(this.step,5);
+      
+      this.remove(this.mainGrid);
+      this.remove(this.subGrid);
+      this.remove( this.margin );
+      //this.remove(this.plane);
+      return this._drawGrid();
+    }
+  }
+
+  _drawNumbering() {
       var label, sizeLabel, sizeLabel2, xLabelsLeft, xLabelsRight, yLabelsBack, yLabelsFront;
       var step = this.step;
 
@@ -297,11 +297,11 @@ GridHelper.prototype._drawNumbering = function() {
           labelsSideRight.add( sizeLabel2 );
         }
         
-        labelsSideLeft = labelsSideRight.clone();
+        var labelsSideLeft = labelsSideRight.clone();
         labelsSideLeft.rotation.z = -Math.PI ;
         //labelsSideLeft = labelsSideRight.clone().translateY(- width );
         
-        labelsBack = labelsFront.clone();
+        var labelsBack = labelsFront.clone();
         labelsBack.rotation.z = -Math.PI ;
       }
        
@@ -333,51 +333,55 @@ GridHelper.prototype._drawNumbering = function() {
       
       
       this.mainGrid.add(this.labels);
-};
-
-GridHelper.prototype.drawTextOnPlane = function(text, size) {
-  var canvas, context, material, plane, texture;
-  
-  if (size == null) {
-    size = 256;
   }
-  
-  canvas = document.createElement('canvas');
-  var size = 128;
-  canvas.width = size;
-  canvas.height = size;
-  context = canvas.getContext('2d');
-  context.font = "18px sans-serif";
-  context.textAlign = 'center';
-  context.fillStyle = this.textColor;
-  context.fillText(text, canvas.width / 2, canvas.height / 2);
-  context.strokeStyle = this.textColor;
-  context.strokeText(text, canvas.width / 2, canvas.height / 2);
-  
-  texture = new THREE.Texture(canvas);
-  texture.needsUpdate = true;
-      texture.generateMipmaps = true;
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearFilter;
-  
-  material = new THREE.MeshBasicMaterial({
-    map: texture,
-    transparent: true,
-    color: 0xffffff,
-    alphaTest: 0.3
-  });
-  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(size / 8, size / 8), material);
-  plane.doubleSided = true
-  plane.overdraw = true
-  
-  return plane;
-  
-};
 
+  drawTextOnPlane(text, size) {
+    var canvas, context, material, plane, texture;
+    
+    if (size == null) {
+      size = 256;
+    }
+    
+    canvas = document.createElement('canvas');
+    var size = 128;
+    canvas.width = size;
+    canvas.height = size;
+    context = canvas.getContext('2d');
+    context.font = "18px sans-serif";
+    context.textAlign = 'center';
+    context.fillStyle = this.textColor;
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    context.strokeStyle = this.textColor;
+    context.strokeText(text, canvas.width / 2, canvas.height / 2);
+    
+    texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+        texture.generateMipmaps = true;
+        texture.magFilter = THREE.LinearFilter;
+        texture.minFilter = THREE.LinearFilter;
+    
+    material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      color: 0xffffff,
+      alphaTest: 0.3
+    });
+    plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(size / 8, size / 8), material);
+    plane.doubleSided = true
+    plane.overdraw = true
+    
+    return plane;
+    
+  }
+}
+
+
+//export { LabeledGrid };
+module.exports = LabeledGrid;
 
 //autoresize, disabled for now
 /*
-GridHelper.prototype.updateGridSize = function() {
+updateGridSize() {
       var max, maxX, maxY, min, minX, minY, size, subchild, _getBounds, _i, _len, _ref,
         _this = this;
       minX = 99999;

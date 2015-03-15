@@ -47,9 +47,25 @@ NODE.js/browserify:
       
       browserify -s ObjectDimensionsHelper src/dimensions/usco-dimensions.js -t babelify --outfile lib/usco-dimensions.js
 
+  
+  Subuilds:
+  ----------
+  
   Build annotations
   
       browserify -s uscoAnnotations src/annotations/usco-annotations.js -t babelify --outfile lib/usco-annotations.js
+
+  LabeledAxes/axes helper
+  
+      browserify -s LabeledAxes src/LabeledAxes.js -t babelify --outfile lib/LabeledAxss.js
+      
+  LabeledGrid/ grid helper
+    
+      browserify -s LabeledGrid src/grids/LabeledGrid.js -t babelify --outfile lib/LabeledGrid.js
+      
+      browserify -s CircularLabeledGrid src/grids/CircularLabeledGrid.js -t babelify --outfile lib/CircularLabeledGrid.js
+      
+      
 
 
 Licence

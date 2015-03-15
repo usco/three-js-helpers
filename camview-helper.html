@@ -1,4 +1,4 @@
-<script src="custom-axis-helper.js" ></script>
+<script src="lib/LabeledAxes.js" ></script>
 <script src="src/controls/CamViewControls.js" ></script>
 
 <polymer-element name="camview-helper" extends="three-js-helper"
@@ -15,10 +15,7 @@
 
       ready: function() {
         this.object = new THREE.Object3D();
-        
-        
         //this.object.add( new CamViewControls() );
-        
         this.super();
       },
       enteredView:function()

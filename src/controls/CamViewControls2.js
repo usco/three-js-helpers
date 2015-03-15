@@ -1,5 +1,8 @@
+import { GizmoMaterial, GizmoLineMaterial } from "../GizmoMaterial"; 
+import { LabeledAxes } from "../LabeledAxes"; 
+
 //FIXME: hack 
-THREE.Vector3.prototype.pickingRay = function ( camera ) {
+/*THREE.Vector3.prototype.pickingRay = function ( camera ) {
     var tan = Math.tan( 0.5 * THREE.Math.degToRad( camera.fov ) ) / camera.zoom;
 
     this.x *= tan * camera.aspect;
@@ -7,87 +10,49 @@ THREE.Vector3.prototype.pickingRay = function ( camera ) {
     this.z = - 1;
 
     return this.transformDirection( camera.matrixWorld );
-};
+};*/
 
 
-GizmoMaterial = function ( parameters ) {
+class CubeEdge extends THREE.Mesh{
+  constructor(size, width, color, position, selectionCallback ){
+    var size = size || 10;
+    var width = width || 4;
+    var position = position || new THREE.Vector3();
+    var color = color || 0xFF0000;
+    this.selectionCallback = selectionCallback;
 
-		THREE.MeshBasicMaterial.call( this );
-
-		//this.depthTest = false;
-		//this.depthWrite = false;
-		this.side = THREE.DoubleSide;
-		//this.transparent = true;
-		this.opacity = 0.8;
-		this.setValues( parameters );
-		
-		this.highlightColor = parameters.highlightColor !== undefined ? options.parameters : 0xFFFF00;
-
-		this.oldColor = this.color.clone();
-		this.oldOpacity = this.opacity;
-
-		this.highlight = function( highlighted ) {
-
-			if ( highlighted ) {
-
-				this.color.set( this.highlightColor );//.setRGB( 1, 1, 0 );
-				this.opacity = 1;
-
-			} else {
-
-					this.color.copy( this.oldColor );
-					this.opacity = this.oldOpacity;
-
-			}
-
-		};
-};
-
-GizmoMaterial.prototype = Object.create( THREE.MeshBasicMaterial.prototype );
-
-
-CubeEdge = function( size, width, color, position, selectionCallback ){
-  var size = size || 10;
-  var width = width || 4;
-  var position = position || new THREE.Vector3();
-  var color = color || 0xFF0000;
-  this.selectionCallback = selectionCallback;
-
-  var midSize = size - width*2;
-  var planeGeometry = new THREE.PlaneGeometry( midSize, width, 2, 2 );
-  planeGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI/2 ) ); 
-  planeGeometry.applyMatrix( new THREE.Matrix4().makeRotationY( Math.PI/2 ) ); 
-  planeGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, 0 ,size /2 ) );
-  
-  var planeGeometry2 = planeGeometry.clone();
-  planeGeometry2.applyMatrix( new THREE.Matrix4().makeRotationZ( Math.PI/2 ) ); 
-  
-  //final geometry
-  var geometry = new THREE.Geometry();
-  geometry.merge(planeGeometry);
-  geometry.merge(planeGeometry2);
-  //geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, width/2 , 0 ) );
-  geometry = new THREE.BoxGeometry( width, width, midSize );
-  geometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, -width /2 ,size /2 ) );
-  
-  var material = new GizmoMaterial( { color:color, 
-	  } );
-  //depthTest:false, depthWrite:false 
-  THREE.Mesh.call(this, geometry, material);
-  this.position.copy( position );
-}
-
-CubeEdge.prototype = Object.create( THREE.Mesh.prototype );
-CubeEdge.prototype.constructor = CubeEdge;  
-
-CubeEdge.prototype.onSelect = function(){
-  if(this.selectionCallback){
-    this.selectionCallback( this.name );
+    var midSize = size - width*2;
+    var planeGeometry = new THREE.PlaneGeometry( midSize, width, 2, 2 );
+    planeGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI/2 ) ); 
+    planeGeometry.applyMatrix( new THREE.Matrix4().makeRotationY( Math.PI/2 ) ); 
+    planeGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, 0 ,size /2 ) );
+    
+    var planeGeometry2 = planeGeometry.clone();
+    planeGeometry2.applyMatrix( new THREE.Matrix4().makeRotationZ( Math.PI/2 ) ); 
+    
+    //final geometry
+    var geometry = new THREE.Geometry();
+    geometry.merge(planeGeometry);
+    geometry.merge(planeGeometry2);
+    //geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, width/2 , 0 ) );
+    geometry = new THREE.BoxGeometry( width, width, midSize );
+    geometry.applyMatrix( new THREE.Matrix4().makeTranslation( -width /2, -width /2 ,size /2 ) );
+    
+    var material = new GizmoMaterial( { color:color, 
+	    } );
+    //depthTest:false, depthWrite:false 
+    super(geometry, material);
+    this.position.copy( position );
   }
+
+  onSelect(){
+    if(this.selectionCallback){
+      this.selectionCallback( this.name );
+    }
 }
 
-
-CubePlane = function( size, color, position, selectionCallback ){
+class CubePlane extends THREE.Mesh{
+  constructor( size, color, position, selectionCallback ){
   var size = size || 10;
   var position = position || new THREE.Vector3();
   var color = color || 0xFF0000;
@@ -96,49 +61,46 @@ CubePlane = function( size, color, position, selectionCallback ){
   var geometry = new THREE.PlaneBufferGeometry( size, size, 2, 2 );
   var material = new GizmoMaterial( { color:color,
    });
-  //, depthTest:false , side:THREE.FrontSide
   
-  THREE.Mesh.call(this, geometry, material);
+  super(geometry, material);
   this.position.copy( position );
+  }
+
+  onSelect(){
+    if(this.selectionCallback){
+      this.selectionCallback( this.name );
+    }
+  }
+
 }
 
-CubePlane.prototype = Object.create( THREE.Mesh.prototype );
-CubePlane.prototype.constructor = CubePlane;  
+class CubeCorner extends THREE.Mesh{
+  constructor( size, color, position, selectionCallback ){
+    var size = size || 10;
+    var position = position || new THREE.Vector3();
+    var color = color || 0xFF0000;
+    this.selectionCallback = selectionCallback;
 
-CubePlane.prototype.onSelect = function(){
-  if(this.selectionCallback){
-    this.selectionCallback( this.name );
+    var geometry = new THREE.BoxGeometry( size, size, size);
+    var material = new GizmoMaterial( { color:color,
+     });
+    
+    super( geometry, material );
+    this.position.copy( position );
+  } 
+
+  onSelect(){
+    if(this.selectionCallback){
+      this.selectionCallback( this.name );
+    }
   }
 }
 
 
-CubeCorner = function( size, color, position, selectionCallback ){
-  var size = size || 10;
-  var position = position || new THREE.Vector3();
-  var color = color || 0xFF0000;
-  this.selectionCallback = selectionCallback;
 
-  var geometry = new THREE.BoxGeometry( size, size, size);
-  var material = new GizmoMaterial( { color:color,
-   });
-  
-  THREE.Mesh.call(this, geometry, material);
-  this.position.copy( position );
-}
-
-CubeCorner.prototype = Object.create( THREE.Mesh.prototype );
-CubeCorner.prototype.constructor = CubeCorner;  
-
-CubeCorner.prototype.onSelect = function(){
-  if(this.selectionCallback){
-    this.selectionCallback( this.name );
-  }
-}
-
-
-
-ViewCubeGizmo = function( controlledCameras, position, options ){
-  THREE.Object3D.call( this );
+class ViewCubeGizmo extends THREE.Object3D
+  constructor( controlledCameras, position, options ){
+  super();
   
   var options = options || {};
   
@@ -355,23 +317,19 @@ ViewCubeGizmo = function( controlledCameras, position, options ){
 	});
 }
 
-ViewCubeGizmo.prototype = Object.create( THREE.Object3D.prototype );
-ViewCubeGizmo.prototype.constructor = ViewCubeGizmo;  
-
-
-ViewCubeGizmo.prototype.hide = function () {
+ViewCubeGizmo.prototype.hide() {
 	this.traverse(function( child ) {
 		child.visible = false;
 	});
 };
 
-ViewCubeGizmo.prototype.show = function () {
+ViewCubeGizmo.prototype.show() {
 	this.traverse(function( child ) {
 		child.visible = true;
 	});
 };
 
-ViewCubeGizmo.prototype.highlight = function ( item ) {
+ViewCubeGizmo.prototype.highlight( item ) {
 	this.traverse(function( child ) {
 		if ( child.material && child.material.highlight ){
 			if ( child.name == item ) {
@@ -384,8 +342,10 @@ ViewCubeGizmo.prototype.highlight = function ( item ) {
 };
 
  
-CamViewControls = function ( options, controlledCameras) { 
-	 THREE.Object3D.call( this );
+class CamViewControls extends THREE.Object3D{
+
+  constructor( options, controlledCameras) { 
+	 super();
 	
 	 var options = options || {};
   
@@ -404,142 +364,138 @@ CamViewControls = function ( options, controlledCameras) {
 	  
 	  , this.edgesColor, this.planesColor, this.cornersColor, controlledCameras);*/
 	  
-	  
 	 this.add( this.viewCubeGizmo );
 	 this.add( new LabeledAxes( options ) );
-}
+  }
 
-CamViewControls.prototype = Object.create( THREE.Object3D.prototype );
-CamViewControls.prototype.constructor = CamViewControls;  
-
-CamViewControls.prototype.init = function( camera, domElement ){
-  console.log("attaching CamViewControls controls to", domElement);
-  this.domElement = domElement;
-  this.camera = camera;
-  
-  var scope = this;
-  
-  var ray = new THREE.Raycaster();
-	var pointerVector = new THREE.Vector3();
-
-	var point = new THREE.Vector3();
-	var offset = new THREE.Vector3();
-	
-	var camPosition = new THREE.Vector3();
-	var camRotation = new THREE.Euler();
-	
-	this.camPosition = camPosition;
-	this.camRotation = camRotation;
-  
-  var useCapture = false;
-  
-  domElement.addEventListener( "mousedown", onPointerDown, useCapture );
-	domElement.addEventListener( "touchstart", onPointerDown, useCapture );
-
-	domElement.addEventListener( "mousemove", onPointerMove, useCapture );
-	domElement.addEventListener( "touchmove", onPointerMove, useCapture );
-
-	domElement.addEventListener( "mouseup", onPointerUp, useCapture );
-	domElement.addEventListener( "mouseout", onPointerUp, useCapture );
-	domElement.addEventListener( "touchend", onPointerUp, useCapture );
-	domElement.addEventListener( "touchcancel", onPointerUp, useCapture );
-	domElement.addEventListener( "touchleave", onPointerUp, useCapture );
-	
-	function intersectObjects( pointer, objects, isOrtho ) {
-
-		var rect = domElement.getBoundingClientRect();
-		var x = pointer.offsetX;//;( pointer.offsetX - rect.left ) / rect.width;
-		var y = pointer.offsetY;//;( pointer.offsetX - rect.top ) / rect.height;
-
-    //pointerVector.set( (x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1, 1  );
+  init( camera, domElement ){
+    console.log("attaching CamViewControls controls to", domElement);
+    this.domElement = domElement;
+    this.camera = camera;
     
-    var x = ( pointer.clientX - rect.left ) / rect.width;
+    var scope = this;
+    
+    var ray = new THREE.Raycaster();
+	  var pointerVector = new THREE.Vector3();
+
+	  var point = new THREE.Vector3();
+	  var offset = new THREE.Vector3();
+	
+	  var camPosition = new THREE.Vector3();
+	  var camRotation = new THREE.Euler();
+	
+	  this.camPosition = camPosition;
+	  this.camRotation = camRotation;
+    
+    var useCapture = false;
+    
+    domElement.addEventListener( "mousedown", onPointerDown, useCapture );
+	  domElement.addEventListener( "touchstart", onPointerDown, useCapture );
+
+	  domElement.addEventListener( "mousemove", onPointerMove, useCapture );
+	  domElement.addEventListener( "touchmove", onPointerMove, useCapture );
+
+	  domElement.addEventListener( "mouseup", onPointerUp, useCapture );
+	  domElement.addEventListener( "mouseout", onPointerUp, useCapture );
+	  domElement.addEventListener( "touchend", onPointerUp, useCapture );
+	  domElement.addEventListener( "touchcancel", onPointerUp, useCapture );
+	  domElement.addEventListener( "touchleave", onPointerUp, useCapture );
+	
+	  function intersectObjects( pointer, objects, isOrtho ) {
+
+		  var rect = domElement.getBoundingClientRect();
+		  var x = pointer.offsetX;//;( pointer.offsetX - rect.left ) / rect.width;
+		  var y = pointer.offsetY;//;( pointer.offsetX - rect.top ) / rect.height;
+
+      //pointerVector.set( (x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1, 1  );
+      
+      var x = ( pointer.clientX - rect.left ) / rect.width;
+	    var y = ( pointer.clientY - rect.top ) / rect.height;
+
+	    pointerVector.set( ( x * 2 ) - 1, - ( y * 2 ) + 1, 0.5 );
+      
+      
+      if( !isOrtho)
+		  {
+		    pointerVector.unproject( camera );
+
+		    ray.set( camPosition, pointerVector.sub( camPosition ).normalize() );
+
+		    var intersections = ray.intersectObjects( objects, true );
+		  }else{
+		
+		   pointerVector.pickingRay( camera );
+       ray.set( camPosition, pointerVector );
+       var intersections = ray.intersectObjects( objects, true );
+		  }
+		  return intersections[0] ? intersections[0] : false;
+
+	  }
+	
+	  function onPointerMove( event ) {
+
+			  event.preventDefault();
+			  event.stopPropagation();
+			
+			  var pointer = event.changedTouches? event.changedTouches[0] : event;
+
+			  var intersect = intersectObjects( pointer, scope.viewCubeGizmo.children, true );
+			
+        if(intersect && intersect.object.name){
+          scope.activeItem = intersect.object.name;
+          scope.viewCubeGizmo.show();
+        }
+        else{
+          scope.activeItem = null;
+          scope.viewCubeGizmo.hide();
+        }
+        //intersect
+			  //point.copy( planeIntersect.point );
+    }
+    function onPointerDown( event ) {
+        //console.log("pointer up in camView controls");
+
+			  var pointer = event.changedTouches ? event.changedTouches[ 0 ] : event;
+			  var intersect = intersectObjects( pointer, scope.viewCubeGizmo.children, true );
+			  if(intersect && intersect.object.onSelect)
+			  {
+		    	event.preventDefault();
+			    event.stopPropagation();
+			    event.stopImmediatePropagation();
+			    
+			    intersect.object.onSelect();
+			  }
+    }
+    
+    function onPointerUp( event ) {
+      scope.activeItem = null;
+      scope.viewCubeGizmo.hide();
+    }
+  }
+
+  intersectObjects = function intersectObjects( pointer, objects ) {
+
+	  var rect = domElement.getBoundingClientRect();
+	  var x = ( pointer.clientX - rect.left ) / rect.width;
 	  var y = ( pointer.clientY - rect.top ) / rect.height;
 
 	  pointerVector.set( ( x * 2 ) - 1, - ( y * 2 ) + 1, 0.5 );
-    
-    
-    if( !isOrtho)
-		{
-		  pointerVector.unproject( camera );
+	  pointerVector.unproject( camera );
 
-		  ray.set( camPosition, pointerVector.sub( camPosition ).normalize() );
+	  ray.set( camPosition, pointerVector.sub( camPosition ).normalize() );
 
-		  var intersections = ray.intersectObjects( objects, true );
-		}else{
-		
-		 pointerVector.pickingRay( camera );
-     ray.set( camPosition, pointerVector );
-     var intersections = ray.intersectObjects( objects, true );
-		}
-		return intersections[0] ? intersections[0] : false;
-
-	}
-	
-	function onPointerMove( event ) {
-
-			event.preventDefault();
-			event.stopPropagation();
-			
-			var pointer = event.changedTouches? event.changedTouches[0] : event;
-
-			var intersect = intersectObjects( pointer, scope.viewCubeGizmo.children, true );
-			
-      if(intersect && intersect.object.name){
-        scope.activeItem = intersect.object.name;
-        scope.viewCubeGizmo.show();
-      }
-      else{
-        scope.activeItem = null;
-        scope.viewCubeGizmo.hide();
-      }
-      //intersect
-			//point.copy( planeIntersect.point );
+	  var intersections = ray.intersectObjects( objects, true );
+	  return intersections[0] ? intersections[0] : false;
   }
-  function onPointerDown( event ) {
-      //console.log("pointer up in camView controls");
 
-			var pointer = event.changedTouches ? event.changedTouches[ 0 ] : event;
-			var intersect = intersectObjects( pointer, scope.viewCubeGizmo.children, true );
-			if(intersect && intersect.object.onSelect)
-			{
-		  	event.preventDefault();
-			  event.stopPropagation();
-			  event.stopImmediatePropagation();
-			  
-			  intersect.object.onSelect();
-			}
-  }
-  
-  function onPointerUp( event ) {
-    scope.activeItem = null;
-    scope.viewCubeGizmo.hide();
-  }
-  
-  
-}
-
-CamViewControls.prototype.intersectObjects = function intersectObjects( pointer, objects ) {
-
-	var rect = domElement.getBoundingClientRect();
-	var x = ( pointer.clientX - rect.left ) / rect.width;
-	var y = ( pointer.clientY - rect.top ) / rect.height;
-
-	pointerVector.set( ( x * 2 ) - 1, - ( y * 2 ) + 1, 0.5 );
-	pointerVector.unproject( camera );
-
-	ray.set( camPosition, pointerVector.sub( camPosition ).normalize() );
-
-	var intersections = ray.intersectObjects( objects, true );
-	return intersections[0] ? intersections[0] : false;
-
-}
-
-CamViewControls.prototype.update = function () {
+  update() {
 		this.camera.updateMatrixWorld();
 		this.camPosition.setFromMatrixPosition( this.camera.matrixWorld );
 		//this.camRotation.setFromRotationMatrix( tempMatrix.extractRotation( camera.matrixWorld ) );
 		//this.gizmo[_mode].highlight( scope.axis );
     this.viewCubeGizmo.highlight( this.activeItem );
+  }
 }
 
+
+export { CamViewControls };

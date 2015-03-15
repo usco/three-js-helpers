@@ -1,4 +1,4 @@
-<script src="custom-axis-helper.js" ></script>
+<script src="lib/LabeledAxes.js" ></script>
 
 <polymer-element name="axis-helper" extends="three-js-helper"
   attributes="size xColor yColor zColor textColor addLabels addArrows">
@@ -13,7 +13,8 @@
       addArrows:true,
 
       ready: function() {
-        this.object = new THREE.LabeledAxes(this.size, this.xColor, this.yColor, this.zColor, this.textColor, this.addLabels, this.addArrows);
+        var foo = new LabeledAxes();
+        this.object = new LabeledAxes(this.size, this.xColor, this.yColor, this.zColor, this.textColor, this.addLabels, this.addArrows);
         this.super();
       },
       enteredView:function()

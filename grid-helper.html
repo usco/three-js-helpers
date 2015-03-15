@@ -1,5 +1,5 @@
-<script src="custom-grid-helper.js"></script>
-<script src="circular-grid-helper.js"></script>
+<script src="lib/LabeledGrid.js"></script>
+<script src="lib/CircularLabeledGrid.js"></script>
 
 <polymer-element name="grid-helper" extends="three-js-helper" attributes="width length step color opacity textColor up type">
   <script>Polymer('grid-helper',{
@@ -15,7 +15,7 @@
       up:[0,1,0],
       type:"rectangular",
       ready: function() {
-        this.object = new GridHelper(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+        this.object = new LabeledGrid(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
         
         this.super();
       },
@@ -54,11 +54,11 @@
          parent.remove( this.object );
          if(this.type == "rectangular")
          {
-          this.object = new GridHelper(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+          this.object = new LabeledGrid(this.width, this.length, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
          }else
          {
           console.log("bla");
-            this.object = new CircularGridHelper(this.width, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
+            this.object = new CircularLabeledGrid(this.width, this.step, new THREE.Vector3(this.up[0],this.up[1],this.up[2]), this.color, this.opacity, this.addText, this.textColor, this.textLocation);
          }
          parent.add( this.object );
       }
